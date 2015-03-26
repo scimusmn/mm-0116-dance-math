@@ -1,2 +1,2 @@
 # mm-0116-dance-math
-Dance to music at different speeds to learn about ratios.
+Track your dance moves at different speeds to learn about ratios.
