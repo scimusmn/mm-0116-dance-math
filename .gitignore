@@ -18,6 +18,9 @@ Release*/
 
 # IDE-specific ignore patterns (e.g. user-specific files)
 
+# Large media files
+*.mov
+
 #XCode
 *.pbxuser
 *.perspective
