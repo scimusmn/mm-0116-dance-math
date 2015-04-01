@@ -26,19 +26,32 @@ class ofApp : public ofBaseApp{
         //Cameras
         ofVideoGrabber camRaw;
         ofVideoGrabber camTracker;
+        ofVideoPlayer vidRaw;
+        ofVideoPlayer vidTracker;
     
         //Tracking
+        class TrackPoint : public ofVec2f {
+        public:
+            TrackPoint(float x, float y, int time, bool beat);
+            int time;
+            bool beat;
+        };
         ofxCv::ContourFinder contourFinder;
-        vector<ofVec3f> drawPts;
-        vector<ofVec3f> playbackPts;
+        vector<TrackPoint> drawPts;
+        vector<TrackPoint> playbackPts;
+        int timeStarted;
+        int timeElapsed;
+        bool isNewBeat;
+        void resetTracking();
     
         //Music
         ofSoundPlayer groove;
         ofSoundPlayer country;
         ofSoundPlayer waltz;
-        int grooveTempo = 930;
+        int grooveTempo = 465;
         int countryTempo = 800;
         int waltzTempo = 1200;
+        int prevBeatTime;
     
         //UI
         DMLayout layout;
