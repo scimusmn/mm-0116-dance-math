@@ -6,6 +6,12 @@
 
 using namespace ofxSimpleLayout;
 
+enum AppState{
+    STATE_NORMAL,
+    STATE_TRACKING,
+    STATE_PLAYBACK
+};
+
 class ofApp : public ofBaseApp{
 
 	public:
@@ -39,21 +45,29 @@ class ofApp : public ofBaseApp{
         ofxCv::ContourFinder contourFinder;
         vector<TrackPoint> drawPts;
         vector<TrackPoint> playbackPts;
-        int timeStarted;
-        int timeElapsed;
-        bool isNewBeat;
         void resetTracking();
+        float camRatio;
+        ofVec2f camOffset;
+        ofPolyline drawLine;
     
         //Music
+        void playMusic(string song, float rate);
+        string currentMusic;
         ofSoundPlayer groove;
         ofSoundPlayer country;
         ofSoundPlayer waltz;
         int grooveTempo = 465;
         int countryTempo = 800;
         int waltzTempo = 1200;
+    
+        int timeStarted;
+        int timeElapsed;
         int prevBeatTime;
+        bool isNewBeat;
     
         //UI
+        AppState appState;
+        void drawTracking();
         DMLayout layout;
     
         //Temp/Debug
