@@ -12,6 +12,8 @@ enum AppState{
     STATE_PLAYBACK
 };
 
+static int SONG_DURATION = 8000;
+
 class ofApp : public ofBaseApp{
 
 	public:
@@ -34,6 +36,10 @@ class ofApp : public ofBaseApp{
         ofVideoGrabber camTracker;
         ofVideoPlayer vidRaw;
         ofVideoPlayer vidTracker;
+        void videoSaved(ofVideoSavedEventArgs& e);
+    
+        //Video Playback
+        ofPtr<ofQTKitGrabber>	vidRecorder;
     
         //Tracking
         class TrackPoint : public ofVec2f {
@@ -53,12 +59,13 @@ class ofApp : public ofBaseApp{
         //Music
         void playMusic(string song, float rate);
         string currentMusic;
+        float currentSpeed;
         ofSoundPlayer groove;
         ofSoundPlayer country;
         ofSoundPlayer waltz;
         int grooveTempo = 465;
         int countryTempo = 800;
-        int waltzTempo = 1200;
+        int waltzTempo = 1100;
     
         int timeStarted;
         int timeElapsed;

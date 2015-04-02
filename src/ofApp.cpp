@@ -13,6 +13,13 @@ void ofApp::setup(){
     camRatio = vidRaw.height / vidTracker.height;
     camOffset = ofVec2f(-30, -15); // Pixel offset from raw camera before scale-up
     
+    //Video Playback
+    vidRecorder = ofPtr<ofQTKitGrabber>( new ofQTKitGrabber() );
+    camRaw.setGrabber(vidRecorder);// Set source of our video grabber. (Raw camera, or vidRaw for debug)
+    camRaw.initGrabber(1280/2, 720/2);
+    ofAddListener(vidRecorder->videoSavedEvent, this, &ofApp::videoSaved);
+    vidRecorder->initRecording();
+    
     //Setup Tracking
     contourFinder.setMinAreaRadius(5); // Filter small blobs
     contourFinder.setMaxAreaRadius(15); // Filter large blobs
@@ -62,7 +69,7 @@ void ofApp::update(){
     }
 
     //Update tracking
-    if (vidTracker.isFrameNew()){
+    if (appState == STATE_TRACKING && vidTracker.isFrameNew()){
         
         timeElapsed = ofGetElapsedTimeMillis() - timeStarted;
         
@@ -74,6 +81,24 @@ void ofApp::update(){
         drawPts.push_back(tp);
         
         isNewBeat = false;
+        
+        //End recording
+        if (timeElapsed >= SONG_DURATION / currentSpeed) {
+            
+            //TODO: Move this all into a separate method...
+            
+            appState = STATE_NORMAL;
+            
+            //Save tracking points
+            playbackPts = drawPts;
+            resetTracking();
+            
+            //Save recorded RGB video
+            if(vidRecorder->isRecording()){
+                vidRecorder->stopRecording();
+            }
+
+        }
 
     }
     
@@ -88,7 +113,7 @@ void ofApp::draw(){
     ofSetColor(255,100,0);
     contourFinder.draw();
 
-    if (appState == STATE_TRACKING){
+    if (appState != STATE_NORMAL){
         drawTracking();
     }
 
@@ -99,27 +124,56 @@ void ofApp::draw(){
     //TEMP
     float timeSinceBeat = ofGetElapsedTimeMillis() - prevBeatTime;
     ofCircle(100, 850, 50 - (timeSinceBeat * 0.025));
-        
+    
 }
 
 //--------------------------------------------------------------
+//TODO: this should be an agnostic function to draw any set of points
+//e.g., void ofApp::drawTracking(points, color, useTime){
 void ofApp::drawTracking(){
     
-    //Draw current tracking
-    drawLine.clear();
-    ofSetColor(255,0,100);
-    float beatWeight = ofMap(ofGetElapsedTimeMillis() - prevBeatTime, 0, (grooveTempo/groove.getSpeed()), 1, 10);
-    for(int i = 0; i < drawPts.size(); i++){
-        drawLine.curveTo(drawPts[i].x, drawPts[i].y);
-        ofSetLineWidth(beatWeight);
-    }
-    drawLine.draw();
-    ofSetColor(255,160,220);
-    for(int i = 0; i < drawPts.size(); i++){
-        if (drawPts[i].beat == true){
-            float timeSinceCreation = timeElapsed - drawPts[i].time;
-            ofCircle(drawPts[i].x, drawPts[i].y, 5);
+    if (appState == STATE_TRACKING){
+    
+        //Draw current tracking
+        drawLine.clear();
+        ofSetColor(255,0,100);
+        float beatWeight = ofMap(ofGetElapsedTimeMillis() - prevBeatTime, 0, (grooveTempo/groove.getSpeed()), 1, 10);
+        for(int i = 0; i < drawPts.size(); i++){
+            drawLine.curveTo(drawPts[i].x, drawPts[i].y);
+            ofSetLineWidth(beatWeight);
         }
+        drawLine.draw();
+        ofSetColor(255,160,220);
+        for(int i = 0; i < drawPts.size(); i++){
+            if (drawPts[i].beat == true){
+                float timeSinceCreation = timeElapsed - drawPts[i].time;
+                ofCircle(drawPts[i].x, drawPts[i].y, 5);
+            }
+        }
+        
+    } else if (appState == STATE_PLAYBACK) {
+        
+        //Draw playback tracking
+        drawLine.clear();
+        ofSetColor(150,255,0);
+        float beatWeight = ofMap(ofGetElapsedTimeMillis() - prevBeatTime, 0, (grooveTempo/groove.getSpeed()), 1, 10);
+        for(int i = 0; i < playbackPts.size(); i++){
+            if (playbackPts[i].time <= ofGetElapsedTimeMillis() - timeStarted){
+                drawLine.curveTo(playbackPts[i].x, playbackPts[i].y);
+                ofSetLineWidth(beatWeight);
+            }
+        }
+        drawLine.draw();
+        ofSetColor(255,222,111);
+        for(int i = 0; i < playbackPts.size(); i++){
+            if (playbackPts[i].beat == true){
+                if (playbackPts[i].time <= ofGetElapsedTimeMillis() - timeStarted){
+                    float timeSinceCreation = timeElapsed - playbackPts[i].time;
+                    ofCircle(playbackPts[i].x, playbackPts[i].y, 9);
+                }
+            }
+        }
+        
     }
     
     ofSetLineWidth(1);
@@ -173,18 +227,22 @@ void ofApp::mousePressed(int x, int y, int button){
         layout.startCountdown();
     }
     
-    if (btn.substr(0,5) == "dance") {
-        string speed = btn.substr(6);
+    if (btn.substr(0,11) == "chose_speed") {
+        string speed = btn.substr(12);
         ofLogNotice("Speed chosen: "+speed);
-        if (speed == "slow") {
-            playMusic(currentMusic, 0.5);
-        } else if (speed =="normal") {
-            playMusic(currentMusic, 1);
-        } else if (speed == "fast") {
-            playMusic(currentMusic, 2);
-        }
+        currentSpeed = ofToFloat(speed);
+    }
+    
+    if (btn == "start_record") {
         resetTracking();
+        playMusic(currentMusic, currentSpeed);
         appState = STATE_TRACKING;
+        
+        //Start video recording
+        stringstream s; //Time-based filename
+        s << "xDANCE_" << ofGetUnixTime() << ".mov";
+        vidRecorder->startRecording(s.str());
+        
     }
     
 }
@@ -215,4 +273,24 @@ ofApp::TrackPoint::TrackPoint(float x, float y, int time, bool beat){
     this->y = y;
     this->time = time;
     this->beat = beat;
+}
+
+//--------------------------------------------------------------
+void ofApp::videoSaved(ofVideoSavedEventArgs& e){
+    
+    // ofQTKitGrabber sends a message with the file name and any errors when the video is done recording
+    if(e.error.empty()){
+        
+        string vidPath = e.videoPath;
+        ofLogNotice("vidPath: "+vidPath);
+        vidRaw.close();
+        vidRaw.loadMovie(vidPath);
+        vidRaw.play();
+        
+        resetTracking();
+        appState = STATE_PLAYBACK;
+
+    } else {
+        ofLogError("videoSavedEvent") << "Video save error: " << e.error;
+    }
 }
