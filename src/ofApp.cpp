@@ -220,21 +220,35 @@ void ofApp::mousePressed(int x, int y, int button){
         layout.startCountdown();
     }
     
-    if (btn.substr(0,11) == "chose_speed") {
+    if (btn.substr(0,11) == "start_dance") {
+        
         string speed = btn.substr(12);
-        ofLogNotice("Speed chosen: "+speed);
         currentSpeed = ofToFloat(speed);
-    }
-    
-    if (btn == "start_record") {
+        ofLogNotice("Speed chosen: "+speed);
+        
+        //TODO: Wait for countdown.
+        
         resetTracking();
         playMusic(currentMusic, currentSpeed);
         appState = STATE_TRACKING;
         
         //Start video recording
         stringstream s; //Time-based filename
-        s << "xDANCE_" << ofGetUnixTime() << ".mov";
+        s << "temp/xDANCE_" << ofGetUnixTime() << ".mov";
         vidRecorder->startRecording(s.str());
+        
+    }
+    
+    if (btn == "start_over") {
+        
+        //clear all tracking
+        resetTracking();
+        appState = STATE_TRACKING;
+        
+        layout.setView(DMLayout::VIEW_PICK_DANCE);
+        
+        //delete all temp files
+        clearTempFiles();
         
     }
     
@@ -282,8 +296,21 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
         
         resetTracking();
         appState = STATE_PLAYBACK;
+        layout.setView(DMLayout::VIEW_PLAYBACK);
 
     } else {
         ofLogError("videoSavedEvent") << "Video save error: " << e.error;
     }
+}
+
+//----------
+void ofApp::clearTempFiles() {
+    
+    ofDirectory tempDir;
+    tempDir.listDir("temp");
+    vector< ofFile > files = tempDir.getFiles();
+    for (int i = 0; i<files.size(); i++) {
+        files[i].remove();
+    }
+
 }

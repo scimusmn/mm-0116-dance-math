@@ -78,6 +78,9 @@ class ofApp : public ofBaseApp{
         void drawTracking();
         DMLayout layout;
     
+        //Util
+        void clearTempFiles();
+    
         //Temp/Debug
         int bpmRadius;
         int prevT;

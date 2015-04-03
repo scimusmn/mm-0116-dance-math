@@ -15,12 +15,14 @@ public:
     static string VIEW_PICK_DANCE;
     static string VIEW_CHOOSE_MUSIC;
     static string VIEW_DANCE_VIEW;
+    static string VIEW_PLAYBACK;
     
     void setupViews();
     void update();
     void startCountdown();
     
 protected:
+    
     int countdownStartTime;
     
 };

@@ -12,6 +12,7 @@
 string DMLayout::VIEW_PICK_DANCE = "view_pick_dance";
 string DMLayout::VIEW_CHOOSE_MUSIC = "view_choose_music";
 string DMLayout::VIEW_DANCE_VIEW = "view_dance_view";
+string DMLayout::VIEW_PLAYBACK = "view_playback";
 
 void DMLayout::setupViews(){
 
@@ -37,11 +38,16 @@ void DMLayout::setupViews(){
     image("sidebar_bg");
     image("txtGetReady");
     stateObject("countdown", 1500, 500);
-    button("button", 1160, 0, "chose_speed_0.5");
-    button("button", 1160, 80, "chose_speed_1");
-    button("button", 1160, 160, "chose_speed_2");
-    button("button", 1420, 600, "start_record");
+    button("button", 1420, 600, "start_dance_1");
     saveView(VIEW_DANCE_VIEW);
+    
+    //Playback View
+    image("sidebar_bg");
+    image("txtPlayback");
+    button("button", 1250, 575, "start_dance_0.5");
+    button("button", 1550, 575, "start_dance_2");
+    button("button", 1400, 750, "start_over");
+    saveView(VIEW_PLAYBACK);
 
 }
 
