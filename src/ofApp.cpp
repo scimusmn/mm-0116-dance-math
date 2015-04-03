@@ -128,56 +128,49 @@ void ofApp::draw(){
 }
 
 //--------------------------------------------------------------
-//TODO: this should be an agnostic function to draw any set of points
-//e.g., void ofApp::drawTracking(points, color, useTime){
 void ofApp::drawTracking(){
     
     if (appState == STATE_TRACKING){
-    
-        //Draw current tracking
-        drawLine.clear();
-        ofSetColor(255,0,100);
-        float beatWeight = ofMap(ofGetElapsedTimeMillis() - prevBeatTime, 0, (grooveTempo/groove.getSpeed()), 1, 10);
-        for(int i = 0; i < drawPts.size(); i++){
-            drawLine.curveTo(drawPts[i].x, drawPts[i].y);
-            ofSetLineWidth(beatWeight);
-        }
-        drawLine.draw();
-        ofSetColor(255,160,220);
-        for(int i = 0; i < drawPts.size(); i++){
-            if (drawPts[i].beat == true){
-                float timeSinceCreation = timeElapsed - drawPts[i].time;
-                ofCircle(drawPts[i].x, drawPts[i].y, 5);
-            }
-        }
+
+        drawTrackedLine(drawPts, ofHexToInt("FFFF00"), false);
         
     } else if (appState == STATE_PLAYBACK) {
         
-        //Draw playback tracking
-        drawLine.clear();
-        ofSetColor(150,255,0);
-        float beatWeight = ofMap(ofGetElapsedTimeMillis() - prevBeatTime, 0, (grooveTempo/groove.getSpeed()), 1, 10);
-        for(int i = 0; i < playbackPts.size(); i++){
-            if (playbackPts[i].time <= ofGetElapsedTimeMillis() - timeStarted){
-                drawLine.curveTo(playbackPts[i].x, playbackPts[i].y);
-                ofSetLineWidth(beatWeight);
-            }
-        }
-        drawLine.draw();
-        ofSetColor(255,222,111);
-        for(int i = 0; i < playbackPts.size(); i++){
-            if (playbackPts[i].beat == true){
-                if (playbackPts[i].time <= ofGetElapsedTimeMillis() - timeStarted){
-                    float timeSinceCreation = timeElapsed - playbackPts[i].time;
-                    ofCircle(playbackPts[i].x, playbackPts[i].y, 9);
-                }
-            }
-        }
+        drawTrackedLine(playbackPts, ofHexToInt("FF0000"), true);
         
     }
     
     ofSetLineWidth(1);
 
+}
+
+//--------------------------------------------------------------
+void ofApp::drawTrackedLine(vector<TrackPoint> pts, int color, bool useTime){
+    
+    drawLine.clear();
+    
+    float beatWeight = ofMap(ofGetElapsedTimeMillis() - prevBeatTime, 0, (grooveTempo/groove.getSpeed()), 1, 10);
+    
+    //Line
+    ofSetHexColor(color);
+    for(int i = 0; i < pts.size(); i++){
+        if (useTime == false || pts[i].time <= ofGetElapsedTimeMillis() - timeStarted){
+            ofSetLineWidth(beatWeight);
+            drawLine.curveTo(pts[i].x, pts[i].y);
+        }
+    }
+    drawLine.draw();
+    
+    //Dots
+    ofSetColor(255,222,111);
+    for(int i = 0; i < pts.size(); i++){
+        if (pts[i].beat == true){
+            if (useTime == false || pts[i].time <= ofGetElapsedTimeMillis() - timeStarted){
+                ofCircle(pts[i].x, pts[i].y, 9);
+            }
+        }
+    }
+        
 }
 
 //--------------------------------------------------------------

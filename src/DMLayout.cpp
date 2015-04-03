@@ -40,7 +40,7 @@ void DMLayout::setupViews(){
     button("button", 1160, 0, "chose_speed_0.5");
     button("button", 1160, 80, "chose_speed_1");
     button("button", 1160, 160, "chose_speed_2");
-    button("button", 1420, 860, "start_record");
+    button("button", 1420, 600, "start_record");
     saveView(VIEW_DANCE_VIEW);
 
 }

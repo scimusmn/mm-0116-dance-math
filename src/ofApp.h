@@ -52,6 +52,7 @@ class ofApp : public ofBaseApp{
         vector<TrackPoint> drawPts;
         vector<TrackPoint> playbackPts;
         void resetTracking();
+        void drawTrackedLine(vector<TrackPoint> pts, int color, bool useTime);
         float camRatio;
         ofVec2f camOffset;
         ofPolyline drawLine;
