@@ -48,14 +48,28 @@ class ofApp : public ofBaseApp{
             int time;
             bool beat;
         };
+    
+        class Session {
+        public:
+            vector<TrackPoint> slowPts;
+            vector<TrackPoint> normPts;
+            vector<TrackPoint> fastPts;
+            string slowVid;
+            string normVid;
+            string fastVid;
+            void saveData(float speed, vector<TrackPoint> pts, string vid);
+            void clear();
+        };
+    
         ofxCv::ContourFinder contourFinder;
         vector<TrackPoint> drawPts;
-        vector<TrackPoint> playbackPts;
         void resetTracking();
+        void resetTracking(bool);
         void drawTrackedLine(vector<TrackPoint> pts, int color, bool useTime);
         float camRatio;
         ofVec2f camOffset;
         ofPolyline drawLine;
+        Session session;
     
         //Music
         void playMusic(string song, float rate);
@@ -79,7 +93,7 @@ class ofApp : public ofBaseApp{
         DMLayout layout;
     
         //Util
-        void clearTempFiles();
+        void clearFiles();
     
         //Temp/Debug
         int bpmRadius;

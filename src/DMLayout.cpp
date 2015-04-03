@@ -30,8 +30,8 @@ void DMLayout::setupViews(){
     image("main_bg");
     image("sidebar_bg");
     image("txtChooseYourMusic");
-    button("button", 250, 150, "preview_music_groove");
-    button("button", 250, 250, "chose_music_groove");
+    button("button", 450, 150, "preview_music_groove");
+    button("button", 450, 250, "chose_music_groove");
     saveView(VIEW_CHOOSE_MUSIC);
     
     //Dance View

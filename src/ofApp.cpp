@@ -11,13 +11,13 @@ void ofApp::setup(){
     vidRaw.play();
     vidTracker.play();
     camRatio = vidRaw.height / vidTracker.height;
-    camOffset = ofVec2f(-30, -15); // Pixel offset from raw camera before scale-up
+    camOffset = ofVec2f(-30, -15); // Pixel offset between raw camera and IR camera (before scale-up)
     
     //Video Playback
     vidRecorder = ofPtr<ofQTKitGrabber>( new ofQTKitGrabber() );
-    camRaw.setGrabber(vidRecorder);// Set source of our video grabber. (Raw camera, or vidRaw for debug)
+    camRaw.setGrabber(vidRecorder);
     camRaw.initGrabber(1280/2, 720/2);
-    ofAddListener(vidRecorder->videoSavedEvent, this, &ofApp::videoSaved);
+    ofAddListener(vidRecorder->videoSavedEvent, this, &ofApp::videoSaved); // Listen for video saved events
     vidRecorder->initRecording();
     
     //Setup Tracking
@@ -36,8 +36,9 @@ void ofApp::setup(){
 }
 
 //--------------------------------------------------------------
-void ofApp::resetTracking(){
-    drawPts.clear();
+void ofApp::resetTracking(){ resetTracking(true); };
+void ofApp::resetTracking(bool resetPts){
+    if (resetPts) drawPts.clear();
     timeStarted = prevBeatTime = ofGetElapsedTimeMillis();
 }
 
@@ -85,17 +86,13 @@ void ofApp::update(){
         //End recording
         if (timeElapsed >= SONG_DURATION / currentSpeed) {
             
-            //TODO: Move this all into a separate method...
-            
             appState = STATE_NORMAL;
-            
-            //Save tracking points
-            playbackPts = drawPts;
-            resetTracking();
-            
-            //Save recorded RGB video
+
+            //Attempt saving RGB video, and wait for success callback
             if(vidRecorder->isRecording()){
                 vidRecorder->stopRecording();
+            } else {
+                ofLogError("Cannot save video") << "video was still recording: " << vidRecorder->isRecording();
             }
 
         }
@@ -136,7 +133,7 @@ void ofApp::drawTracking(){
         
     } else if (appState == STATE_PLAYBACK) {
         
-        drawTrackedLine(playbackPts, ofHexToInt("FF0000"), true);
+        drawTrackedLine(drawPts, ofHexToInt("FF0000"), true);
         
     }
     
@@ -248,7 +245,8 @@ void ofApp::mousePressed(int x, int y, int button){
         layout.setView(DMLayout::VIEW_PICK_DANCE);
         
         //delete all temp files
-        clearTempFiles();
+        clearFiles();
+        session.clear();
         
     }
     
@@ -275,14 +273,6 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 }
 
 //--------------------------------------------------------------
-ofApp::TrackPoint::TrackPoint(float x, float y, int time, bool beat){
-    this->x = x;
-    this->y = y;
-    this->time = time;
-    this->beat = beat;
-}
-
-//--------------------------------------------------------------
 void ofApp::videoSaved(ofVideoSavedEventArgs& e){
     
     // ofQTKitGrabber sends a message with the file name and any errors when the video is done recording
@@ -290,12 +280,19 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
         
         string vidPath = e.videoPath;
         ofLogNotice("vidPath: "+vidPath);
+        
+        //Save to session
+        session.saveData(currentSpeed, drawPts, vidPath);
+        
+        //Start large playback of most recently recorded video
         vidRaw.close();
         vidRaw.loadMovie(vidPath);
         vidRaw.play();
         
-        resetTracking();
+        resetTracking(false);
         appState = STATE_PLAYBACK;
+        
+        //Which playback pts to draw
         layout.setView(DMLayout::VIEW_PLAYBACK);
 
     } else {
@@ -304,13 +301,46 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
 }
 
 //----------
-void ofApp::clearTempFiles() {
+void ofApp::clearFiles() {
     
-    ofDirectory tempDir;
-    tempDir.listDir("temp");
-    vector< ofFile > files = tempDir.getFiles();
+    ofDirectory dir;
+    dir.listDir("temp");
+    vector< ofFile > files = dir.getFiles();
     for (int i = 0; i<files.size(); i++) {
         files[i].remove();
     }
 
 }
+
+//--------------------------------------------------------------
+ofApp::TrackPoint::TrackPoint(float x, float y, int time, bool beat){
+    this->x = x;
+    this->y = y;
+    this->time = time;
+    this->beat = beat;
+}
+
+//--------------------------------------------------------------
+void ofApp::Session::saveData(float speed, vector<TrackPoint> pts, string vid){
+    if (speed == 0.5) {
+        slowPts = pts;
+        slowVid = vid;
+    } else if (speed == 1) {
+        normPts = pts;
+        normVid = vid;
+    } else if (speed == 2) {
+        fastPts = pts;
+        fastVid = vid;
+    } else {
+        ofLogError("Session") << "Can not save session. Unrecognized speed: " << speed;
+    }
+}
+
+//--------------------------------------------------------------
+void ofApp::Session::clear(){
+    slowPts.clear();
+    normPts.clear();
+    fastPts.clear();
+    slowVid = normVid = fastVid = "";
+}
+
