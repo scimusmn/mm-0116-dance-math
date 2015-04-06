@@ -58,9 +58,11 @@ class ofApp : public ofBaseApp{
             string normVid;
             string fastVid;
             void saveData(float speed, vector<TrackPoint> pts, string vid);
+            int getColor(float speed);
             void clear();
         };
     
+        Session session;
         ofxCv::ContourFinder contourFinder;
         vector<TrackPoint> drawPts;
         void resetTracking();
@@ -69,7 +71,6 @@ class ofApp : public ofBaseApp{
         float camRatio;
         ofVec2f camOffset;
         ofPolyline drawLine;
-        Session session;
     
         //Music
         void playMusic(string song, float rate);

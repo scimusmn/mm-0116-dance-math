@@ -62,7 +62,7 @@ void ofApp::update(){
     layout.update();
     vidRaw.update();
     vidTracker.update();
-    
+
     //Update beat timer
     if ((ofGetElapsedTimeMillis() - prevBeatTime) >= (grooveTempo/groove.getSpeed())){
         prevBeatTime = ofGetElapsedTimeMillis();
@@ -99,6 +99,16 @@ void ofApp::update(){
 
     }
     
+    //Loop playback
+    if (appState == STATE_PLAYBACK){
+        if (vidRaw.getIsMovieDone() == 1){
+            vidRaw.firstFrame();
+            vidRaw.play();
+            resetTracking(false);
+        }
+    }
+    
+    
 }
 
 //--------------------------------------------------------------
@@ -121,6 +131,7 @@ void ofApp::draw(){
     //TEMP
     float timeSinceBeat = ofGetElapsedTimeMillis() - prevBeatTime;
     ofCircle(100, 850, 50 - (timeSinceBeat * 0.025));
+    ofDrawBitmapString(ofToString(ofGetFrameRate())+"fps", 20, 20);
     
 }
 
@@ -129,11 +140,13 @@ void ofApp::drawTracking(){
     
     if (appState == STATE_TRACKING){
 
-        drawTrackedLine(drawPts, ofHexToInt("FFFF00"), false);
+        drawTrackedLine(drawPts, session.getColor(currentSpeed), false);
         
     } else if (appState == STATE_PLAYBACK) {
         
-        drawTrackedLine(drawPts, ofHexToInt("FF0000"), true);
+        if(!session.slowPts.empty()) drawTrackedLine(session.slowPts, ofHexToInt("FF0000"), true);
+        if(!session.normPts.empty()) drawTrackedLine(session.normPts, ofHexToInt("00FF00"), true);
+        if(!session.fastPts.empty()) drawTrackedLine(session.fastPts, ofHexToInt("0000FF"), true);
         
     }
     
@@ -146,24 +159,27 @@ void ofApp::drawTrackedLine(vector<TrackPoint> pts, int color, bool useTime){
     
     drawLine.clear();
     
-    float beatWeight = ofMap(ofGetElapsedTimeMillis() - prevBeatTime, 0, (grooveTempo/groove.getSpeed()), 1, 10);
-    
     //Line
+    ofSetLineWidth(4);
     ofSetHexColor(color);
+    if (!pts.empty()) drawLine.addVertex(pts[0].x, pts[0].y);
     for(int i = 0; i < pts.size(); i++){
         if (useTime == false || pts[i].time <= ofGetElapsedTimeMillis() - timeStarted){
-            ofSetLineWidth(beatWeight);
             drawLine.curveTo(pts[i].x, pts[i].y);
+        } else {
+            drawLine.curveTo(pts[i].x, pts[i].y);
+            break;
         }
     }
+    if (useTime == false && !pts.empty()) drawLine.addVertex(pts[pts.size()-1].x, pts[pts.size()-1].y);
     drawLine.draw();
     
     //Dots
-    ofSetColor(255,222,111);
+    ofSetColor(255,255,255,200);
     for(int i = 0; i < pts.size(); i++){
         if (pts[i].beat == true){
             if (useTime == false || pts[i].time <= ofGetElapsedTimeMillis() - timeStarted){
-                ofCircle(pts[i].x, pts[i].y, 9);
+                ofCircle(pts[i].x, pts[i].y, 7);
             }
         }
     }
@@ -240,9 +256,10 @@ void ofApp::mousePressed(int x, int y, int button){
         
         //clear all tracking
         resetTracking();
-        appState = STATE_TRACKING;
+        appState = STATE_NORMAL;
         
         layout.setView(DMLayout::VIEW_PICK_DANCE);
+        vidRaw.setLoopState(OF_LOOP_NORMAL);
         
         //delete all temp files
         clearFiles();
@@ -288,6 +305,7 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
         vidRaw.close();
         vidRaw.loadMovie(vidPath);
         vidRaw.play();
+        vidRaw.setLoopState(OF_LOOP_NONE);
         
         resetTracking(false);
         appState = STATE_PLAYBACK;
@@ -331,6 +349,19 @@ void ofApp::Session::saveData(float speed, vector<TrackPoint> pts, string vid){
     } else if (speed == 2) {
         fastPts = pts;
         fastVid = vid;
+    } else {
+        ofLogError("Session") << "Can not save session. Unrecognized speed: " << speed;
+    }
+}
+
+//--------------------------------------------------------------
+int ofApp::Session::getColor(float speed){
+    if (speed == 0.5) {
+        return ofHexToInt("FF0000");
+    } else if (speed == 1) {
+        return ofHexToInt("00FF00");
+    } else if (speed == 2) {
+        return ofHexToInt("0000FF");
     } else {
         ofLogError("Session") << "Can not save session. Unrecognized speed: " << speed;
     }
