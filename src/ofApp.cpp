@@ -27,6 +27,9 @@ void ofApp::setup(){
     
     //Load Sounds
     groove.loadSound("sounds/groove.wav");
+    country.loadSound("sounds/country.wav");
+    waltz.loadSound("sounds/waltz.wav");
+    rock.loadSound("sounds/rock.wav");
     
     //Load/Setup UI
     layout.setupViews();
@@ -44,16 +47,44 @@ void ofApp::resetTracking(bool resetPts){
 
 //--------------------------------------------------------------
 void ofApp::playMusic(string song, float rate){
+    
+    ofSoundStopAll();
+    
     if (song == "groove") {
+        currentSongDuration = 8000;
+        currentTempo = grooveTempo;
         groove.setSpeed(rate);
         groove.play();
     } else if (song == "country") {
+        currentSongDuration = 8000;
+        currentTempo = countryTempo;
         country.setSpeed(rate);
         country.play();
     } else if (song == "waltz") {
+        currentSongDuration = 11000;
+        currentTempo = waltzTempo;
         waltz.setSpeed(rate);
         waltz.play();
+    } else if (song == "rock") {
+        currentSongDuration = 5000;
+        currentTempo = rockTempo;
+        rock.setSpeed(rate);
+        rock.play();
     }
+}
+
+//--------------------------------------------------------------
+void ofApp::startDanceCountdown(){
+    
+    layout.setView(DMLayout::VIEW_DANCE_VIEW);
+    layout.startCountdown();
+    
+    appState = STATE_COUNTDOWN;
+    
+    //TODO: Switch back to Get Ready view, wait for countdown.
+    //TODO: Do some fancy timing so the music plays as an intro, allowing the dance to get into the beat beforehand.
+    //playMusic(currentMusic, currentSpeed);
+
 }
 
 //--------------------------------------------------------------
@@ -64,7 +95,7 @@ void ofApp::update(){
     vidTracker.update();
 
     //Update beat timer
-    if ((ofGetElapsedTimeMillis() - prevBeatTime) >= (grooveTempo/groove.getSpeed())){
+    if ((ofGetElapsedTimeMillis() - prevBeatTime) >= (currentTempo/currentSpeed)){
         prevBeatTime = ofGetElapsedTimeMillis();
         isNewBeat = true;
     }
@@ -76,15 +107,17 @@ void ofApp::update(){
         
         contourFinder.findContours(vidTracker);
         
-        float tx = (camOffset.x + contourFinder.getCenter(0).x) * camRatio;
-        float ty = (camOffset.y + contourFinder.getCenter(0).y) * camRatio;
-        TrackPoint tp = TrackPoint(tx, ty, timeElapsed, isNewBeat);
-        drawPts.push_back(tp);
-        
+        if (contourFinder.size() > 0){
+            float tx = (camOffset.x + contourFinder.getCenter(0).x) * camRatio;
+            float ty = (camOffset.y + contourFinder.getCenter(0).y) * camRatio;
+            TrackPoint tp = TrackPoint(tx, ty, timeElapsed, isNewBeat);
+            drawPts.push_back(tp);
+        }
+
         isNewBeat = false;
         
         //End recording
-        if (timeElapsed >= SONG_DURATION / currentSpeed) {
+        if (timeElapsed >= currentSongDuration / currentSpeed) {
             
             appState = STATE_NORMAL;
 
@@ -99,13 +132,33 @@ void ofApp::update(){
 
     }
     
-    //Loop playback
-    if (appState == STATE_PLAYBACK){
-        if (vidRaw.getIsMovieDone() == 1){
-            vidRaw.firstFrame();
-            vidRaw.play();
-            resetTracking(false);
+    //Wait for countdown
+    if (appState == STATE_COUNTDOWN){
+        if (layout.getCountdownComplete() == true) {
+            
+            //Start tracking
+            resetTracking();
+            playMusic(currentMusic, currentSpeed);
+            appState = STATE_TRACKING;
+            
+            //Start video recording
+            stringstream s; //Time-based filename
+            s << "temp/xDANCE_" << ofGetUnixTime() << ".mov";
+            vidRecorder->startRecording(s.str());
+            
+            ofLogNotice("Countdown complete! ") << "Start recording: " << s;
+            
         }
+        
+    }
+    
+    //Loop playback
+    if (appState == STATE_PLAYBACK && vidRaw.getIsMovieDone() == true){
+        
+        vidRaw.firstFrame();
+        vidRaw.play();
+        resetTracking(false);
+        
     }
     
     
@@ -116,22 +169,27 @@ void ofApp::draw(){
 
     //Draw Cams/Vids
     vidRaw.draw(0,0);
-    vidTracker.draw(0,720);
-    ofSetColor(255,100,0);
-    contourFinder.draw();
 
     if (appState != STATE_NORMAL){
         drawTracking();
     }
 
+    #ifdef DEBUG_HELPERS
+        ofPushMatrix();
+        ofTranslate(0, 720);
+        ofSetColor(255,255,255);
+        vidTracker.draw(0,0);
+        ofSetColor(255,100,0);
+        contourFinder.draw();
+        float timeSinceBeat = ofGetElapsedTimeMillis() - prevBeatTime;
+        ofCircle(750, 250, 50 - (timeSinceBeat * 0.025));
+        ofDrawBitmapString(ofToString(ofGetFrameRate())+"fps", 20, 30);
+        ofPopMatrix();
+    #endif
+    
     //Draw layout
     ofSetColor(255,255,255);
     layout.draw();
-    
-    //TEMP
-    float timeSinceBeat = ofGetElapsedTimeMillis() - prevBeatTime;
-    ofCircle(100, 850, 50 - (timeSinceBeat * 0.025));
-    ofDrawBitmapString(ofToString(ofGetFrameRate())+"fps", 20, 20);
     
 }
 
@@ -229,8 +287,10 @@ void ofApp::mousePressed(int x, int y, int button){
         string music = btn.substr(12);
         ofLogNotice("Music chosen: "+music);
         currentMusic = music;
-        layout.setView(DMLayout::VIEW_DANCE_VIEW);
-        layout.startCountdown();
+        
+        //Start initial dance
+        currentSpeed = 1;
+        startDanceCountdown();
     }
     
     if (btn.substr(0,11) == "start_dance") {
@@ -239,16 +299,7 @@ void ofApp::mousePressed(int x, int y, int button){
         currentSpeed = ofToFloat(speed);
         ofLogNotice("Speed chosen: "+speed);
         
-        //TODO: Wait for countdown.
-        
-        resetTracking();
-        playMusic(currentMusic, currentSpeed);
-        appState = STATE_TRACKING;
-        
-        //Start video recording
-        stringstream s; //Time-based filename
-        s << "temp/xDANCE_" << ofGetUnixTime() << ".mov";
-        vidRecorder->startRecording(s.str());
+        startDanceCountdown();
         
     }
     
@@ -264,6 +315,9 @@ void ofApp::mousePressed(int x, int y, int button){
         //delete all temp files
         clearFiles();
         session.clear();
+        
+        //reset base time
+        ofResetElapsedTimeCounter();
         
     }
     

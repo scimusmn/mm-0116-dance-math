@@ -4,15 +4,16 @@
 #include "ofxCv.h"
 #include "DMLayout.h"
 
+//#define DEBUG_HELPERS		// uncomment this to draw debug helpers
+
 using namespace ofxSimpleLayout;
 
 enum AppState{
     STATE_NORMAL,
+    STATE_COUNTDOWN,
     STATE_TRACKING,
     STATE_PLAYBACK
 };
-
-static int SONG_DURATION = 8000;
 
 class ofApp : public ofBaseApp{
 
@@ -76,12 +77,16 @@ class ofApp : public ofBaseApp{
         void playMusic(string song, float rate);
         string currentMusic;
         float currentSpeed;
+        int currentTempo;
+        int currentSongDuration;
         ofSoundPlayer groove;
         ofSoundPlayer country;
         ofSoundPlayer waltz;
+        ofSoundPlayer rock;
         int grooveTempo = 465;
-        int countryTempo = 800;
-        int waltzTempo = 1100;
+        int countryTempo = 465;
+        int waltzTempo = 1300;
+        int rockTempo = 150;
     
         int timeStarted;
         int timeElapsed;
@@ -91,6 +96,7 @@ class ofApp : public ofBaseApp{
         //UI
         AppState appState;
         void drawTracking();
+        void startDanceCountdown();
         DMLayout layout;
     
         //Util

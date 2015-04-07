@@ -20,6 +20,7 @@ public:
     void setupViews();
     void update();
     void startCountdown();
+    bool getCountdownComplete();
     
 protected:
     

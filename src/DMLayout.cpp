@@ -30,23 +30,29 @@ void DMLayout::setupViews(){
     image("main_bg");
     image("sidebar_bg");
     image("txtChooseYourMusic");
-    button("button", 450, 150, "preview_music_groove");
-    button("button", 450, 250, "chose_music_groove");
+    button("button", 250, 150, "preview_music_groove");
+    button("button", 250, 225, "chose_music_groove");
+    button("button", 550, 150, "preview_music_country");
+    button("button", 550, 225, "chose_music_country");
+    button("button", 250, 450, "preview_music_waltz");
+    button("button", 250, 525, "chose_music_waltz");
+    button("button", 550, 450, "preview_music_rock");
+    button("button", 550, 525, "chose_music_rock");
     saveView(VIEW_CHOOSE_MUSIC);
     
     //Dance View
     image("sidebar_bg");
     image("txtGetReady");
     stateObject("countdown", 1500, 500);
-    button("button", 1420, 600, "start_dance_1");
     saveView(VIEW_DANCE_VIEW);
     
     //Playback View
     image("sidebar_bg");
     image("txtPlayback");
-    button("button", 1250, 575, "start_dance_0.5");
-    button("button", 1550, 575, "start_dance_2");
-    button("button", 1400, 750, "start_over");
+    button("button", 1200, 565, "start_dance_0.5");
+    button("button", 1450, 565, "start_dance_1");
+    button("button", 1700, 565, "start_dance_2");
+    button("button", 1450, 750, "start_over");
     saveView(VIEW_PLAYBACK);
 
 }
@@ -55,18 +61,24 @@ void DMLayout::startCountdown(){
     countdownStartTime = ofGetElapsedTimef();
 }
 
+bool DMLayout::getCountdownComplete(){
+    if (countdownStartTime == -1) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void DMLayout::update(){
     
-    /*
     if (countdownStartTime > 0) {
-        int secs = 5 - floor(ofGetElapsedTimef() - countdownStartTime);
-        if (secs >= 0) {
-            setState("countdown", ofToString(secs));
-        } else {
+        int secs = 6 - floor(ofGetElapsedTimef() - countdownStartTime);
+        setState("countdown", ofToString(secs));
+        if (secs <= 0) {
+            ofLogNotice("DMLayout::Countdown complete");
             countdownStartTime = -1;
         }
     }
-    */
     
     Layout::update();
     
