@@ -76,14 +76,13 @@ void ofApp::playMusic(string song, float rate){
 //--------------------------------------------------------------
 void ofApp::startDanceCountdown(){
     
+    ofSoundStopAll();
     layout.setView(DMLayout::VIEW_DANCE_VIEW);
-    layout.startCountdown();
-    
     appState = STATE_COUNTDOWN;
     
-    //TODO: Switch back to Get Ready view, wait for countdown.
+    layout.startCountdown();
+    
     //TODO: Do some fancy timing so the music plays as an intro, allowing the dance to get into the beat beforehand.
-    //playMusic(currentMusic, currentSpeed);
 
 }
 
@@ -233,7 +232,7 @@ void ofApp::drawTrackedLine(vector<TrackPoint> pts, int color, bool useTime){
     drawLine.draw();
     
     //Dots
-    ofSetColor(255,255,255,200);
+    ofSetColor(255,255,255);
     for(int i = 0; i < pts.size(); i++){
         if (pts[i].beat == true){
             if (useTime == false || pts[i].time <= ofGetElapsedTimeMillis() - timeStarted){

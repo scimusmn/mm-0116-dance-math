@@ -4,7 +4,7 @@
 #include "ofxCv.h"
 #include "DMLayout.h"
 
-//#define DEBUG_HELPERS		// uncomment this to draw debug helpers
+//#define DEBUG_HELPERS		// uncomment to draw debug helpers
 
 using namespace ofxSimpleLayout;
 
