@@ -4,7 +4,7 @@
 #include "ofxCv.h"
 #include "DMLayout.h"
 
-//#define DEBUG_HELPERS		// uncomment to draw debug helpers
+#define DEBUG_HELPERS		// uncomment to draw debug helpers
 
 using namespace ofxSimpleLayout;
 
@@ -28,20 +28,15 @@ class ofApp : public ofBaseApp{
 		void mouseDragged(int x, int y, int button);
 		void mousePressed(int x, int y, int button);
 		void mouseReleased(int x, int y, int button);
-		void windowResized(int w, int h);
-		void dragEvent(ofDragInfo dragInfo);
-		void gotMessage(ofMessage msg);
     
         //Cameras
         ofVideoGrabber camRaw;
         ofVideoGrabber camTracker;
-        ofVideoPlayer vidRaw;
-        ofVideoPlayer vidTracker;
+        int camRawDeviceID = 0;
+        int camTrackerDeviceID = 1;
+        ofPtr<ofQTKitGrabber> vidRecorder;
         void videoSaved(ofVideoSavedEventArgs& e);
-    
-        //Video Playback
-        ofPtr<ofQTKitGrabber>	vidRecorder;
-    
+
         //Tracking
         class TrackPoint : public ofVec2f {
         public:
@@ -95,6 +90,7 @@ class ofApp : public ofBaseApp{
     
         //UI
         AppState appState;
+        ofVideoPlayer vidPlayback;
         void drawTracking();
         void startDanceCountdown();
         DMLayout layout;

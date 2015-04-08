@@ -6,24 +6,21 @@ void ofApp::setup(){
     ofEnableSmoothing();
     
     //Setup Cameras
-    vidRaw.loadMovie("videos/light720.mov");
-    vidTracker.loadMovie("videos/light480_offset.mov");
-    vidRaw.play();
-    vidTracker.play();
-    camRatio = vidRaw.height / vidTracker.height;
-    camOffset = ofVec2f(-30, -15); // Pixel offset between raw camera and IR camera (before scale-up)
-    
-    //Video Playback
     vidRecorder = ofPtr<ofQTKitGrabber>( new ofQTKitGrabber() );
     camRaw.setGrabber(vidRecorder);
-    camRaw.initGrabber(1280/2, 720/2);
+    camRaw.setDeviceID(camRawDeviceID);
+    camRaw.initGrabber(1280,960);
     ofAddListener(vidRecorder->videoSavedEvent, this, &ofApp::videoSaved); // Listen for video saved events
     vidRecorder->initRecording();
-    
+    camTracker.setDeviceID(camTrackerDeviceID);
+    camTracker.initGrabber(320,240);
+    camRatio = camRaw.height / camTracker.height;
+    camOffset = ofVec2f(6, -5); // Pixel offset between raw camera and IR camera (before scale-up)
+ 
     //Setup Tracking
-    contourFinder.setMinAreaRadius(5); // Filter small blobs
+    contourFinder.setMinAreaRadius(0); // Filter small blobs
     contourFinder.setMaxAreaRadius(15); // Filter large blobs
-    contourFinder.setThreshold(252); // Filter non-white blobs
+    contourFinder.setThreshold(245); // Filter non-white blobs
     
     //Load Sounds
     groove.loadSound("sounds/groove.wav");
@@ -90,8 +87,12 @@ void ofApp::startDanceCountdown(){
 void ofApp::update(){
     
     layout.update();
-    vidRaw.update();
-    vidTracker.update();
+    if (appState == STATE_PLAYBACK) {
+        vidPlayback.update();
+    } else {
+        camRaw.update();
+        camTracker.update();
+    }
 
     //Update beat timer
     if ((ofGetElapsedTimeMillis() - prevBeatTime) >= (currentTempo/currentSpeed)){
@@ -100,13 +101,14 @@ void ofApp::update(){
     }
 
     //Update tracking
-    if (appState == STATE_TRACKING && vidTracker.isFrameNew()){
+    if (appState == STATE_TRACKING && camTracker.isFrameNew()){
         
         timeElapsed = ofGetElapsedTimeMillis() - timeStarted;
         
-        contourFinder.findContours(vidTracker);
+        contourFinder.findContours(camTracker);
         
         if (contourFinder.size() > 0){
+            ofLogError("found contours") << "how many: " << contourFinder.size();
             float tx = (camOffset.x + contourFinder.getCenter(0).x) * camRatio;
             float ty = (camOffset.y + contourFinder.getCenter(0).y) * camRatio;
             TrackPoint tp = TrackPoint(tx, ty, timeElapsed, isNewBeat);
@@ -152,10 +154,10 @@ void ofApp::update(){
     }
     
     //Loop playback
-    if (appState == STATE_PLAYBACK && vidRaw.getIsMovieDone() == true){
+    if (appState == STATE_PLAYBACK && vidPlayback.getIsMovieDone() == true){
         
-        vidRaw.firstFrame();
-        vidRaw.play();
+        vidPlayback.firstFrame();
+        vidPlayback.play();
         resetTracking(false);
         
     }
@@ -167,17 +169,21 @@ void ofApp::update(){
 void ofApp::draw(){
 
     //Draw Cams/Vids
-    vidRaw.draw(0,0);
+    if (appState == STATE_PLAYBACK){
+        vidPlayback.draw(0,0);
+    } else {
+        camRaw.draw(0,0);
+    }
 
     if (appState != STATE_NORMAL){
         drawTracking();
     }
-
+    
     #ifdef DEBUG_HELPERS
         ofPushMatrix();
         ofTranslate(0, 720);
         ofSetColor(255,255,255);
-        vidTracker.draw(0,0);
+        camTracker.draw(0,0);
         ofSetColor(255,100,0);
         contourFinder.draw();
         float timeSinceBeat = ofGetElapsedTimeMillis() - prevBeatTime;
@@ -245,7 +251,20 @@ void ofApp::drawTrackedLine(vector<TrackPoint> pts, int color, bool useTime){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-
+    //Change raw cam source
+    if(key == 'r') {
+        camRaw.close();
+        camRawDeviceID = (camRawDeviceID + 1) % camRaw.listDevices().size();
+        camRaw.setDeviceID(camRawDeviceID);
+        camRaw.initGrabber(1280,960);
+    }
+    //Change IR cam source
+    if(key == 'i') {
+        camTracker.close();
+        camTrackerDeviceID = (camTrackerDeviceID + 1) % camTracker.listDevices().size();
+        camTracker.setDeviceID(camTrackerDeviceID);
+        camTracker.initGrabber(320,240);
+    }
 }
 
 //--------------------------------------------------------------
@@ -309,7 +328,7 @@ void ofApp::mousePressed(int x, int y, int button){
         appState = STATE_NORMAL;
         
         layout.setView(DMLayout::VIEW_PICK_DANCE);
-        vidRaw.setLoopState(OF_LOOP_NORMAL);
+        vidPlayback.setLoopState(OF_LOOP_NORMAL);
         
         //delete all temp files
         clearFiles();
@@ -328,21 +347,6 @@ void ofApp::mouseReleased(int x, int y, int button){
 }
 
 //--------------------------------------------------------------
-void ofApp::windowResized(int w, int h){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
-
-}
-
-//--------------------------------------------------------------
 void ofApp::videoSaved(ofVideoSavedEventArgs& e){
     
     // ofQTKitGrabber sends a message with the file name and any errors when the video is done recording
@@ -355,10 +359,10 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
         session.saveData(currentSpeed, drawPts, vidPath);
         
         //Start large playback of most recently recorded video
-        vidRaw.close();
-        vidRaw.loadMovie(vidPath);
-        vidRaw.play();
-        vidRaw.setLoopState(OF_LOOP_NONE);
+        vidPlayback.close();
+        vidPlayback.loadMovie(vidPath);
+        vidPlayback.play();
+        vidPlayback.setLoopState(OF_LOOP_NONE);
         
         resetTracking(false);
         appState = STATE_PLAYBACK;
