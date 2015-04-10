@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxCv.h"
+#include "Jukebox.h"
 #include "DMLayout.h"
 
 #define DEBUG_HELPERS		// uncomment to draw debug helpers
@@ -33,7 +34,7 @@ class ofApp : public ofBaseApp{
         ofVideoGrabber camRaw;
         ofVideoGrabber camTracker;
         int camRawDeviceID = 0;
-        int camTrackerDeviceID = 1;
+        int camTrackerDeviceID = 2;
         ofPtr<ofQTKitGrabber> vidRecorder;
         void videoSaved(ofVideoSavedEventArgs& e);
 
@@ -69,20 +70,9 @@ class ofApp : public ofBaseApp{
         ofPolyline drawLine;
     
         //Music
-        void playMusic(string song, float rate);
-        string currentMusic;
-        float currentSpeed;
-        int currentTempo;
-        int currentSongDuration;
-        ofSoundPlayer groove;
-        ofSoundPlayer country;
-        ofSoundPlayer waltz;
-        ofSoundPlayer rock;
-        int grooveTempo = 465;
-        int countryTempo = 465;
-        int waltzTempo = 1300;
-        int rockTempo = 150;
+        Jukebox jukebox;
     
+        float currentSpeed;
         int timeStarted;
         int timeElapsed;
         int prevBeatTime;

@@ -22,6 +22,7 @@
 		A6668C5B1272D7FCD5B5A16F /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6CEC50DB3D06414010233963 /* Utilities.cpp */; };
 		B6840996567E78436F7ECFAB /* ETF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B047FF96258DC01792B272DB /* ETF.cpp */; };
 		BBAB23CB13894F3D00AA2426 /* GLUT.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = BBAB23BE13894E4700AA2426 /* GLUT.framework */; };
+		BFB5149C1AD881E5003BF056 /* Jukebox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFB5149A1AD881E5003BF056 /* Jukebox.cpp */; };
 		BFFBB5A01AC5E5580004F7B0 /* DMLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFBB59E1AC5E5580004F7B0 /* DMLayout.cpp */; };
 		C602002DE761F9B52DB4400A /* ObjectFinder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AE75A3FBA2C2D87D14F06FE6 /* ObjectFinder.cpp */; };
 		D3301F6A0B43BB293ED97C1D /* ofxCvShortImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A4DD23693DFAB8EC05FAA5D /* ofxCvShortImage.cpp */; };
@@ -171,6 +172,8 @@
 		B8427966039B53A0FE69C1F0 /* cxcore.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = cxcore.h; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv/cxcore.h; sourceTree = SOURCE_ROOT; };
 		B9076967F8C54A04362C04AA /* Helpers.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = Helpers.cpp; path = ../../../addons/ofxCv/libs/ofxCv/src/Helpers.cpp; sourceTree = SOURCE_ROOT; };
 		BBAB23BE13894E4700AA2426 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = ../../../libs/glut/lib/osx/GLUT.framework; sourceTree = "<group>"; };
+		BFB5149A1AD881E5003BF056 /* Jukebox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Jukebox.cpp; sourceTree = "<group>"; };
+		BFB5149B1AD881E5003BF056 /* Jukebox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Jukebox.h; sourceTree = "<group>"; };
 		BFFBB59E1AC5E5580004F7B0 /* DMLayout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DMLayout.cpp; sourceTree = "<group>"; };
 		BFFBB59F1AC5E5580004F7B0 /* DMLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DMLayout.h; sourceTree = "<group>"; };
 		C1C56D20A1A57DC44096BFE7 /* ofxCvContourFinder.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxCvContourFinder.h; path = ../../../addons/ofxOpenCv/src/ofxCvContourFinder.h; sourceTree = SOURCE_ROOT; };
@@ -713,6 +716,8 @@
 				E4B69E1F0A3A1BDC003C02F2 /* ofApp.h */,
 				BFFBB59E1AC5E5580004F7B0 /* DMLayout.cpp */,
 				BFFBB59F1AC5E5580004F7B0 /* DMLayout.h */,
+				BFB5149A1AD881E5003BF056 /* Jukebox.cpp */,
+				BFB5149B1AD881E5003BF056 /* Jukebox.h */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -856,6 +861,7 @@
 				BFFBB5A01AC5E5580004F7B0 /* DMLayout.cpp in Sources */,
 				A6668C5B1272D7FCD5B5A16F /* Utilities.cpp in Sources */,
 				DBCB84A37F9AECC254870D79 /* Wrappers.cpp in Sources */,
+				BFB5149C1AD881E5003BF056 /* Jukebox.cpp in Sources */,
 				74AD5E672F48211FE09C2B09 /* ofxSimpleLayout.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

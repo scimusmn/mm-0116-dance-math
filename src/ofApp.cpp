@@ -5,17 +5,34 @@ void ofApp::setup(){
     
     ofEnableSmoothing();
     
+    //List out cameras
+    vector<ofVideoDevice> devices = camRaw.listDevices();
+    
+    for(int i = 0; i < devices.size(); i++){
+        cout << devices[i].id << ": " << devices[i].deviceName << " : " << devices[i].hardwareName;
+        if( devices[i].bAvailable ){
+            cout << endl;
+        }else{
+            cout << " - unavailable " << endl;
+        }
+    }
+    
     //Setup Cameras
     vidRecorder = ofPtr<ofQTKitGrabber>( new ofQTKitGrabber() );
     camRaw.setGrabber(vidRecorder);
-    camRaw.setDeviceID(camRawDeviceID);
-    camRaw.initGrabber(1280,960);
+    camRaw.setDeviceID(camRawDeviceID);    
+    camTracker.setDeviceID(camTrackerDeviceID);
+    camTracker.initGrabber(320,180);
+    camRaw.initGrabber(1280,720);
+    
+    printf("a --- camTracker : asked for 320 by 180 - actual size is %i by %i \n", camTracker.width, camTracker.height);
+    printf("a --- camRaw: asked for 1280 by 720 - actual size is %i by %i \n", camRaw.width, camRaw.height);
+           
     ofAddListener(vidRecorder->videoSavedEvent, this, &ofApp::videoSaved); // Listen for video saved events
     vidRecorder->initRecording();
-    camTracker.setDeviceID(camTrackerDeviceID);
-    camTracker.initGrabber(320,240);
+    
     camRatio = camRaw.height / camTracker.height;
-    camOffset = ofVec2f(6, -5); // Pixel offset between raw camera and IR camera (before scale-up)
+    camOffset = ofVec2f(3.5, 30); // Pixel offset between raw camera and IR camera (before scale-up)
  
     //Setup Tracking
     contourFinder.setMinAreaRadius(0); // Filter small blobs
@@ -23,11 +40,11 @@ void ofApp::setup(){
     contourFinder.setThreshold(245); // Filter non-white blobs
     
     //Load Sounds
-    groove.loadSound("sounds/groove.wav");
-    country.loadSound("sounds/country.wav");
-    waltz.loadSound("sounds/waltz.wav");
-    rock.loadSound("sounds/rock.wav");
-    
+    jukebox.addSong("groove", "sounds/groove.wav", 18400, 9230, 576);
+    jukebox.addSong("country", "sounds/country.wav", 55555, 1111, 465);
+    jukebox.addSong("waltz", "sounds/waltz.wav", 66666, 1111, 465);
+    jukebox.addSong("rock", "sounds/rock.wav", 77777, 1111, 465);
+
     //Load/Setup UI
     layout.setupViews();
     layout.setView(DMLayout::VIEW_PICK_DANCE);
@@ -42,33 +59,6 @@ void ofApp::resetTracking(bool resetPts){
     timeStarted = prevBeatTime = ofGetElapsedTimeMillis();
 }
 
-//--------------------------------------------------------------
-void ofApp::playMusic(string song, float rate){
-    
-    ofSoundStopAll();
-    
-    if (song == "groove") {
-        currentSongDuration = 8000;
-        currentTempo = grooveTempo;
-        groove.setSpeed(rate);
-        groove.play();
-    } else if (song == "country") {
-        currentSongDuration = 8000;
-        currentTempo = countryTempo;
-        country.setSpeed(rate);
-        country.play();
-    } else if (song == "waltz") {
-        currentSongDuration = 11000;
-        currentTempo = waltzTempo;
-        waltz.setSpeed(rate);
-        waltz.play();
-    } else if (song == "rock") {
-        currentSongDuration = 5000;
-        currentTempo = rockTempo;
-        rock.setSpeed(rate);
-        rock.play();
-    }
-}
 
 //--------------------------------------------------------------
 void ofApp::startDanceCountdown(){
@@ -76,7 +66,6 @@ void ofApp::startDanceCountdown(){
     ofSoundStopAll();
     layout.setView(DMLayout::VIEW_DANCE_VIEW);
     appState = STATE_COUNTDOWN;
-    
     layout.startCountdown();
     
     //TODO: Do some fancy timing so the music plays as an intro, allowing the dance to get into the beat beforehand.
@@ -95,7 +84,7 @@ void ofApp::update(){
     }
 
     //Update beat timer
-    if ((ofGetElapsedTimeMillis() - prevBeatTime) >= (currentTempo/currentSpeed)){
+    if ((ofGetElapsedTimeMillis() - prevBeatTime) >= (jukebox.tempo / jukebox.rate)){
         prevBeatTime = ofGetElapsedTimeMillis();
         isNewBeat = true;
     }
@@ -108,7 +97,6 @@ void ofApp::update(){
         contourFinder.findContours(camTracker);
         
         if (contourFinder.size() > 0){
-            ofLogError("found contours") << "how many: " << contourFinder.size();
             float tx = (camOffset.x + contourFinder.getCenter(0).x) * camRatio;
             float ty = (camOffset.y + contourFinder.getCenter(0).y) * camRatio;
             TrackPoint tp = TrackPoint(tx, ty, timeElapsed, isNewBeat);
@@ -118,7 +106,7 @@ void ofApp::update(){
         isNewBeat = false;
         
         //End recording
-        if (timeElapsed >= currentSongDuration / currentSpeed) {
+        if (timeElapsed >= jukebox.duration / jukebox.rate) {
             
             appState = STATE_NORMAL;
 
@@ -139,7 +127,7 @@ void ofApp::update(){
             
             //Start tracking
             resetTracking();
-            playMusic(currentMusic, currentSpeed);
+            jukebox.play(currentSpeed);
             appState = STATE_TRACKING;
             
             //Start video recording
@@ -172,7 +160,7 @@ void ofApp::draw(){
     if (appState == STATE_PLAYBACK){
         vidPlayback.draw(0,0);
     } else {
-        camRaw.draw(0,0);
+        camRaw.draw(0,0,1280,960);
     }
 
     if (appState != STATE_NORMAL){
@@ -253,17 +241,34 @@ void ofApp::drawTrackedLine(vector<TrackPoint> pts, int color, bool useTime){
 void ofApp::keyPressed(int key){
     //Change raw cam source
     if(key == 'r') {
+        
+        int w = camRaw.width;
+        int h = camRaw.height;
         camRaw.close();
         camRawDeviceID = (camRawDeviceID + 1) % camRaw.listDevices().size();
+        camRaw.setGrabber(vidRecorder);
         camRaw.setDeviceID(camRawDeviceID);
-        camRaw.initGrabber(1280,960);
+        camRaw.initGrabber(w,h);
+        
+        printf("r--- camRaw: new device id: %i \n", camRawDeviceID);
+        printf("r--- camRaw: asked for %i by %i - actual size is %i by %i \n", w, h, camRaw.width, camRaw.height);
+        printf("r--- camTracker current size: %i by %i \n", camTracker.width, camTracker.height);
+        
     }
     //Change IR cam source
     if(key == 'i') {
+        
+        int w = camTracker.width;
+        int h = camTracker.height;
         camTracker.close();
         camTrackerDeviceID = (camTrackerDeviceID + 1) % camTracker.listDevices().size();
         camTracker.setDeviceID(camTrackerDeviceID);
-        camTracker.initGrabber(320,240);
+        camTracker.initGrabber(w,h);
+        
+        printf("i--- camTracker: new device id: %i \n", camTrackerDeviceID);
+        printf("i--- camTracker : asked for %i by %i - actual size is %i by %i \n", w, h, camTracker.width, camTracker.height);
+        printf("i--- camRaw current size: %i by %i \n", camRaw.width, camRaw.height);
+        
     }
 }
 
@@ -298,13 +303,15 @@ void ofApp::mousePressed(int x, int y, int button){
     if (btn.substr(0,13) == "preview_music") {
         string music = btn.substr(14);
         ofLogNotice("Preview music: "+music);
-        playMusic(music, 1);
+        jukebox.switchSong(music);
+        jukebox.play();
     }
     
     if (btn.substr(0,11) == "chose_music") {
         string music = btn.substr(12);
         ofLogNotice("Music chosen: "+music);
-        currentMusic = music;
+        
+        jukebox.switchSong(music);
         
         //Start initial dance
         currentSpeed = 1;
