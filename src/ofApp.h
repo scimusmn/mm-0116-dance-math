@@ -5,12 +5,13 @@
 #include "Jukebox.h"
 #include "DMLayout.h"
 
-#define DEBUG_HELPERS		// uncomment to draw debug helpers
+//#define DEBUG_HELPERS		// uncomment to draw debug helpers
 
 using namespace ofxSimpleLayout;
 
 enum AppState{
     STATE_NORMAL,
+    STATE_PRE_COUNTDOWN,
     STATE_COUNTDOWN,
     STATE_TRACKING,
     STATE_PLAYBACK
@@ -62,6 +63,7 @@ class ofApp : public ofBaseApp{
         Session session;
         ofxCv::ContourFinder contourFinder;
         vector<TrackPoint> drawPts;
+        void initRecording();
         void resetTracking();
         void resetTracking(bool);
         void drawTrackedLine(vector<TrackPoint> pts, int color, bool useTime);
@@ -71,7 +73,6 @@ class ofApp : public ofBaseApp{
     
         //Music
         Jukebox jukebox;
-    
         float currentSpeed;
         int timeStarted;
         int timeElapsed;
@@ -80,6 +81,7 @@ class ofApp : public ofBaseApp{
     
         //UI
         AppState appState;
+        int countdown;
         ofVideoPlayer vidPlayback;
         void drawTracking();
         void startDanceCountdown();

@@ -32,7 +32,7 @@ public:
     
     map<string, Song> songs;
     
-    //These match whatever current song is loaded.
+    //These match whatever current song is set by switchSong().
     string id;
     string path;
     int duration;

@@ -30,14 +30,14 @@ void DMLayout::setupViews(){
     image("main_bg");
     image("sidebar_bg");
     image("txtChooseYourMusic");
-    button("btnPreview", 250, 150, "preview_music_groove");
-    button("btnSong1", 250, 275, "chose_music_groove");
-    button("btnPreview", 550, 150, "preview_music_country");
-    button("btnSong2", 550, 275, "chose_music_country");
-    button("btnPreview", 250, 490, "preview_music_waltz");
+    button("btnPreview", 250, 150, "preview_music_jazz");
+    button("btnSong1", 250, 275, "chose_music_jazz");
+    button("btnPreview", 550, 150, "preview_music_calliope");
+    button("btnSong2", 550, 275, "chose_music_calliope");
+    button("btnPreview", 250, 480, "preview_music_waltz");
     button("btnSong3", 250, 605, "chose_music_waltz");
-    button("btnPreview", 550, 490, "preview_music_rock");
-    button("btnSong4", 550, 605, "chose_music_rock");
+    button("btnPreview", 550, 480, "preview_music_tango");
+    button("btnSong4", 550, 605, "chose_music_tango");
     saveView(VIEW_CHOOSE_MUSIC);
     
     //Dance View
@@ -57,30 +57,4 @@ void DMLayout::setupViews(){
 
 }
 
-void DMLayout::startCountdown(){
-    countdownStartTime = ofGetElapsedTimef();
-}
-
-bool DMLayout::getCountdownComplete(){
-    if (countdownStartTime == -1) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-void DMLayout::update(){
-    
-    if (countdownStartTime > 0) {
-        int secs = 6 - floor(ofGetElapsedTimef() - countdownStartTime);
-        setState("countdown", ofToString(secs));
-        if (secs <= 0) {
-            ofLogNotice("DMLayout::Countdown complete");
-            countdownStartTime = -1;
-        }
-    }
-    
-    Layout::update();
-    
-}
 

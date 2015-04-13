@@ -4,6 +4,7 @@
 void ofApp::setup(){
     
     ofEnableSmoothing();
+    ofBackground(30,30,30);
     
     //List out cameras
     vector<ofVideoDevice> devices = camRaw.listDevices();
@@ -37,18 +38,34 @@ void ofApp::setup(){
     //Setup Tracking
     contourFinder.setMinAreaRadius(0); // Filter small blobs
     contourFinder.setMaxAreaRadius(15); // Filter large blobs
-    contourFinder.setThreshold(245); // Filter non-white blobs
+    contourFinder.setThreshold(250); // Filter non-white blobs
     
     //Load Sounds
-    jukebox.addSong("groove", "sounds/groove.wav", 18400, 9230, 576);
-    jukebox.addSong("country", "sounds/country.wav", 55555, 1111, 465);
-    jukebox.addSong("waltz", "sounds/waltz.wav", 66666, 1111, 465);
-    jukebox.addSong("rock", "sounds/rock.wav", 77777, 1111, 465);
+    jukebox.addSong("jazz", "sounds/jazz.wav", 10801, 3707, 466);
+    jukebox.addSong("waltz", "sounds/waltz.wav", 14567, 7107, 943);
+    jukebox.addSong("calliope", "sounds/calliope.wav", 11493, 5517, 766);
+    jukebox.addSong("tango", "sounds/tango.wav", 10236, 3783, 466);
 
     //Load/Setup UI
     layout.setupViews();
     layout.setView(DMLayout::VIEW_PICK_DANCE);
     appState = STATE_NORMAL;
+    
+}
+
+//--------------------------------------------------------------
+void ofApp::initRecording(){
+    
+    //Tracking
+    resetTracking();
+    appState = STATE_TRACKING;
+    
+    //Video recording
+    stringstream s;
+    s << "temp/xDANCE_" << ofGetUnixTime() << ".mov";
+    vidRecorder->startRecording(s.str());
+    
+    ofLogNotice("initRecording() ") << "Start recording: " << s;
     
 }
 
@@ -65,10 +82,14 @@ void ofApp::startDanceCountdown(){
     
     ofSoundStopAll();
     layout.setView(DMLayout::VIEW_DANCE_VIEW);
-    appState = STATE_COUNTDOWN;
-    layout.startCountdown();
     
-    //TODO: Do some fancy timing so the music plays as an intro, allowing the dance to get into the beat beforehand.
+    countdown = 9;
+    layout.setState("countdown", ofToString(countdown));
+    
+    //Wait 5 seconds then count down.
+    resetTracking();
+    appState = STATE_PRE_COUNTDOWN;
+    
 
 }
 
@@ -76,6 +97,7 @@ void ofApp::startDanceCountdown(){
 void ofApp::update(){
     
     layout.update();
+    
     if (appState == STATE_PLAYBACK) {
         vidPlayback.update();
     } else {
@@ -88,11 +110,11 @@ void ofApp::update(){
         prevBeatTime = ofGetElapsedTimeMillis();
         isNewBeat = true;
     }
+    
+    timeElapsed = ofGetElapsedTimeMillis() - timeStarted;
 
     //Update tracking
     if (appState == STATE_TRACKING && camTracker.isFrameNew()){
-        
-        timeElapsed = ofGetElapsedTimeMillis() - timeStarted;
         
         contourFinder.findContours(camTracker);
         
@@ -106,7 +128,7 @@ void ofApp::update(){
         isNewBeat = false;
         
         //End recording
-        if (timeElapsed >= jukebox.duration / jukebox.rate) {
+        if (timeElapsed >= ((jukebox.duration - jukebox.intro) / jukebox.rate)) {
             
             appState = STATE_NORMAL;
 
@@ -122,23 +144,30 @@ void ofApp::update(){
     }
     
     //Wait for countdown
-    if (appState == STATE_COUNTDOWN){
-        if (layout.getCountdownComplete() == true) {
-            
-            //Start tracking
+    if (appState == STATE_PRE_COUNTDOWN){
+        
+        if (timeElapsed > 1000){
+            isNewBeat = true;
+            appState = STATE_COUNTDOWN;
             resetTracking();
             jukebox.play(currentSpeed);
-            appState = STATE_TRACKING;
-            
-            //Start video recording
-            stringstream s; //Time-based filename
-            s << "temp/xDANCE_" << ofGetUnixTime() << ".mov";
-            vidRecorder->startRecording(s.str());
-            
-            ofLogNotice("Countdown complete! ") << "Start recording: " << s;
-            
         }
         
+    } else if (appState == STATE_COUNTDOWN){
+        
+        if (isNewBeat == true){
+            
+            countdown--;
+            isNewBeat = false;
+            ofLogNotice("Countdown beat:" + ofToString(countdown));
+            layout.setState("countdown", ofToString(countdown));
+            
+            if (countdown <= 0) {
+                initRecording();                
+            }
+            
+        }
+
     }
     
     //Loop playback
@@ -157,6 +186,11 @@ void ofApp::update(){
 void ofApp::draw(){
 
     //Draw Cams/Vids
+    
+    ofPushMatrix();
+    ofTranslate(1280, 0, 0);
+    ofScale(-1, 1); //**--> Drawing is MIRRORED
+    
     if (appState == STATE_PLAYBACK){
         vidPlayback.draw(0,0);
     } else {
@@ -180,6 +214,8 @@ void ofApp::draw(){
         ofPopMatrix();
     #endif
     
+    ofPopMatrix(); //**--> Drawing is UN-MIRRORED
+    
     //Draw layout
     ofSetColor(255,255,255);
     layout.draw();
@@ -195,9 +231,9 @@ void ofApp::drawTracking(){
         
     } else if (appState == STATE_PLAYBACK) {
         
-        if(!session.slowPts.empty()) drawTrackedLine(session.slowPts, ofHexToInt("FF0000"), true);
-        if(!session.normPts.empty()) drawTrackedLine(session.normPts, ofHexToInt("00FF00"), true);
-        if(!session.fastPts.empty()) drawTrackedLine(session.fastPts, ofHexToInt("0000FF"), true);
+        if(!session.slowPts.empty()) drawTrackedLine(session.slowPts, session.getColor(0.5), true);
+        if(!session.normPts.empty()) drawTrackedLine(session.normPts, session.getColor(1), true);
+        if(!session.fastPts.empty()) drawTrackedLine(session.fastPts, session.getColor(2), true);
         
     }
     

@@ -18,12 +18,8 @@ public:
     static string VIEW_PLAYBACK;
     
     void setupViews();
-    void update();
-    void startCountdown();
-    bool getCountdownComplete();
     
 protected:
     
-    int countdownStartTime;
     
 };
