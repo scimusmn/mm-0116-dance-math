@@ -6,40 +6,15 @@ void ofApp::setup(){
     ofEnableSmoothing();
     ofBackground(30,30,30);
     
-    //List out cameras
-    vector<ofVideoDevice> devices = camRaw.listDevices();
-    
-    for(int i = 0; i < devices.size(); i++){
-        cout << devices[i].id << ": " << devices[i].deviceName << " : " << devices[i].hardwareName;
-        if( devices[i].bAvailable ){
-            cout << endl;
-        }else{
-            cout << " - unavailable " << endl;
-        }
-    }
-    
     //Setup Cameras
     vidRecorder = ofPtr<ofQTKitGrabber>( new ofQTKitGrabber() );
     camRaw.setGrabber(vidRecorder);
-    camRaw.setDeviceID(camRawDeviceID);    
-    camTracker.setDeviceID(camTrackerDeviceID);
-    camTracker.initGrabber(320,180);
+    camRaw.setDeviceID(0);
     camRaw.initGrabber(1280,720);
-    
-    printf("a --- camTracker : asked for 320 by 180 - actual size is %i by %i \n", camTracker.width, camTracker.height);
-    printf("a --- camRaw: asked for 1280 by 720 - actual size is %i by %i \n", camRaw.width, camRaw.height);
-           
+
     ofAddListener(vidRecorder->videoSavedEvent, this, &ofApp::videoSaved); // Listen for video saved events
     vidRecorder->initRecording();
-    
-    camRatio = camRaw.height / camTracker.height;
-    camOffset = ofVec2f(3.5, 30); // Pixel offset between raw camera and IR camera (before scale-up)
- 
-    //Setup Tracking
-    contourFinder.setMinAreaRadius(0); // Filter small blobs
-    contourFinder.setMaxAreaRadius(15); // Filter large blobs
-    contourFinder.setThreshold(250); // Filter non-white blobs
-    
+
     //Load Sounds
     jukebox.addSong("jazz", "sounds/jazz.wav", 10801, 3707, 466);
     jukebox.addSong("waltz", "sounds/waltz.wav", 14567, 7107, 943);
@@ -57,7 +32,7 @@ void ofApp::setup(){
 void ofApp::initRecording(){
     
     //Tracking
-    resetTracking();
+    resetBeatTracking();
     appState = STATE_TRACKING;
     
     //Video recording
@@ -70,9 +45,7 @@ void ofApp::initRecording(){
 }
 
 //--------------------------------------------------------------
-void ofApp::resetTracking(){ resetTracking(true); };
-void ofApp::resetTracking(bool resetPts){
-    if (resetPts) drawPts.clear();
+void ofApp::resetBeatTracking(){
     timeStarted = prevBeatTime = ofGetElapsedTimeMillis();
 }
 
@@ -87,10 +60,9 @@ void ofApp::startDanceCountdown(){
     layout.setState("countdown", ofToString(countdown));
     
     //Wait 5 seconds then count down.
-    resetTracking();
+    resetBeatTracking();
     appState = STATE_PRE_COUNTDOWN;
     
-
 }
 
 //--------------------------------------------------------------
@@ -99,10 +71,9 @@ void ofApp::update(){
     layout.update();
     
     if (appState == STATE_PLAYBACK) {
-        vidPlayback.update();
+        session.updateVids();
     } else {
         camRaw.update();
-        camTracker.update();
     }
 
     //Update beat timer
@@ -114,16 +85,7 @@ void ofApp::update(){
     timeElapsed = ofGetElapsedTimeMillis() - timeStarted;
 
     //Update tracking
-    if (appState == STATE_TRACKING && camTracker.isFrameNew()){
-        
-        contourFinder.findContours(camTracker);
-        
-        if (contourFinder.size() > 0){
-            float tx = (camOffset.x + contourFinder.getCenter(0).x) * camRatio;
-            float ty = (camOffset.y + contourFinder.getCenter(0).y) * camRatio;
-            TrackPoint tp = TrackPoint(tx, ty, timeElapsed, isNewBeat);
-            drawPts.push_back(tp);
-        }
+    if (appState == STATE_TRACKING){
 
         isNewBeat = false;
         
@@ -149,7 +111,7 @@ void ofApp::update(){
         if (timeElapsed > 1000){
             isNewBeat = true;
             appState = STATE_COUNTDOWN;
-            resetTracking();
+            resetBeatTracking();
             jukebox.play(currentSpeed);
         }
         
@@ -171,14 +133,12 @@ void ofApp::update(){
     }
     
     //Loop playback
-    if (appState == STATE_PLAYBACK && vidPlayback.getIsMovieDone() == true){
+    if (appState == STATE_PLAYBACK && session.normPlayer.getIsMovieDone() == true){
         
-        vidPlayback.firstFrame();
-        vidPlayback.play();
-        resetTracking(false);
+        session.restartVids();
+        resetBeatTracking();
         
     }
-    
     
 }
 
@@ -192,22 +152,17 @@ void ofApp::draw(){
     ofScale(-1, 1); //**--> Drawing is MIRRORED
     
     if (appState == STATE_PLAYBACK){
-        vidPlayback.draw(0,0);
+        
+        session.drawVids();
+
     } else {
         camRaw.draw(0,0,1280,960);
-    }
-
-    if (appState != STATE_NORMAL){
-        drawTracking();
     }
     
     #ifdef DEBUG_HELPERS
         ofPushMatrix();
         ofTranslate(0, 720);
-        ofSetColor(255,255,255);
-        camTracker.draw(0,0);
         ofSetColor(255,100,0);
-        contourFinder.draw();
         float timeSinceBeat = ofGetElapsedTimeMillis() - prevBeatTime;
         ofCircle(750, 250, 50 - (timeSinceBeat * 0.025));
         ofDrawBitmapString(ofToString(ofGetFrameRate())+"fps", 20, 30);
@@ -223,89 +178,8 @@ void ofApp::draw(){
 }
 
 //--------------------------------------------------------------
-void ofApp::drawTracking(){
-    
-    if (appState == STATE_TRACKING){
-
-        drawTrackedLine(drawPts, session.getColor(currentSpeed), false);
-        
-    } else if (appState == STATE_PLAYBACK) {
-        
-        if(!session.slowPts.empty()) drawTrackedLine(session.slowPts, session.getColor(0.5), true);
-        if(!session.normPts.empty()) drawTrackedLine(session.normPts, session.getColor(1), true);
-        if(!session.fastPts.empty()) drawTrackedLine(session.fastPts, session.getColor(2), true);
-        
-    }
-    
-    ofSetLineWidth(1);
-
-}
-
-//--------------------------------------------------------------
-void ofApp::drawTrackedLine(vector<TrackPoint> pts, int color, bool useTime){
-    
-    drawLine.clear();
-    
-    //Line
-    ofSetLineWidth(4);
-    ofSetHexColor(color);
-    if (!pts.empty()) drawLine.addVertex(pts[0].x, pts[0].y);
-    for(int i = 0; i < pts.size(); i++){
-        if (useTime == false || pts[i].time <= ofGetElapsedTimeMillis() - timeStarted){
-            drawLine.curveTo(pts[i].x, pts[i].y);
-        } else {
-            drawLine.curveTo(pts[i].x, pts[i].y);
-            break;
-        }
-    }
-    if (useTime == false && !pts.empty()) drawLine.addVertex(pts[pts.size()-1].x, pts[pts.size()-1].y);
-    drawLine.draw();
-    
-    //Dots
-    ofSetColor(255,255,255);
-    for(int i = 0; i < pts.size(); i++){
-        if (pts[i].beat == true){
-            if (useTime == false || pts[i].time <= ofGetElapsedTimeMillis() - timeStarted){
-                ofCircle(pts[i].x, pts[i].y, 7);
-            }
-        }
-    }
-        
-}
-
-//--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    //Change raw cam source
-    if(key == 'r') {
-        
-        int w = camRaw.width;
-        int h = camRaw.height;
-        camRaw.close();
-        camRawDeviceID = (camRawDeviceID + 1) % camRaw.listDevices().size();
-        camRaw.setGrabber(vidRecorder);
-        camRaw.setDeviceID(camRawDeviceID);
-        camRaw.initGrabber(w,h);
-        
-        printf("r--- camRaw: new device id: %i \n", camRawDeviceID);
-        printf("r--- camRaw: asked for %i by %i - actual size is %i by %i \n", w, h, camRaw.width, camRaw.height);
-        printf("r--- camTracker current size: %i by %i \n", camTracker.width, camTracker.height);
-        
-    }
-    //Change IR cam source
-    if(key == 'i') {
-        
-        int w = camTracker.width;
-        int h = camTracker.height;
-        camTracker.close();
-        camTrackerDeviceID = (camTrackerDeviceID + 1) % camTracker.listDevices().size();
-        camTracker.setDeviceID(camTrackerDeviceID);
-        camTracker.initGrabber(w,h);
-        
-        printf("i--- camTracker: new device id: %i \n", camTrackerDeviceID);
-        printf("i--- camTracker : asked for %i by %i - actual size is %i by %i \n", w, h, camTracker.width, camTracker.height);
-        printf("i--- camRaw current size: %i by %i \n", camRaw.width, camRaw.height);
-        
-    }
+    
 }
 
 //--------------------------------------------------------------
@@ -367,7 +241,7 @@ void ofApp::mousePressed(int x, int y, int button){
     if (btn == "start_over") {
         
         //clear all tracking
-        resetTracking();
+        resetBeatTracking();
         appState = STATE_NORMAL;
         
         layout.setView(DMLayout::VIEW_PICK_DANCE);
@@ -380,6 +254,10 @@ void ofApp::mousePressed(int x, int y, int button){
         //reset base time
         ofResetElapsedTimeCounter();
         
+    }
+    
+    if (btn == "toggle_overlay"){
+        showOverlay = !showOverlay;
     }
     
 }
@@ -396,18 +274,9 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
     if(e.error.empty()){
         
         string vidPath = e.videoPath;
-        ofLogNotice("vidPath: "+vidPath);
+        session.saveData(currentSpeed, vidPath);
         
-        //Save to session
-        session.saveData(currentSpeed, drawPts, vidPath);
-        
-        //Start large playback of most recently recorded video
-        vidPlayback.close();
-        vidPlayback.loadMovie(vidPath);
-        vidPlayback.play();
-        vidPlayback.setLoopState(OF_LOOP_NONE);
-        
-        resetTracking(false);
+        resetBeatTracking();
         appState = STATE_PLAYBACK;
         
         //Which playback pts to draw
@@ -431,28 +300,95 @@ void ofApp::clearFiles() {
 }
 
 //--------------------------------------------------------------
-ofApp::TrackPoint::TrackPoint(float x, float y, int time, bool beat){
-    this->x = x;
-    this->y = y;
-    this->time = time;
-    this->beat = beat;
-}
-
-//--------------------------------------------------------------
-void ofApp::Session::saveData(float speed, vector<TrackPoint> pts, string vid){
+void ofApp::Session::saveData(float speed, string vid){
     if (speed == 0.5) {
-        slowPts = pts;
         slowVid = vid;
+        slowPlayer.close();
+        slowPlayer.loadMovie(slowVid);
+        slowPlayer.play();
+        slowPlayer.setSpeed(2);
+        slowPlayer.setLoopState(OF_LOOP_NONE);
     } else if (speed == 1) {
-        normPts = pts;
         normVid = vid;
+        normPlayer.close();
+        normPlayer.loadMovie(normVid);
+        normPlayer.play();
+        normPlayer.setSpeed(1);
+        normPlayer.setLoopState(OF_LOOP_NONE);
     } else if (speed == 2) {
-        fastPts = pts;
         fastVid = vid;
+        fastPlayer.close();
+        fastPlayer.loadMovie(fastVid);
+        fastPlayer.play();
+        fastPlayer.setSpeed(0.5);
+        fastPlayer.setLoopState(OF_LOOP_NONE);
     } else {
         ofLogError("Session") << "Can not save session. Unrecognized speed: " << speed;
     }
 }
+
+//--------------------------------------------------------------
+void ofApp::Session::updateVids(){
+    
+    if(!normVid.empty()) {
+        normPlayer.update();
+    }
+    
+    if(!slowVid.empty()) {
+        slowPlayer.update();
+    }
+    
+    if(!fastVid.empty()) {
+        fastPlayer.update();
+    }
+    
+}
+
+//--------------------------------------------------------------
+void ofApp::Session::drawVids(){
+    
+    if(!normVid.empty()) {
+        ofSetColor(255,255,255,255);
+        normPlayer.draw(0,0,1280,960);
+    }
+    
+//    ofEnableBlendMode(OF_BLENDMODE_ADD);
+    
+    if(!slowVid.empty()) {
+        ofSetColor(255,200,200,85);
+        slowPlayer.draw(0,0,1280,960);
+    }
+    
+    if(!fastVid.empty()) {
+        ofSetColor(200,200,255,85);
+        fastPlayer.draw(0,0,1280,960);
+    }
+    
+//    ofDisableBlendMode();
+    ofSetColor(255,255,255);
+}
+
+//--------------------------------------------------------------
+void ofApp::Session::restartVids(){
+    
+    if(!normVid.empty()) {
+        normPlayer.firstFrame();
+        normPlayer.play();
+    }
+    
+    if(!slowVid.empty()) {
+        slowPlayer.firstFrame();
+        slowPlayer.play();
+    }
+    
+    if(!fastVid.empty()) {
+        fastPlayer.firstFrame();
+        fastPlayer.play();
+    }
+    
+}
+
+
 
 //--------------------------------------------------------------
 int ofApp::Session::getColor(float speed){
@@ -469,9 +405,9 @@ int ofApp::Session::getColor(float speed){
 
 //--------------------------------------------------------------
 void ofApp::Session::clear(){
-    slowPts.clear();
-    normPts.clear();
-    fastPts.clear();
     slowVid = normVid = fastVid = "";
+    slowPlayer.close();
+    normPlayer.close();
+    fastPlayer.close();
 }
 

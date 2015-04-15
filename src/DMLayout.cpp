@@ -53,6 +53,8 @@ void DMLayout::setupViews(){
     button("btnNormalSpeed", 1440, 515, "start_dance_1");
     button("btnDoubleSpeed", 1690, 515, "start_dance_2");
     button("btnStartOver", 1440, 750, "start_over");
+//    button("btnOverlayTracking", 1440, 50, "toggle_overlay");
+//    button("btnShowAll", 1400, 50, "show_all");
     saveView(VIEW_PLAYBACK);
 
 }

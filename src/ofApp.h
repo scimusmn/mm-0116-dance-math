@@ -33,43 +33,30 @@ class ofApp : public ofBaseApp{
     
         //Cameras
         ofVideoGrabber camRaw;
-        ofVideoGrabber camTracker;
-        int camRawDeviceID = 0;
-        int camTrackerDeviceID = 2;
         ofPtr<ofQTKitGrabber> vidRecorder;
         void videoSaved(ofVideoSavedEventArgs& e);
 
-        //Tracking
-        class TrackPoint : public ofVec2f {
-        public:
-            TrackPoint(float x, float y, int time, bool beat);
-            int time;
-            bool beat;
-        };
-    
+        //Session
         class Session {
         public:
-            vector<TrackPoint> slowPts;
-            vector<TrackPoint> normPts;
-            vector<TrackPoint> fastPts;
             string slowVid;
             string normVid;
             string fastVid;
-            void saveData(float speed, vector<TrackPoint> pts, string vid);
+            ofVideoPlayer slowPlayer;
+            ofVideoPlayer normPlayer;
+            ofVideoPlayer fastPlayer;
+            void saveData(float speed, string vid);
+            void updateVids();
+            void drawVids();
+            void restartVids();
             int getColor(float speed);
             void clear();
         };
     
         Session session;
         ofxCv::ContourFinder contourFinder;
-        vector<TrackPoint> drawPts;
         void initRecording();
-        void resetTracking();
-        void resetTracking(bool);
-        void drawTrackedLine(vector<TrackPoint> pts, int color, bool useTime);
-        float camRatio;
-        ofVec2f camOffset;
-        ofPolyline drawLine;
+        void resetBeatTracking();
     
         //Music
         Jukebox jukebox;
@@ -83,7 +70,6 @@ class ofApp : public ofBaseApp{
         AppState appState;
         int countdown;
         ofVideoPlayer vidPlayback;
-        void drawTracking();
         void startDanceCountdown();
         DMLayout layout;
     
@@ -91,6 +77,7 @@ class ofApp : public ofBaseApp{
         void clearFiles();
     
         //Temp/Debug
+        bool showOverlay;
         int bpmRadius;
         int prevT;
 		
