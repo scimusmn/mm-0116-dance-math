@@ -30,25 +30,26 @@ void DMLayout::setupViews(){
     image("main_bg");
     image("sidebar_bg");
     image("txtChooseYourMusic");
-    button("btnSong1", 250, 275, "chose_music_jazz");
-    button("btnSong2", 580, 275, "chose_music_calliope");
+    button("btnSong1", 250, 205, "chose_music_jazz");
+    button("btnSong2", 580, 205, "chose_music_clicks");
     button("btnSong3", 250, 605, "chose_music_waltz");
     button("btnSong4", 580, 605, "chose_music_tango");
     saveView(VIEW_CHOOSE_MUSIC);
     
     //Dance View
     image("sidebar_bg");
-    image("txtGetReady");
+    stateObject("txtGetReady", 0, 0);
     stateObject("countdown", 1500, 500);
     saveView(VIEW_DANCE_VIEW);
     
     //Playback View
     image("sidebar_bg");
     image("txtPlayback");
-    button("btnRecordNow", 1490, 180, "start_dance_1");
+    button("btnRecordNow", 1490, 180, "start_dance_0.5");
     button("btnRecordNow", 1490, 421, "start_dance_1");
     button("btnRecordNow", 1490, 662, "start_dance_2");
-    button("btnStartOver", 1560, 915, "start_over");
+    button("btnStartOver", 1600, 915, "start_over");
+    button("btnTogglePlayback", 1200, 1000, "toggle_playback");
     saveView(VIEW_PLAYBACK);
 
 }

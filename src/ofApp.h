@@ -9,6 +9,11 @@
 
 using namespace ofxSimpleLayout;
 
+const int VID_SIZE_BIG_W = 1280;
+const int VID_SIZE_BIG_H = 720;
+const int VID_SIZE_SMALL_W = 320;
+const int VID_SIZE_SMALL_H = 180;
+
 enum AppState{
     STATE_NORMAL,
     STATE_PRE_COUNTDOWN,
@@ -53,6 +58,8 @@ class ofApp : public ofBaseApp{
             void drawFeatureVids();
             void drawButtonVids();
             void restartVids();
+            void drawProgress(int startX, int endX, int y, float prog, int color, float barHeight);
+            void drawProgress(int startX, int endX, int y, float prog, int color);
             int getColor(float speed);
             void clear();
         };
@@ -67,6 +74,7 @@ class ofApp : public ofBaseApp{
         float currentSpeed;
         int timeStarted;
         int timeElapsed;
+        float recordProgress;
         int prevBeatTime;
         bool isNewBeat;
     
