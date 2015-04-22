@@ -5,7 +5,7 @@
 #include "Jukebox.h"
 #include "DMLayout.h"
 
-#define DEBUG_HELPERS		// uncomment to draw debug helpers
+//#define DEBUG_HELPERS		// uncomment to draw debug helpers
 
 using namespace ofxSimpleLayout;
 
