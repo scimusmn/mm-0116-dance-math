@@ -309,31 +309,37 @@ void ofApp::clearFiles() {
 void ofApp::Session::saveData(float speed, string vid){
     if (speed == 0.5) {
         slowVid = vid;
+        slowPlayer.stop();
         slowPlayer.close();
         slowPlayer.loadMovie(slowVid);
         slowPlayer.play();
         slowPlayer.setSpeed(2);
         slowPlayer.setLoopState(OF_LOOP_NONE);
+        slowBtnPlayer.stop();
         slowBtnPlayer.close();
         slowBtnPlayer.loadMovie(slowVid);
         slowBtnPlayer.play();
     } else if (speed == 1) {
         normVid = vid;
+        normPlayer.stop();
         normPlayer.close();
         normPlayer.loadMovie(normVid);
         normPlayer.play();
         normPlayer.setSpeed(1);
         normPlayer.setLoopState(OF_LOOP_NONE);
+        normBtnPlayer.stop();
         normBtnPlayer.close();
         normBtnPlayer.loadMovie(normVid);
         normBtnPlayer.play();
     } else if (speed == 2) {
         fastVid = vid;
+        fastPlayer.stop();
         fastPlayer.close();
         fastPlayer.loadMovie(fastVid);
         fastPlayer.play();
         fastPlayer.setSpeed(0.5);
         fastPlayer.setLoopState(OF_LOOP_NONE);
+        fastBtnPlayer.stop();
         fastBtnPlayer.close();
         fastBtnPlayer.loadMovie(fastVid);
         fastBtnPlayer.play();
@@ -453,17 +459,17 @@ void ofApp::Session::clear(){
     
     //Note: Due to an OF bug, you cannot close an
     //ofVideoPlayer when current position is 0 so we
-    //set all player positions to non-zero before closing.
+    //stop all players before closing.
     //see http://goo.gl/Vz8zdx
     
-    slowPlayer.setPosition(0.5);
-    normPlayer.setPosition(0.5);
-    fastPlayer.setPosition(0.5);
+    slowPlayer.stop();
+    normPlayer.stop();
+    fastPlayer.stop();
     
-    slowBtnPlayer.setPosition(0.5);
-    normBtnPlayer.setPosition(0.5);
-    fastBtnPlayer.setPosition(0.5);
-    
+    slowBtnPlayer.stop();
+    normBtnPlayer.stop();
+    fastBtnPlayer.stop();
+
     slowPlayer.close();
     normPlayer.close();
     fastPlayer.close();
