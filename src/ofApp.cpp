@@ -23,7 +23,7 @@ void ofApp::setup(){
 
     //Load/Setup UI
     layout.setupViews();
-    layout.setView(DMLayout::VIEW_PICK_DANCE);
+    layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
     appState = STATE_NORMAL;
     
 }
@@ -244,7 +244,7 @@ void ofApp::mousePressed(int x, int y, int button){
         resetBeatTracking();
         appState = STATE_NORMAL;
         
-        layout.setView(DMLayout::VIEW_PICK_DANCE);
+        layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
         vidPlayback.setLoopState(OF_LOOP_NORMAL);
         
         //delete all temp files

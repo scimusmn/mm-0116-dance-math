@@ -16,7 +16,7 @@ string DMLayout::VIEW_PLAYBACK = "view_playback";
 
 void DMLayout::setupViews(){
 
-    //Pick a Dance
+    //Pick a Dance (currently not in use)
     image("main_bg");
     image("sidebar_bg");
     image("txtPickADance");
@@ -30,14 +30,10 @@ void DMLayout::setupViews(){
     image("main_bg");
     image("sidebar_bg");
     image("txtChooseYourMusic");
-    button("btnPreview", 250, 150, "preview_music_jazz");
     button("btnSong1", 250, 275, "chose_music_jazz");
-    button("btnPreview", 550, 150, "preview_music_calliope");
-    button("btnSong2", 550, 275, "chose_music_calliope");
-    button("btnPreview", 250, 480, "preview_music_waltz");
+    button("btnSong2", 580, 275, "chose_music_calliope");
     button("btnSong3", 250, 605, "chose_music_waltz");
-    button("btnPreview", 550, 480, "preview_music_tango");
-    button("btnSong4", 550, 605, "chose_music_tango");
+    button("btnSong4", 580, 605, "chose_music_tango");
     saveView(VIEW_CHOOSE_MUSIC);
     
     //Dance View
