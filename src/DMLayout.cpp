@@ -49,12 +49,10 @@ void DMLayout::setupViews(){
     //Playback View
     image("sidebar_bg");
     image("txtPlayback");
-    button("btnHalfSpeed", 1190, 515, "start_dance_0.5");
-    button("btnNormalSpeed", 1440, 515, "start_dance_1");
-    button("btnDoubleSpeed", 1690, 515, "start_dance_2");
-    button("btnStartOver", 1440, 750, "start_over");
-//    button("btnOverlayTracking", 1440, 50, "toggle_overlay");
-//    button("btnShowAll", 1400, 50, "show_all");
+    button("btnRecordNow", 1490, 180, "start_dance_1");
+    button("btnRecordNow", 1490, 421, "start_dance_0.5");
+    button("btnRecordNow", 1490, 662, "start_dance_2");
+    button("btnStartOver", 1560, 915, "start_over");
     saveView(VIEW_PLAYBACK);
 
 }

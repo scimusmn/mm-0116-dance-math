@@ -5,7 +5,7 @@
 #include "Jukebox.h"
 #include "DMLayout.h"
 
-//#define DEBUG_HELPERS		// uncomment to draw debug helpers
+#define DEBUG_HELPERS		// uncomment to draw debug helpers
 
 using namespace ofxSimpleLayout;
 
@@ -45,9 +45,13 @@ class ofApp : public ofBaseApp{
             ofVideoPlayer slowPlayer;
             ofVideoPlayer normPlayer;
             ofVideoPlayer fastPlayer;
+            ofVideoPlayer slowBtnPlayer;
+            ofVideoPlayer normBtnPlayer;
+            ofVideoPlayer fastBtnPlayer;
             void saveData(float speed, string vid);
             void updateVids();
-            void drawVids();
+            void drawFeatureVids();
+            void drawButtonVids();
             void restartVids();
             int getColor(float speed);
             void clear();

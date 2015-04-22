@@ -121,7 +121,6 @@ void ofApp::update(){
             
             countdown--;
             isNewBeat = false;
-            ofLogNotice("Countdown beat:" + ofToString(countdown));
             layout.setState("countdown", ofToString(countdown));
             
             if (countdown <= 0) {
@@ -148,32 +147,41 @@ void ofApp::draw(){
     //Draw Cams/Vids
     
     ofPushMatrix();
-    ofTranslate(1280, 0, 0);
+    ofTranslate(1280, 0);
     ofScale(-1, 1); //**--> Drawing is MIRRORED
     
     if (appState == STATE_PLAYBACK){
-        
-        session.drawVids();
-
+        session.drawFeatureVids();
     } else {
-        camRaw.draw(0,0,1280,960);
+        camRaw.draw(0,0,1280,720);
     }
-    
-    #ifdef DEBUG_HELPERS
-        ofPushMatrix();
-        ofTranslate(0, 720);
-        ofSetColor(255,100,0);
-        float timeSinceBeat = ofGetElapsedTimeMillis() - prevBeatTime;
-        ofCircle(750, 250, 50 - (timeSinceBeat * 0.025));
-        ofDrawBitmapString(ofToString(ofGetFrameRate())+"fps", 20, 30);
-        ofPopMatrix();
-    #endif
-    
+
     ofPopMatrix(); //**--> Drawing is UN-MIRRORED
     
     //Draw layout
     ofSetColor(255,255,255);
     layout.draw();
+    
+    if (appState == STATE_PLAYBACK){
+        
+        ofPushMatrix();
+        ofTranslate(1810, 0);
+        ofScale(-1, 1); //**--> Drawing is MIRRORED
+        session.drawButtonVids();
+        ofPopMatrix(); //**--> Drawing is UN-MIRRORED
+        
+    }
+    
+    #ifdef DEBUG_HELPERS
+        ofPushMatrix();
+        ofTranslate(0, 1000);
+        ofSetColor(255,100,0);
+        float timeSinceBeat = ofGetElapsedTimeMillis() - prevBeatTime;
+        ofCircle(200, 0, 50 - (timeSinceBeat * 0.025));
+        ofDrawBitmapString(ofToString(ofGetFrameRate())+"fps", 20, 30);
+        ofPopMatrix();
+        ofSetColor(255,255,255);
+    #endif
     
 }
 
@@ -202,28 +210,22 @@ void ofApp::mousePressed(int x, int y, int button){
     
     string btn = layout.getSelected(x, y);
     
-    ofLogNotice("btnmsg: "+btn);
-    
     if (btn.substr(0,11) == "chose_dance") {
         string dance = btn.substr(12);
-        ofLogNotice("Dance chosen: "+dance);
         layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
     }
     
     if (btn.substr(0,13) == "preview_music") {
         string music = btn.substr(14);
-        ofLogNotice("Preview music: "+music);
         jukebox.switchSong(music);
         jukebox.play();
     }
     
     if (btn.substr(0,11) == "chose_music") {
         string music = btn.substr(12);
-        ofLogNotice("Music chosen: "+music);
-        
         jukebox.switchSong(music);
         
-        //Start initial dance
+        //Start first dance
         currentSpeed = 1;
         startDanceCountdown();
     }
@@ -232,8 +234,6 @@ void ofApp::mousePressed(int x, int y, int button){
         
         string speed = btn.substr(12);
         currentSpeed = ofToFloat(speed);
-        ofLogNotice("Speed chosen: "+speed);
-        
         startDanceCountdown();
         
     }
@@ -249,15 +249,13 @@ void ofApp::mousePressed(int x, int y, int button){
         
         //delete all temp files
         clearFiles();
+        
+        //clear session data
         session.clear();
         
         //reset base time
         ofResetElapsedTimeCounter();
         
-    }
-    
-    if (btn == "toggle_overlay"){
-        showOverlay = !showOverlay;
     }
     
 }
@@ -291,10 +289,18 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
 void ofApp::clearFiles() {
     
     ofDirectory dir;
+    dir.allowExt("mov");
     dir.listDir("temp");
     vector< ofFile > files = dir.getFiles();
+    
     for (int i = 0; i<files.size(); i++) {
-        files[i].remove();
+        
+        if (files[i].exists()) {
+            files[i].remove();
+        } else{
+            ofLogWarning("Trying to delete non-existant file: " + ofToString(files[i].getBaseName()));
+        }
+        
     }
 
 }
@@ -308,6 +314,9 @@ void ofApp::Session::saveData(float speed, string vid){
         slowPlayer.play();
         slowPlayer.setSpeed(2);
         slowPlayer.setLoopState(OF_LOOP_NONE);
+        slowBtnPlayer.close();
+        slowBtnPlayer.loadMovie(slowVid);
+        slowBtnPlayer.play();
     } else if (speed == 1) {
         normVid = vid;
         normPlayer.close();
@@ -315,6 +324,9 @@ void ofApp::Session::saveData(float speed, string vid){
         normPlayer.play();
         normPlayer.setSpeed(1);
         normPlayer.setLoopState(OF_LOOP_NONE);
+        normBtnPlayer.close();
+        normBtnPlayer.loadMovie(normVid);
+        normBtnPlayer.play();
     } else if (speed == 2) {
         fastVid = vid;
         fastPlayer.close();
@@ -322,6 +334,9 @@ void ofApp::Session::saveData(float speed, string vid){
         fastPlayer.play();
         fastPlayer.setSpeed(0.5);
         fastPlayer.setLoopState(OF_LOOP_NONE);
+        fastBtnPlayer.close();
+        fastBtnPlayer.loadMovie(fastVid);
+        fastBtnPlayer.play();
     } else {
         ofLogError("Session") << "Can not save session. Unrecognized speed: " << speed;
     }
@@ -332,40 +347,68 @@ void ofApp::Session::updateVids(){
     
     if(!normVid.empty()) {
         normPlayer.update();
+        normBtnPlayer.update();
     }
     
     if(!slowVid.empty()) {
         slowPlayer.update();
+        slowBtnPlayer.update();
     }
     
     if(!fastVid.empty()) {
         fastPlayer.update();
+        fastBtnPlayer.update();
     }
     
 }
 
 //--------------------------------------------------------------
-void ofApp::Session::drawVids(){
+void ofApp::Session::drawFeatureVids(){
     
     if(!normVid.empty()) {
         ofSetColor(255,255,255,255);
-        normPlayer.draw(0,0,1280,960);
+        normPlayer.draw(0,0,1280,720);
     }
     
-//    ofEnableBlendMode(OF_BLENDMODE_ADD);
-    
     if(!slowVid.empty()) {
-        ofSetColor(255,200,200,85);
-        slowPlayer.draw(0,0,1280,960);
+        if(fastVid.empty()) {
+            ofSetColor(255,255,255,127);
+        } else {
+            ofSetColor(255,255,255,85);
+        }
+        slowPlayer.draw(0,0,1280,720);
     }
     
     if(!fastVid.empty()) {
-        ofSetColor(200,200,255,85);
-        fastPlayer.draw(0,0,1280,960);
+        if(slowVid.empty()) {
+            ofSetColor(255,255,255,127);
+        } else {
+            ofSetColor(255,255,255,85);
+        }
+        fastPlayer.draw(0,0,1280,720);
+    }
+
+    ofSetColor(255,255,255);
+    
+}
+
+//--------------------------------------------------------------
+void ofApp::Session::drawButtonVids(){
+    
+    ofSetColor(255,255,255,255);
+    
+    if(!normVid.empty()) {
+        normBtnPlayer.draw(0,180,1280/4,720/4);
     }
     
-//    ofDisableBlendMode();
-    ofSetColor(255,255,255);
+    if(!slowVid.empty()) {
+        slowBtnPlayer.draw(0,421,1280/4,720/4);
+    }
+    
+    if(!fastVid.empty()) {
+        fastBtnPlayer.draw(0,662,1280/4,720/4);
+    }
+    
 }
 
 //--------------------------------------------------------------
@@ -405,9 +448,29 @@ int ofApp::Session::getColor(float speed){
 
 //--------------------------------------------------------------
 void ofApp::Session::clear(){
+    
     slowVid = normVid = fastVid = "";
+    
+    //Note: Due to an OF bug, you cannot close an
+    //ofVideoPlayer when current position is 0 so we
+    //set all player positions to non-zero before closing.
+    //see http://goo.gl/Vz8zdx
+    
+    slowPlayer.setPosition(0.5);
+    normPlayer.setPosition(0.5);
+    fastPlayer.setPosition(0.5);
+    
+    slowBtnPlayer.setPosition(0.5);
+    normBtnPlayer.setPosition(0.5);
+    fastBtnPlayer.setPosition(0.5);
+    
     slowPlayer.close();
     normPlayer.close();
     fastPlayer.close();
+    
+    slowBtnPlayer.close();
+    normBtnPlayer.close();
+    fastBtnPlayer.close();
+    
 }
 
