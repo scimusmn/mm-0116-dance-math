@@ -48,6 +48,7 @@ void DMLayout::setupViews(){
     button("btnRecordNow", 1490, 180, "start_dance_1");
     button("btnRecordNow", 1490, 421, "start_dance_0.5");
 //    button("btnRecordNow", 1490, 662, "start_dance_2");
+    button("invisiButton", 1490, 662, "start_dance_2");
     button("btnStartOver", 1600, 915, "start_over");
     button("btnTogglePlayback", 1200, 1000, "toggle_playback");
     saveView(VIEW_PLAYBACK);
