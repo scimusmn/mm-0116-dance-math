@@ -470,8 +470,8 @@ void ofApp::Session::drawButtonVids(){
     ofSetColor(255,255,255,255);
     
     if(!slowVid.empty()) {
-//        slowBtnPlayer.draw(1490,421, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-//        drawProgress(1490, 1490+VID_SIZE_SMALL_W, 421 + VID_SIZE_SMALL_H, slowBtnPlayer.getPosition(), getColor(0.5));
+        slowBtnPlayer.draw(1490,421, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        drawProgress(1490, 1490+VID_SIZE_SMALL_W, 421 + VID_SIZE_SMALL_H, slowBtnPlayer.getPosition(), getColor(0.5));
     }
     
     if(!normVid.empty()) {
@@ -480,8 +480,8 @@ void ofApp::Session::drawButtonVids(){
     }
 
     if(!fastVid.empty()) {
-        fastBtnPlayer.draw(1490,662, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        drawProgress(1490, 1490+VID_SIZE_SMALL_W, 662 + VID_SIZE_SMALL_H, fastBtnPlayer.getPosition(), getColor(2));
+//        fastBtnPlayer.draw(1490,662, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+//        drawProgress(1490, 1490+VID_SIZE_SMALL_W, 662 + VID_SIZE_SMALL_H, fastBtnPlayer.getPosition(), getColor(2));
     }
     
 }
