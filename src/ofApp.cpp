@@ -149,41 +149,34 @@ void ofApp::draw(){
 
     //Draw Cams/Vids
     ofPushMatrix();
-    ofTranslate(1280-85, 0);
-    ofScale(-1, 1); //**--> Drawing is MIRRORED
+    ofTranslate(-85, 0); //**--> Drawing is SHIFTED
     
     if (appState == STATE_PLAYBACK){
         session.drawFeatureVids();
         if(!session.slowVid.empty()) {
-            session.drawProgress(VID_SIZE_BIG_W, 0, VID_SIZE_BIG_H+0, session.normPlayer.getPosition(), session.getColor(0.5));
+            session.drawProgress(0, VID_SIZE_BIG_W, VID_SIZE_BIG_H+0, session.normPlayer.getPosition(), session.getColor(0.5));
         }
         if(!session.normVid.empty()) {
-            session.drawProgress(VID_SIZE_BIG_W, 0, VID_SIZE_BIG_H+8, session.normPlayer.getPosition(), session.getColor(1));
+            session.drawProgress(0, VID_SIZE_BIG_W, VID_SIZE_BIG_H+8, session.normPlayer.getPosition(), session.getColor(1));
         }
         if(!session.fastVid.empty()) {
-            session.drawProgress(VID_SIZE_BIG_W, 0, VID_SIZE_BIG_H+16, session.normPlayer.getPosition(), session.getColor(2));
+            session.drawProgress(0, VID_SIZE_BIG_W, VID_SIZE_BIG_H+16, session.normPlayer.getPosition(), session.getColor(2));
         }
     } else {
         camRaw.draw(0,0,1280,720);
         if (appState == STATE_TRACKING) {
-            session.drawProgress(1280, 0, 720, recordProgress, session.getColor(currentSpeed), 32);
+            session.drawProgress(0, 1280, 720, recordProgress, session.getColor(currentSpeed), 32);
         }
     }
 
-    ofPopMatrix(); //**--> Drawing is UN-MIRRORED
+    ofPopMatrix(); //**--> Drawing is UN-SHIFTED
     
     //Draw layout
     ofSetColor(255,255,255);
     layout.draw();
     
     if (appState == STATE_PLAYBACK){
-        
-        ofPushMatrix();
-        ofTranslate(1810, 0);
-        ofScale(-1, 1); //**--> Drawing is MIRRORED
         session.drawButtonVids();
-        ofPopMatrix(); //**--> Drawing is UN-MIRRORED
-        
     }
     
     #ifdef DEBUG_HELPERS
@@ -477,18 +470,18 @@ void ofApp::Session::drawButtonVids(){
     ofSetColor(255,255,255,255);
     
     if(!slowVid.empty()) {
-        slowBtnPlayer.draw(0,421, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        drawProgress(VID_SIZE_SMALL_W, 0, 421 + VID_SIZE_SMALL_H, slowBtnPlayer.getPosition(), getColor(0.5));
+//        slowBtnPlayer.draw(1490,421, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+//        drawProgress(1490, 1490+VID_SIZE_SMALL_W, 421 + VID_SIZE_SMALL_H, slowBtnPlayer.getPosition(), getColor(0.5));
     }
     
     if(!normVid.empty()) {
-        normBtnPlayer.draw(0,180, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        drawProgress(VID_SIZE_SMALL_W, 0, 180 + VID_SIZE_SMALL_H, normBtnPlayer.getPosition(), getColor(1));
+        normBtnPlayer.draw(1490,180, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        drawProgress(1490, 1490+VID_SIZE_SMALL_W, 180 + VID_SIZE_SMALL_H, normBtnPlayer.getPosition(), getColor(1));
     }
 
     if(!fastVid.empty()) {
-        fastBtnPlayer.draw(0,662, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        drawProgress(VID_SIZE_SMALL_W, 0, 662 + VID_SIZE_SMALL_H, fastBtnPlayer.getPosition(), getColor(2));
+        fastBtnPlayer.draw(1490,662, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        drawProgress(1490, 1490+VID_SIZE_SMALL_W, 662 + VID_SIZE_SMALL_H, fastBtnPlayer.getPosition(), getColor(2));
     }
     
 }
