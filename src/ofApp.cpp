@@ -155,13 +155,13 @@ void ofApp::draw(){
     if (appState == STATE_PLAYBACK){
         session.drawFeatureVids();
         if(!session.slowVid.empty()) {
-            session.drawProgress(VID_SIZE_BIG_W, 0, VID_SIZE_BIG_H+5, session.normPlayer.getPosition(), session.getColor(0.5));
+            session.drawProgress(VID_SIZE_BIG_W, 0, VID_SIZE_BIG_H+0, session.normPlayer.getPosition(), session.getColor(0.5));
         }
         if(!session.normVid.empty()) {
-            session.drawProgress(VID_SIZE_BIG_W, 0, VID_SIZE_BIG_H+18, session.normPlayer.getPosition(), session.getColor(1));
+            session.drawProgress(VID_SIZE_BIG_W, 0, VID_SIZE_BIG_H+8, session.normPlayer.getPosition(), session.getColor(1));
         }
         if(!session.fastVid.empty()) {
-            session.drawProgress(VID_SIZE_BIG_W, 0, VID_SIZE_BIG_H+31, session.normPlayer.getPosition(), session.getColor(2));
+            session.drawProgress(VID_SIZE_BIG_W, 0, VID_SIZE_BIG_H+16, session.normPlayer.getPosition(), session.getColor(2));
         }
     } else {
         camRaw.draw(0,0,1280,720);
@@ -315,6 +315,11 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
         //Which playback pts to draw
         layout.setView(DMLayout::VIEW_PLAYBACK);
         
+        //Default to adjusted speed
+        session.slowBtnPlayer.setSpeed(2);
+        session.normBtnPlayer.setSpeed(1);
+        session.fastBtnPlayer.setSpeed(0.5);
+        
         //Restart all video buttons
         session.fastBtnPlayer.firstFrame();
         session.normBtnPlayer.firstFrame();
@@ -359,13 +364,13 @@ void ofApp::Session::drawProgress(int startX, int endX, int y, float prog, int c
     ofRect(startX, y, progX, barHeight);
     
     //draw ticks
-    ofSetColor(99,99,99,150);
-    ofSetLineWidth(2);
+//    ofSetColor(99,99,99,150);
+//    ofSetLineWidth(2);
 //    ofLine(startX, y, startX, y + barHeight + 4); // start
 //    ofLine(endX, y, endX, y + barHeight + 4); // end
-    ofLine((startX+endX)/2, y, (startX+endX)/2, y + barHeight + 4); // half
-    ofLine((startX+endX)*.25, y, (startX+endX)*.25, y + barHeight + 4); // 1/4
-    ofLine((startX+endX)*.75, y, (startX+endX)*.75, y + barHeight + 4); // 3/4
+//    ofLine((startX+endX)/2, y, (startX+endX)/2, y + barHeight + 4); // half
+//    ofLine((startX+endX)*.25, y, (startX+endX)*.25, y + barHeight + 4); // 1/4
+//    ofLine((startX+endX)*.75, y, (startX+endX)*.75, y + barHeight + 4); // 3/4
     
     ofSetColor(255,255,255);
     
@@ -445,9 +450,9 @@ void ofApp::Session::drawFeatureVids(){
     if(!slowVid.empty()) {
         //Change opacity based on how many vids are displaying
         if(fastVid.empty()) {
-            ofSetColor(255,255,255,127);
+            ofSetColor(255,255,255,140);
         } else {
-            ofSetColor(255,255,255,95);
+            ofSetColor(255,255,255,100);
         }
         slowPlayer.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
     }
@@ -457,7 +462,7 @@ void ofApp::Session::drawFeatureVids(){
         if(slowVid.empty()) {
             ofSetColor(255,255,255,140);
         } else {
-            ofSetColor(255,255,255,95);
+            ofSetColor(255,255,255,100);
         }
         fastPlayer.draw(0,0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
     }
@@ -472,18 +477,18 @@ void ofApp::Session::drawButtonVids(){
     ofSetColor(255,255,255,255);
     
     if(!slowVid.empty()) {
-        slowBtnPlayer.draw(0,180, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        drawProgress(VID_SIZE_SMALL_W, 0, 176 + VID_SIZE_SMALL_H, slowBtnPlayer.getPosition(), getColor(0.5));
+        slowBtnPlayer.draw(0,421, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        drawProgress(VID_SIZE_SMALL_W, 0, 421 + VID_SIZE_SMALL_H, slowBtnPlayer.getPosition(), getColor(0.5));
     }
     
     if(!normVid.empty()) {
-        normBtnPlayer.draw(0,421, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        drawProgress(VID_SIZE_SMALL_W, 0, 417 + VID_SIZE_SMALL_H, normBtnPlayer.getPosition(), getColor(1));
+        normBtnPlayer.draw(0,180, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        drawProgress(VID_SIZE_SMALL_W, 0, 180 + VID_SIZE_SMALL_H, normBtnPlayer.getPosition(), getColor(1));
     }
 
     if(!fastVid.empty()) {
         fastBtnPlayer.draw(0,662, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        drawProgress(VID_SIZE_SMALL_W, 0, 658 + VID_SIZE_SMALL_H, fastBtnPlayer.getPosition(), getColor(2));
+        drawProgress(VID_SIZE_SMALL_W, 0, 662 + VID_SIZE_SMALL_H, fastBtnPlayer.getPosition(), getColor(2));
     }
     
 }
