@@ -6,49 +6,24 @@ void ofApp::setup(){
     ofEnableSmoothing();
     ofBackground(30,30,30);
     
-    //List out cameras
-    vector<ofVideoDevice> devices = camRaw.listDevices();
-    
-    for(int i = 0; i < devices.size(); i++){
-        cout << devices[i].id << ": " << devices[i].deviceName << " : " << devices[i].hardwareName;
-        if( devices[i].bAvailable ){
-            cout << endl;
-        }else{
-            cout << " - unavailable " << endl;
-        }
-    }
-    
     //Setup Cameras
     vidRecorder = ofPtr<ofQTKitGrabber>( new ofQTKitGrabber() );
     camRaw.setGrabber(vidRecorder);
-    camRaw.setDeviceID(camRawDeviceID);    
-    camTracker.setDeviceID(camTrackerDeviceID);
-    camTracker.initGrabber(320,180);
+    camRaw.setDeviceID(0);
     camRaw.initGrabber(1280,720);
-    
-    printf("a --- camTracker : asked for 320 by 180 - actual size is %i by %i \n", camTracker.width, camTracker.height);
-    printf("a --- camRaw: asked for 1280 by 720 - actual size is %i by %i \n", camRaw.width, camRaw.height);
-           
+
     ofAddListener(vidRecorder->videoSavedEvent, this, &ofApp::videoSaved); // Listen for video saved events
     vidRecorder->initRecording();
-    
-    camRatio = camRaw.height / camTracker.height;
-    camOffset = ofVec2f(3.5, 30); // Pixel offset between raw camera and IR camera (before scale-up)
- 
-    //Setup Tracking
-    contourFinder.setMinAreaRadius(0); // Filter small blobs
-    contourFinder.setMaxAreaRadius(15); // Filter large blobs
-    contourFinder.setThreshold(250); // Filter non-white blobs
-    
+
     //Load Sounds
     jukebox.addSong("jazz", "sounds/jazz.wav", 10801, 3707, 466);
+    jukebox.addSong("clicks", "sounds/clicks.wav", 14567, 7107, 943);
     jukebox.addSong("waltz", "sounds/waltz.wav", 14567, 7107, 943);
-    jukebox.addSong("calliope", "sounds/calliope.wav", 11493, 5517, 766);
     jukebox.addSong("tango", "sounds/tango.wav", 10236, 3783, 466);
 
     //Load/Setup UI
     layout.setupViews();
-    layout.setView(DMLayout::VIEW_PICK_DANCE);
+    layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
     appState = STATE_NORMAL;
     
 }
@@ -57,7 +32,7 @@ void ofApp::setup(){
 void ofApp::initRecording(){
     
     //Tracking
-    resetTracking();
+    resetBeatTracking();
     appState = STATE_TRACKING;
     
     //Video recording
@@ -70,10 +45,9 @@ void ofApp::initRecording(){
 }
 
 //--------------------------------------------------------------
-void ofApp::resetTracking(){ resetTracking(true); };
-void ofApp::resetTracking(bool resetPts){
-    if (resetPts) drawPts.clear();
+void ofApp::resetBeatTracking(){
     timeStarted = prevBeatTime = ofGetElapsedTimeMillis();
+    timeElapsed = recordProgress = 0;
 }
 
 
@@ -87,10 +61,9 @@ void ofApp::startDanceCountdown(){
     layout.setState("countdown", ofToString(countdown));
     
     //Wait 5 seconds then count down.
-    resetTracking();
+    resetBeatTracking();
     appState = STATE_PRE_COUNTDOWN;
     
-
 }
 
 //--------------------------------------------------------------
@@ -99,10 +72,9 @@ void ofApp::update(){
     layout.update();
     
     if (appState == STATE_PLAYBACK) {
-        vidPlayback.update();
+        session.updateVids();
     } else {
         camRaw.update();
-        camTracker.update();
     }
 
     //Update beat timer
@@ -112,23 +84,15 @@ void ofApp::update(){
     }
     
     timeElapsed = ofGetElapsedTimeMillis() - timeStarted;
+    recordProgress = timeElapsed / ((jukebox.duration - jukebox.intro) / jukebox.rate);
 
     //Update tracking
-    if (appState == STATE_TRACKING && camTracker.isFrameNew()){
-        
-        contourFinder.findContours(camTracker);
-        
-        if (contourFinder.size() > 0){
-            float tx = (camOffset.x + contourFinder.getCenter(0).x) * camRatio;
-            float ty = (camOffset.y + contourFinder.getCenter(0).y) * camRatio;
-            TrackPoint tp = TrackPoint(tx, ty, timeElapsed, isNewBeat);
-            drawPts.push_back(tp);
-        }
+    if (appState == STATE_TRACKING){
 
         isNewBeat = false;
         
         //End recording
-        if (timeElapsed >= ((jukebox.duration - jukebox.intro) / jukebox.rate)) {
+        if (recordProgress >= 1) {
             
             appState = STATE_NORMAL;
 
@@ -149,7 +113,7 @@ void ofApp::update(){
         if (timeElapsed > 1000){
             isNewBeat = true;
             appState = STATE_COUNTDOWN;
-            resetTracking();
+            resetBeatTracking();
             jukebox.play(currentSpeed);
         }
         
@@ -159,10 +123,10 @@ void ofApp::update(){
             
             countdown--;
             isNewBeat = false;
-            ofLogNotice("Countdown beat:" + ofToString(countdown));
             layout.setState("countdown", ofToString(countdown));
             
             if (countdown <= 0) {
+                layout.setState("txtGetReady", "1");
                 initRecording();                
             }
             
@@ -171,14 +135,12 @@ void ofApp::update(){
     }
     
     //Loop playback
-    if (appState == STATE_PLAYBACK && vidPlayback.getIsMovieDone() == true){
+    if (appState == STATE_PLAYBACK && session.normPlayer.getIsMovieDone() == true){
         
-        vidPlayback.firstFrame();
-        vidPlayback.play();
-        resetTracking(false);
+        session.restartVids();
+        resetBeatTracking();
         
     }
-    
     
 }
 
@@ -186,126 +148,60 @@ void ofApp::update(){
 void ofApp::draw(){
 
     //Draw Cams/Vids
-    
     ofPushMatrix();
-    ofTranslate(1280, 0, 0);
+    ofTranslate(1280-85, 0);
     ofScale(-1, 1); //**--> Drawing is MIRRORED
     
     if (appState == STATE_PLAYBACK){
-        vidPlayback.draw(0,0);
+        session.drawFeatureVids();
+        if(!session.slowVid.empty()) {
+            session.drawProgress(VID_SIZE_BIG_W, 0, VID_SIZE_BIG_H+0, session.normPlayer.getPosition(), session.getColor(0.5));
+        }
+        if(!session.normVid.empty()) {
+            session.drawProgress(VID_SIZE_BIG_W, 0, VID_SIZE_BIG_H+8, session.normPlayer.getPosition(), session.getColor(1));
+        }
+        if(!session.fastVid.empty()) {
+            session.drawProgress(VID_SIZE_BIG_W, 0, VID_SIZE_BIG_H+16, session.normPlayer.getPosition(), session.getColor(2));
+        }
     } else {
-        camRaw.draw(0,0,1280,960);
+        camRaw.draw(0,0,1280,720);
+        if (appState == STATE_TRACKING) {
+            session.drawProgress(1280, 0, 720, recordProgress, session.getColor(currentSpeed), 32);
+        }
     }
 
-    if (appState != STATE_NORMAL){
-        drawTracking();
-    }
-    
-    #ifdef DEBUG_HELPERS
-        ofPushMatrix();
-        ofTranslate(0, 720);
-        ofSetColor(255,255,255);
-        camTracker.draw(0,0);
-        ofSetColor(255,100,0);
-        contourFinder.draw();
-        float timeSinceBeat = ofGetElapsedTimeMillis() - prevBeatTime;
-        ofCircle(750, 250, 50 - (timeSinceBeat * 0.025));
-        ofDrawBitmapString(ofToString(ofGetFrameRate())+"fps", 20, 30);
-        ofPopMatrix();
-    #endif
-    
     ofPopMatrix(); //**--> Drawing is UN-MIRRORED
     
     //Draw layout
     ofSetColor(255,255,255);
     layout.draw();
     
-}
-
-//--------------------------------------------------------------
-void ofApp::drawTracking(){
-    
-    if (appState == STATE_TRACKING){
-
-        drawTrackedLine(drawPts, session.getColor(currentSpeed), false);
+    if (appState == STATE_PLAYBACK){
         
-    } else if (appState == STATE_PLAYBACK) {
-        
-        if(!session.slowPts.empty()) drawTrackedLine(session.slowPts, session.getColor(0.5), true);
-        if(!session.normPts.empty()) drawTrackedLine(session.normPts, session.getColor(1), true);
-        if(!session.fastPts.empty()) drawTrackedLine(session.fastPts, session.getColor(2), true);
+        ofPushMatrix();
+        ofTranslate(1810, 0);
+        ofScale(-1, 1); //**--> Drawing is MIRRORED
+        session.drawButtonVids();
+        ofPopMatrix(); //**--> Drawing is UN-MIRRORED
         
     }
     
-    ofSetLineWidth(1);
-
-}
-
-//--------------------------------------------------------------
-void ofApp::drawTrackedLine(vector<TrackPoint> pts, int color, bool useTime){
+    #ifdef DEBUG_HELPERS
+        ofPushMatrix();
+        ofTranslate(0, 1000);
+        ofSetColor(255,100,0);
+        float timeSinceBeat = ofGetElapsedTimeMillis() - prevBeatTime;
+        ofCircle(200, 0, 50 - (timeSinceBeat * 0.025));
+        ofDrawBitmapString(ofToString(ofGetFrameRate())+"fps", 20, 30);
+        ofPopMatrix();
+        ofSetColor(255,255,255);
+    #endif
     
-    drawLine.clear();
-    
-    //Line
-    ofSetLineWidth(4);
-    ofSetHexColor(color);
-    if (!pts.empty()) drawLine.addVertex(pts[0].x, pts[0].y);
-    for(int i = 0; i < pts.size(); i++){
-        if (useTime == false || pts[i].time <= ofGetElapsedTimeMillis() - timeStarted){
-            drawLine.curveTo(pts[i].x, pts[i].y);
-        } else {
-            drawLine.curveTo(pts[i].x, pts[i].y);
-            break;
-        }
-    }
-    if (useTime == false && !pts.empty()) drawLine.addVertex(pts[pts.size()-1].x, pts[pts.size()-1].y);
-    drawLine.draw();
-    
-    //Dots
-    ofSetColor(255,255,255);
-    for(int i = 0; i < pts.size(); i++){
-        if (pts[i].beat == true){
-            if (useTime == false || pts[i].time <= ofGetElapsedTimeMillis() - timeStarted){
-                ofCircle(pts[i].x, pts[i].y, 7);
-            }
-        }
-    }
-        
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    //Change raw cam source
-    if(key == 'r') {
-        
-        int w = camRaw.width;
-        int h = camRaw.height;
-        camRaw.close();
-        camRawDeviceID = (camRawDeviceID + 1) % camRaw.listDevices().size();
-        camRaw.setGrabber(vidRecorder);
-        camRaw.setDeviceID(camRawDeviceID);
-        camRaw.initGrabber(w,h);
-        
-        printf("r--- camRaw: new device id: %i \n", camRawDeviceID);
-        printf("r--- camRaw: asked for %i by %i - actual size is %i by %i \n", w, h, camRaw.width, camRaw.height);
-        printf("r--- camTracker current size: %i by %i \n", camTracker.width, camTracker.height);
-        
-    }
-    //Change IR cam source
-    if(key == 'i') {
-        
-        int w = camTracker.width;
-        int h = camTracker.height;
-        camTracker.close();
-        camTrackerDeviceID = (camTrackerDeviceID + 1) % camTracker.listDevices().size();
-        camTracker.setDeviceID(camTrackerDeviceID);
-        camTracker.initGrabber(w,h);
-        
-        printf("i--- camTracker: new device id: %i \n", camTrackerDeviceID);
-        printf("i--- camTracker : asked for %i by %i - actual size is %i by %i \n", w, h, camTracker.width, camTracker.height);
-        printf("i--- camRaw current size: %i by %i \n", camRaw.width, camRaw.height);
-        
-    }
+    
 }
 
 //--------------------------------------------------------------
@@ -328,53 +224,68 @@ void ofApp::mousePressed(int x, int y, int button){
     
     string btn = layout.getSelected(x, y);
     
-    ofLogNotice("btnmsg: "+btn);
-    
     if (btn.substr(0,11) == "chose_dance") {
         string dance = btn.substr(12);
-        ofLogNotice("Dance chosen: "+dance);
         layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
     }
     
     if (btn.substr(0,13) == "preview_music") {
         string music = btn.substr(14);
-        ofLogNotice("Preview music: "+music);
         jukebox.switchSong(music);
         jukebox.play();
     }
     
     if (btn.substr(0,11) == "chose_music") {
         string music = btn.substr(12);
-        ofLogNotice("Music chosen: "+music);
-        
         jukebox.switchSong(music);
-        
-        //Start initial dance
+        //Start first dance
         currentSpeed = 1;
         startDanceCountdown();
     }
     
     if (btn.substr(0,11) == "start_dance") {
-        
         string speed = btn.substr(12);
         currentSpeed = ofToFloat(speed);
-        ofLogNotice("Speed chosen: "+speed);
-        
         startDanceCountdown();
+    }
+    
+    if (btn == "toggle_playback") {
+        
+        if (session.slowBtnPlayer.getSpeed()==2 || session.fastBtnPlayer.getSpeed()==0.5){
+            //Show original speed
+            session.slowBtnPlayer.setSpeed(1);
+            session.normBtnPlayer.setSpeed(1);
+            session.fastBtnPlayer.setSpeed(1);
+        } else {
+            //Show adjusted speed
+            session.slowBtnPlayer.setSpeed(2);
+            session.normBtnPlayer.setSpeed(1);
+            session.fastBtnPlayer.setSpeed(0.5);
+        }
+        
+        //restart videos
+        session.slowPlayer.firstFrame();
+        session.normPlayer.firstFrame();
+        session.fastPlayer.firstFrame();
+        session.slowBtnPlayer.firstFrame();
+        session.normBtnPlayer.firstFrame();
+        session.fastBtnPlayer.firstFrame();
         
     }
     
     if (btn == "start_over") {
         
         //clear all tracking
-        resetTracking();
+        resetBeatTracking();
         appState = STATE_NORMAL;
         
-        layout.setView(DMLayout::VIEW_PICK_DANCE);
+        layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
         vidPlayback.setLoopState(OF_LOOP_NORMAL);
         
         //delete all temp files
         clearFiles();
+        
+        //clear session data
         session.clear();
         
         //reset base time
@@ -396,62 +307,210 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
     if(e.error.empty()){
         
         string vidPath = e.videoPath;
-        ofLogNotice("vidPath: "+vidPath);
+        session.saveData(currentSpeed, vidPath);
         
-        //Save to session
-        session.saveData(currentSpeed, drawPts, vidPath);
-        
-        //Start large playback of most recently recorded video
-        vidPlayback.close();
-        vidPlayback.loadMovie(vidPath);
-        vidPlayback.play();
-        vidPlayback.setLoopState(OF_LOOP_NONE);
-        
-        resetTracking(false);
+        resetBeatTracking();
         appState = STATE_PLAYBACK;
         
         //Which playback pts to draw
         layout.setView(DMLayout::VIEW_PLAYBACK);
+        
+        //Default to adjusted speed
+        session.slowBtnPlayer.setSpeed(2);
+        session.normBtnPlayer.setSpeed(1);
+        session.fastBtnPlayer.setSpeed(0.5);
+        
+        //Restart all video buttons
+        session.fastBtnPlayer.firstFrame();
+        session.normBtnPlayer.firstFrame();
+        session.slowBtnPlayer.firstFrame();
 
     } else {
         ofLogError("videoSavedEvent") << "Video save error: " << e.error;
     }
 }
 
-//----------
+//--------------------------------------------------------------
 void ofApp::clearFiles() {
     
     ofDirectory dir;
+    dir.allowExt("mov");
     dir.listDir("temp");
     vector< ofFile > files = dir.getFiles();
+    
     for (int i = 0; i<files.size(); i++) {
-        files[i].remove();
+        
+        if (files[i].exists()) {
+            files[i].remove();
+        } else{
+            ofLogWarning("Trying to delete non-existant file: " + ofToString(files[i].getBaseName()));
+        }
+        
     }
 
 }
 
 //--------------------------------------------------------------
-ofApp::TrackPoint::TrackPoint(float x, float y, int time, bool beat){
-    this->x = x;
-    this->y = y;
-    this->time = time;
-    this->beat = beat;
+void ofApp::Session::drawProgress(int startX, int endX, int y, float prog, int color) {
+    drawProgress(startX, endX, y, prog, color, 8);
 }
 
 //--------------------------------------------------------------
-void ofApp::Session::saveData(float speed, vector<TrackPoint> pts, string vid){
+void ofApp::Session::drawProgress(int startX, int endX, int y, float prog, int color, float barHeight) {
+    
+    ofSetHexColor(color);
+    float progX = ofMap(prog, 1, 0, startX, endX);
+    progX = (endX-startX) * prog;
+    ofRect(startX, y, progX, barHeight);
+    
+    //draw ticks
+//    ofSetColor(99,99,99,150);
+//    ofSetLineWidth(2);
+//    ofLine(startX, y, startX, y + barHeight + 4); // start
+//    ofLine(endX, y, endX, y + barHeight + 4); // end
+//    ofLine((startX+endX)/2, y, (startX+endX)/2, y + barHeight + 4); // half
+//    ofLine((startX+endX)*.25, y, (startX+endX)*.25, y + barHeight + 4); // 1/4
+//    ofLine((startX+endX)*.75, y, (startX+endX)*.75, y + barHeight + 4); // 3/4
+    
+    ofSetColor(255,255,255);
+    
+}
+
+//--------------------------------------------------------------
+void ofApp::Session::saveData(float speed, string vid){
     if (speed == 0.5) {
-        slowPts = pts;
         slowVid = vid;
+        slowPlayer.stop();
+        slowPlayer.close();
+        slowPlayer.loadMovie(slowVid);
+        slowPlayer.play();
+        slowPlayer.setSpeed(2);
+        slowPlayer.setLoopState(OF_LOOP_NONE);
+        slowBtnPlayer.stop();
+        slowBtnPlayer.close();
+        slowBtnPlayer.loadMovie(slowVid);
+        slowBtnPlayer.play();
     } else if (speed == 1) {
-        normPts = pts;
         normVid = vid;
+        normPlayer.stop();
+        normPlayer.close();
+        normPlayer.loadMovie(normVid);
+        normPlayer.play();
+        normPlayer.setSpeed(1);
+        normPlayer.setLoopState(OF_LOOP_NONE);
+        normBtnPlayer.stop();
+        normBtnPlayer.close();
+        normBtnPlayer.loadMovie(normVid);
+        normBtnPlayer.play();
     } else if (speed == 2) {
-        fastPts = pts;
         fastVid = vid;
+        fastPlayer.stop();
+        fastPlayer.close();
+        fastPlayer.loadMovie(fastVid);
+        fastPlayer.play();
+        fastPlayer.setSpeed(0.5);
+        fastPlayer.setLoopState(OF_LOOP_NONE);
+        fastBtnPlayer.stop();
+        fastBtnPlayer.close();
+        fastBtnPlayer.loadMovie(fastVid);
+        fastBtnPlayer.play();
     } else {
         ofLogError("Session") << "Can not save session. Unrecognized speed: " << speed;
     }
+}
+
+//--------------------------------------------------------------
+void ofApp::Session::updateVids(){
+    
+    if(!normVid.empty()) {
+        normPlayer.update();
+        normBtnPlayer.update();
+    }
+    
+    if(!slowVid.empty()) {
+        slowPlayer.update();
+        slowBtnPlayer.update();
+    }
+    
+    if(!fastVid.empty()) {
+        fastPlayer.update();
+        fastBtnPlayer.update();
+    }
+    
+}
+
+//--------------------------------------------------------------
+void ofApp::Session::drawFeatureVids(){
+    
+    if(!normVid.empty()) {
+        ofSetColor(255,255,255,255);
+        normPlayer.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
+    }
+    
+    if(!slowVid.empty()) {
+        //Change opacity based on how many vids are displaying
+        if(fastVid.empty()) {
+            ofSetColor(255,255,255,140);
+        } else {
+            ofSetColor(255,255,255,100);
+        }
+        slowPlayer.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
+    }
+    
+    if(!fastVid.empty()) {
+        //Change opacity based on how many vids are displaying
+        if(slowVid.empty()) {
+            ofSetColor(255,255,255,140);
+        } else {
+            ofSetColor(255,255,255,100);
+        }
+        fastPlayer.draw(0,0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
+    }
+
+    ofSetColor(255,255,255);
+    
+}
+
+//--------------------------------------------------------------
+void ofApp::Session::drawButtonVids(){
+    
+    ofSetColor(255,255,255,255);
+    
+    if(!slowVid.empty()) {
+        slowBtnPlayer.draw(0,421, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        drawProgress(VID_SIZE_SMALL_W, 0, 421 + VID_SIZE_SMALL_H, slowBtnPlayer.getPosition(), getColor(0.5));
+    }
+    
+    if(!normVid.empty()) {
+        normBtnPlayer.draw(0,180, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        drawProgress(VID_SIZE_SMALL_W, 0, 180 + VID_SIZE_SMALL_H, normBtnPlayer.getPosition(), getColor(1));
+    }
+
+    if(!fastVid.empty()) {
+        fastBtnPlayer.draw(0,662, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        drawProgress(VID_SIZE_SMALL_W, 0, 662 + VID_SIZE_SMALL_H, fastBtnPlayer.getPosition(), getColor(2));
+    }
+    
+}
+
+//--------------------------------------------------------------
+void ofApp::Session::restartVids(){
+    
+    if(!slowVid.empty()) {
+        slowPlayer.firstFrame();
+        slowPlayer.play();
+    }
+    
+    if(!normVid.empty()) {
+        normPlayer.firstFrame();
+        normPlayer.play();
+    }
+
+    if(!fastVid.empty()) {
+        fastPlayer.firstFrame();
+        fastPlayer.play();
+    }
+    
 }
 
 //--------------------------------------------------------------
@@ -469,9 +528,29 @@ int ofApp::Session::getColor(float speed){
 
 //--------------------------------------------------------------
 void ofApp::Session::clear(){
-    slowPts.clear();
-    normPts.clear();
-    fastPts.clear();
+    
     slowVid = normVid = fastVid = "";
+    
+    //Note: Due to an OF bug, you cannot close an
+    //ofVideoPlayer when current position is 0 so we
+    //stop all players before closing.
+    //see http://goo.gl/Vz8zdx
+    
+    slowPlayer.stop();
+    normPlayer.stop();
+    fastPlayer.stop();
+    
+    slowBtnPlayer.stop();
+    normBtnPlayer.stop();
+    fastBtnPlayer.stop();
+
+    slowPlayer.close();
+    normPlayer.close();
+    fastPlayer.close();
+    
+    slowBtnPlayer.close();
+    normBtnPlayer.close();
+    fastBtnPlayer.close();
+    
 }
 
