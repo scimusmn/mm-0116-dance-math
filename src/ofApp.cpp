@@ -16,10 +16,16 @@ void ofApp::setup(){
     vidRecorder->initRecording();
 
     //Load Sounds
+    /*
     jukebox.addSong("jazz", "sounds/jazz.wav", 10801, 3707, 466);
     jukebox.addSong("clicks", "sounds/clicks.wav", 14567, 7107, 943);
     jukebox.addSong("waltz", "sounds/waltz.wav", 14567, 7107, 943);
     jukebox.addSong("tango", "sounds/tango.wav", 10236, 3783, 466);
+     */
+    jukebox.addSong("jazz", "sounds/clicks.wav", 14567, 7107, 943);
+    jukebox.addSong("clicks", "sounds/clicks.wav", 14567, 7107, 943);
+    jukebox.addSong("waltz", "sounds/ClickTrackGo.wav", 14567, 7107, 943);
+    jukebox.addSong("tango", "sounds/ClickTrackGo.wav", 14567, 7107, 943);
 
     //Load/Setup UI
     layout.setupViews();
