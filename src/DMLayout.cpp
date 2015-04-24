@@ -13,6 +13,7 @@ string DMLayout::VIEW_PICK_DANCE = "view_pick_dance";
 string DMLayout::VIEW_CHOOSE_MUSIC = "view_choose_music";
 string DMLayout::VIEW_DANCE_VIEW = "view_dance_view";
 string DMLayout::VIEW_PLAYBACK = "view_playback";
+//TODO: add all permanent screens as constants
 
 void DMLayout::setupViews(){
 
@@ -41,6 +42,30 @@ void DMLayout::setupViews(){
     stateObject("txtGetReady", 0, 0);
     stateObject("countdown", 1500, 500);
     saveView(VIEW_DANCE_VIEW);
+    
+    //Normal Playback
+    image("main_bg");
+    image("txtHowDidYouDo");
+    button("btnRecordHalfSpeed", 890, 760, "start_dance_0.5");
+    saveView("playback_1");
+    
+    //Duel Playback
+    image("main_bg");
+    image("txtDidYouKeep");
+    button("btnDoublePlaybackSpeed", 1200, 830, "double_playback_speed");
+    saveView("playback_2");
+    
+    //Sped-up Playback
+    image("main_bg");
+    image("txtDidYouKeep");
+    button("btnCombine", 890, 770, "combine");
+    saveView("playback_3");
+    
+    //Combined Playback
+    image("main_bg");
+    image("txtDoTheyMatch");
+    button("btnStartOver", 890, 800, "start_over");
+    saveView("playback_4");
     
     //Playback View
     image("sidebar_bg");

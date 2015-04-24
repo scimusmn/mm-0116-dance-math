@@ -10,18 +10,12 @@ void ofApp::setup(){
     vidRecorder = ofPtr<ofQTKitGrabber>( new ofQTKitGrabber() );
     camRaw.setGrabber(vidRecorder);
     camRaw.setDeviceID(0);
-    camRaw.initGrabber(1280,720);
+    camRaw.initGrabber(1280/2,720/2);
 
     ofAddListener(vidRecorder->videoSavedEvent, this, &ofApp::videoSaved); // Listen for video saved events
     vidRecorder->initRecording();
 
     //Load Sounds
-    /*
-    jukebox.addSong("jazz", "sounds/jazz.wav", 10801, 3707, 466);
-    jukebox.addSong("clicks", "sounds/clicks.wav", 14567, 7107, 943);
-    jukebox.addSong("waltz", "sounds/waltz.wav", 14567, 7107, 943);
-    jukebox.addSong("tango", "sounds/tango.wav", 10236, 3783, 466);
-     */
     jukebox.addSong("jazz", "sounds/circle.wav", 14567, 7107, 943);
     jukebox.addSong("clicks", "sounds/triangle.wav", 14567, 7107, 943);
     jukebox.addSong("waltz", "sounds/square.wav", 14567, 7107, 943);
@@ -31,6 +25,7 @@ void ofApp::setup(){
     layout.setupViews();
     layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
     appState = STATE_NORMAL;
+    session.tempCombine =false;
     
 }
 
@@ -223,6 +218,19 @@ void ofApp::mousePressed(int x, int y, int button){
     
     string btn = layout.getSelected(x, y);
     
+    //Temp segragated playback
+    if (btn == "double_playback_speed"){
+        //speed up second vid
+        session.slowBtnPlayer.setSpeed(2);
+        session.slowBtnPlayer.firstFrame();
+        session.normBtnPlayer.firstFrame();
+        layout.setView("playback_3");
+    } else if (btn == "combine") {
+        //TODO set opacity and overlay
+        session.tempCombine = true;
+        layout.setView("playback_4");
+    }
+    
     if (btn.substr(0,11) == "chose_dance") {
         string dance = btn.substr(12);
         layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
@@ -290,6 +298,8 @@ void ofApp::mousePressed(int x, int y, int button){
         //reset base time
         ofResetElapsedTimeCounter();
         
+        session.tempCombine = false;
+        
     }
     
 }
@@ -312,12 +322,17 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
         appState = STATE_PLAYBACK;
         
         //Which playback pts to draw
-        layout.setView(DMLayout::VIEW_PLAYBACK);
+        if (currentSpeed == 1) {
+            layout.setView("playback_1");
+        } else {
+            layout.setView("playback_2");
+        }
         
-        //Default to adjusted speed
-        session.slowBtnPlayer.setSpeed(2);
+        
+        //Default to orignal speeds
+        session.slowBtnPlayer.setSpeed(1);
         session.normBtnPlayer.setSpeed(1);
-        session.fastBtnPlayer.setSpeed(0.5);
+        session.fastBtnPlayer.setSpeed(1);
         
         //Restart all video buttons
         session.fastBtnPlayer.firstFrame();
@@ -422,17 +437,17 @@ void ofApp::Session::saveData(float speed, string vid){
 void ofApp::Session::updateVids(){
     
     if(!normVid.empty()) {
-        normPlayer.update();
+//        normPlayer.update();
         normBtnPlayer.update();
     }
     
     if(!slowVid.empty()) {
-        slowPlayer.update();
+//        slowPlayer.update();
         slowBtnPlayer.update();
     }
     
     if(!fastVid.empty()) {
-        fastPlayer.update();
+//        fastPlayer.update();
         fastBtnPlayer.update();
     }
     
@@ -440,7 +455,7 @@ void ofApp::Session::updateVids(){
 
 //--------------------------------------------------------------
 void ofApp::Session::drawFeatureVids(){
-    
+    /*
     if(!normVid.empty()) {
         ofSetColor(255,255,255,255);
         normPlayer.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
@@ -467,7 +482,7 @@ void ofApp::Session::drawFeatureVids(){
     }
 
     ofSetColor(255,255,255);
-    
+    */
 }
 
 //--------------------------------------------------------------
@@ -475,14 +490,29 @@ void ofApp::Session::drawButtonVids(){
     
     ofSetColor(255,255,255,255);
     
+    //Draw combined
+    if (tempCombine==true){
+        normBtnPlayer.draw(680,300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        drawProgress(680, 680+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, normBtnPlayer.getPosition(), getColor(1));
+        ofSetColor(255,255,255,140);
+        slowBtnPlayer.draw(680,300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        drawProgress(680, 680+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, slowBtnPlayer.getPosition(), getColor(1));
+        return;
+    }
+    
     if(!slowVid.empty()) {
-        slowBtnPlayer.draw(1490,421, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        drawProgress(1490, 1490+VID_SIZE_SMALL_W, 421 + VID_SIZE_SMALL_H, slowBtnPlayer.getPosition(), getColor(0.5));
+        slowBtnPlayer.draw(1000,300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        drawProgress(1000, 1000+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, slowBtnPlayer.getPosition(), getColor(0.5));
     }
     
     if(!normVid.empty()) {
-        normBtnPlayer.draw(1490,180, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        drawProgress(1490, 1490+VID_SIZE_SMALL_W, 180 + VID_SIZE_SMALL_H, normBtnPlayer.getPosition(), getColor(1));
+        if (slowVid.empty()) {
+            normBtnPlayer.draw(680,300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+            drawProgress(680, 680+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, normBtnPlayer.getPosition(), getColor(1));
+        }else{
+            normBtnPlayer.draw(300,300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+            drawProgress(300, 300+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, normBtnPlayer.getPosition(), getColor(1));
+        }
     }
 
     if(!fastVid.empty()) {

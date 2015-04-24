@@ -11,8 +11,8 @@ using namespace ofxSimpleLayout;
 
 const int VID_SIZE_BIG_W = 1280;
 const int VID_SIZE_BIG_H = 720;
-const int VID_SIZE_SMALL_W = 320;
-const int VID_SIZE_SMALL_H = 180;
+const int VID_SIZE_SMALL_W = 640;
+const int VID_SIZE_SMALL_H = 360;
 
 enum AppState{
     STATE_NORMAL,
@@ -62,6 +62,8 @@ class ofApp : public ofBaseApp{
             void drawProgress(int startX, int endX, int y, float prog, int color);
             int getColor(float speed);
             void clear();
+            
+            bool tempCombine;
         };
     
         Session session;
