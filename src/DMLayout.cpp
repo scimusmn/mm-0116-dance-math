@@ -52,13 +52,13 @@ void DMLayout::setupViews(){
     //Duel Playback
     image("main_bg");
     image("txtDidYouKeep");
-    button("btnDoublePlaybackSpeed", 1200, 830, "double_playback_speed");
+    button("btnDoublePlaybackSpeed", 1260, 830, "double_playback_speed");
     saveView("playback_2");
     
     //Sped-up Playback
     image("main_bg");
     image("txtDidYouKeep");
-    button("btnCombine", 890, 770, "combine");
+    button("btnCombine", 880, 840, "combine");
     saveView("playback_3");
     
     //Combined Playback

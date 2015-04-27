@@ -376,16 +376,6 @@ void ofApp::Session::drawProgress(int startX, int endX, int y, float prog, int c
     float progX = ofMap(prog, 1, 0, startX, endX);
     progX = (endX-startX) * prog;
     ofRect(startX, y, progX, barHeight);
-    
-    //draw ticks
-//    ofSetColor(99,99,99,150);
-//    ofSetLineWidth(2);
-//    ofLine(startX, y, startX, y + barHeight + 4); // start
-//    ofLine(endX, y, endX, y + barHeight + 4); // end
-//    ofLine((startX+endX)/2, y, (startX+endX)/2, y + barHeight + 4); // half
-//    ofLine((startX+endX)*.25, y, (startX+endX)*.25, y + barHeight + 4); // 1/4
-//    ofLine((startX+endX)*.75, y, (startX+endX)*.75, y + barHeight + 4); // 3/4
-    
     ofSetColor(255,255,255);
     
 }
