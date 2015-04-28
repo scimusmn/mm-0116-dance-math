@@ -384,40 +384,34 @@ void ofApp::Session::drawProgress(int startX, int endX, int y, float prog, int c
 void ofApp::Session::saveData(float speed, string vid){
     if (speed == 0.5) {
         slowVid = vid;
-        slowPlayer.stop();
-        slowPlayer.close();
-        slowPlayer.loadMovie(slowVid);
-        slowPlayer.play();
-        slowPlayer.setSpeed(2);
-        slowPlayer.setLoopState(OF_LOOP_NONE);
+        
         slowBtnPlayer.stop();
+        slowBtnPlayer.update();
+        ofSleepMillis(50);
         slowBtnPlayer.close();
         slowBtnPlayer.loadMovie(slowVid);
         slowBtnPlayer.play();
+        
     } else if (speed == 1) {
         normVid = vid;
-        normPlayer.stop();
-        normPlayer.close();
-        normPlayer.loadMovie(normVid);
-        normPlayer.play();
-        normPlayer.setSpeed(1);
-        normPlayer.setLoopState(OF_LOOP_NONE);
+        
         normBtnPlayer.stop();
+        normBtnPlayer.update();
+        ofSleepMillis(50);
         normBtnPlayer.close();
         normBtnPlayer.loadMovie(normVid);
         normBtnPlayer.play();
+        
     } else if (speed == 2) {
         fastVid = vid;
-        fastPlayer.stop();
-        fastPlayer.close();
-        fastPlayer.loadMovie(fastVid);
-        fastPlayer.play();
-        fastPlayer.setSpeed(0.5);
-        fastPlayer.setLoopState(OF_LOOP_NONE);
+        
         fastBtnPlayer.stop();
+        fastBtnPlayer.update();
+        ofSleepMillis(50);
         fastBtnPlayer.close();
         fastBtnPlayer.loadMovie(fastVid);
         fastBtnPlayer.play();
+        
     } else {
         ofLogError("Session") << "Can not save session. Unrecognized speed: " << speed;
     }
@@ -516,17 +510,17 @@ void ofApp::Session::drawButtonVids(){
 void ofApp::Session::restartVids(){
     
     if(!slowVid.empty()) {
-        slowPlayer.firstFrame();
+//        slowPlayer.firstFrame();
         slowPlayer.play();
     }
     
     if(!normVid.empty()) {
-        normPlayer.firstFrame();
+//        normPlayer.firstFrame();
         normPlayer.play();
     }
 
     if(!fastVid.empty()) {
-        fastPlayer.firstFrame();
+//        fastPlayer.firstFrame();
         fastPlayer.play();
     }
     
@@ -552,8 +546,10 @@ void ofApp::Session::clear(){
     
     //Note: Due to an OF bug, you cannot close an
     //ofVideoPlayer when current position is 0 so we
-    //stop all players before closing.
+    //stop all players before closing,
+    //and sleep to allow any related callbacks
     //see http://goo.gl/Vz8zdx
+    //also http://goo.gl/WJRc8O
     
     slowPlayer.stop();
     normPlayer.stop();
@@ -562,6 +558,16 @@ void ofApp::Session::clear(){
     slowBtnPlayer.stop();
     normBtnPlayer.stop();
     fastBtnPlayer.stop();
+    
+    slowPlayer.update();
+    normPlayer.update();
+    fastPlayer.update();
+    
+    slowBtnPlayer.update();
+    normBtnPlayer.update();
+    fastBtnPlayer.update();
+    
+    ofSleepMillis(50);
 
     slowPlayer.close();
     normPlayer.close();
