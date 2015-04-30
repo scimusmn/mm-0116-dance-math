@@ -19,7 +19,7 @@ void ofApp::setup(){
     jukebox.addSong("jazz", "sounds/circle.wav", 14567, 7107, 943);
     jukebox.addSong("clicks", "sounds/triangle.wav", 14567, 7107, 943);
     jukebox.addSong("waltz", "sounds/square.wav", 14567, 7107, 943);
-    jukebox.addSong("tango", "sounds/clicks.wav", 14567, 7107, 943);
+    jukebox.addSong("tango", "sounds/freestyle.wav", 10769, 5103, 700);
 
     //Load/Setup UI
     layout.setupViews();
@@ -111,9 +111,11 @@ void ofApp::update(){
     //Wait for countdown
     if (appState == STATE_PRE_COUNTDOWN){
         
-        if (timeElapsed > 1000){
+        if (timeElapsed > 6500){
             isNewBeat = true;
             appState = STATE_COUNTDOWN;
+            layout.setView(DMLayout::VIEW_DANCE_VIEW); // TEMP: this shouldn't be necessary once interstital GetReady screen is its own thing
+            layout.setState("txtGetReady", "1");
             resetBeatTracking();
             jukebox.play(currentSpeed);
         }
@@ -127,7 +129,7 @@ void ofApp::update(){
             layout.setState("countdown", ofToString(countdown));
             
             if (countdown <= 0) {
-                layout.setState("txtGetReady", "1");
+                layout.setState("txtGetReady", "2");
                 initRecording();                
             }
             
@@ -321,13 +323,20 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
         resetBeatTracking();
         appState = STATE_PLAYBACK;
         
-        //Which playback pts to draw
+        //Which playback
         if (currentSpeed == 1) {
+            //Finished first recording...
+            
+            //TEMP: should create separate view and countdown for second countdown?
+            startDanceCountdown();
+            currentSpeed = 0.5;
+            //
+            
             layout.setView("playback_1");
         } else {
+            //Finished second recording ...
             layout.setView("playback_2");
         }
-        
         
         //Default to orignal speeds
         session.slowBtnPlayer.setSpeed(1);
@@ -342,6 +351,7 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
     } else {
         ofLogError("videoSavedEvent") << "Video save error: " << e.error;
     }
+    
 }
 
 //--------------------------------------------------------------
@@ -528,6 +538,10 @@ void ofApp::Session::restartVids(){
 
 //--------------------------------------------------------------
 int ofApp::Session::getColor(float speed){
+    
+    //temp
+    return ofHexToInt("FF0000");
+    
     if (speed == 0.5) {
         return ofHexToInt("FF0000");
     } else if (speed == 1) {

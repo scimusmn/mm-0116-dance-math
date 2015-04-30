@@ -17,24 +17,23 @@ string DMLayout::VIEW_PLAYBACK = "view_playback";
 
 void DMLayout::setupViews(){
 
-    //Pick a Dance (currently not in use)
+    //Pick a Dance (currently not in use) // DEPRECATED
     image("main_bg");
     image("sidebar_bg");
     image("txtPickADance");
-    videoButton("chooseDanceA", 50, 50, "chose_dance_a");
-    videoButton("chooseDanceB", 550, 50, "chose_dance_b");
-    videoButton("chooseDanceC", 50, 450, "chose_dance_c");
-    videoButton("chooseDanceD", 550, 450, "chose_dance_d");
+    videoButton("chooseDanceA", 200, 350, "chose_dance_a");
+    videoButton("chooseDanceB", 600, 350, "chose_dance_b");
+    videoButton("chooseDanceC", 1000, 350, "chose_dance_c");
+    videoButton("chooseDanceD", 1400, 350, "chose_dance_d");
     saveView(VIEW_PICK_DANCE);
     
     //Choose your music
     image("main_bg");
-    image("sidebar_bg");
     image("txtChooseYourMusic");
-    button("btnSong1", 250, 205, "chose_music_jazz");
-    button("btnSong2", 580, 205, "chose_music_clicks");
-    button("btnSong3", 250, 605, "chose_music_waltz");
-    button("btnSong4", 580, 605, "chose_music_tango");
+    videoButton("circle", 96, 377, "chose_music_jazz");
+    videoButton("triangle", 535, 377, "chose_music_clicks");
+    videoButton("square", 975, 377, "chose_music_waltz");
+    videoButton("square", 1414, 377, "chose_music_tango");
     saveView(VIEW_CHOOSE_MUSIC);
     
     //Dance View
@@ -46,28 +45,31 @@ void DMLayout::setupViews(){
     //Normal Playback
     image("main_bg");
     image("txtHowDidYouDo");
-    button("btnRecordHalfSpeed", 890, 760, "start_dance_0.5");
+//    button("btnRecordHalfSpeed", 890, 760, "start_dance_0.5");
+    button("btnStartOverSticky", 1813, 972, "start_over");
     saveView("playback_1");
     
     //Duel Playback
     image("main_bg");
     image("txtDidYouKeep");
-    button("btnDoublePlaybackSpeed", 1260, 830, "double_playback_speed");
+    button("btnDoublePlaybackSpeed", 1225, 830, "double_playback_speed");
+    button("btnStartOverSticky", 1813, 972, "start_over");
     saveView("playback_2");
     
     //Sped-up Playback
     image("main_bg");
-    image("txtDidYouKeep");
+    image("txtDoTheyMatch1");
     button("btnCombine", 880, 840, "combine");
+    button("btnStartOverSticky", 1813, 972, "start_over");
     saveView("playback_3");
     
     //Combined Playback
     image("main_bg");
-    image("txtDoTheyMatch");
+    image("txtDoTheyMatch2");
     button("btnStartOver", 890, 800, "start_over");
     saveView("playback_4");
     
-    //Playback View
+    //Playback View // DEPRECATED
     image("sidebar_bg");
     image("txtPlayback");
     button("btnRecordNow", 1490, 180, "start_dance_1");
