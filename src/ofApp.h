@@ -18,7 +18,7 @@ enum AppState{
     STATE_NORMAL,
     STATE_PRE_COUNTDOWN,
     STATE_COUNTDOWN,
-    STATE_TRACKING,
+    STATE_RECORDING,
     STATE_PLAYBACK
 };
 
@@ -47,16 +47,12 @@ class ofApp : public ofBaseApp{
             string slowVid;
             string normVid;
             string fastVid;
-            ofVideoPlayer slowPlayer;
-            ofVideoPlayer normPlayer;
-            ofVideoPlayer fastPlayer;
             ofVideoPlayer slowBtnPlayer;
             ofVideoPlayer normBtnPlayer;
             ofVideoPlayer fastBtnPlayer;
             void saveData(float speed, string vid);
             void updateVids();
-            void drawFeatureVids();
-            void drawButtonVids();
+            void drawRecordedVids();
             void restartVids();
             void drawProgress(int startX, int endX, int y, float prog, int color, float barHeight);
             void drawProgress(int startX, int endX, int y, float prog, int color);
@@ -65,7 +61,6 @@ class ofApp : public ofBaseApp{
             
             bool tempCombine;
         };
-    
         Session session;
         ofxCv::ContourFinder contourFinder;
         void initRecording();

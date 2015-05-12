@@ -35,7 +35,7 @@ void ofApp::initRecording(){
     
     //Tracking
     resetBeatTracking();
-    appState = STATE_TRACKING;
+    appState = STATE_RECORDING;
     
     //Video recording
     stringstream s;
@@ -90,7 +90,7 @@ void ofApp::update(){
     recordProgress = timeElapsed / ((jukebox.duration - jukebox.intro) / jukebox.rate);
 
     //Update tracking
-    if (appState == STATE_TRACKING){
+    if (appState == STATE_RECORDING){
 
         isNewBeat = false;
         
@@ -140,7 +140,7 @@ void ofApp::update(){
     }
     
     //Loop playback
-    if (appState == STATE_PLAYBACK && session.normPlayer.getIsMovieDone() == true){
+    if (appState == STATE_PLAYBACK && session.normBtnPlayer.getIsMovieDone() == true){
         
         session.restartVids();
         resetBeatTracking();
@@ -156,22 +156,14 @@ void ofApp::draw(){
     ofPushMatrix();
     ofTranslate(-85, 0); //**--> Drawing is SHIFTED
     
-    if (appState == STATE_PLAYBACK){
-        session.drawFeatureVids();
-        if(!session.slowVid.empty()) {
-            session.drawProgress(0, VID_SIZE_BIG_W, VID_SIZE_BIG_H+0, session.normPlayer.getPosition(), session.getColor(0.5));
-        }
-        if(!session.normVid.empty()) {
-            session.drawProgress(0, VID_SIZE_BIG_W, VID_SIZE_BIG_H+8, session.normPlayer.getPosition(), session.getColor(1));
-        }
-        if(!session.fastVid.empty()) {
-            session.drawProgress(0, VID_SIZE_BIG_W, VID_SIZE_BIG_H+16, session.normPlayer.getPosition(), session.getColor(2));
-        }
-    } else {
+    if (appState != STATE_PLAYBACK){
+        
         camRaw.draw(0,0,1280,720);
-        if (appState == STATE_TRACKING) {
+        
+        if (appState == STATE_RECORDING) {
             session.drawProgress(0, 1280, 720, recordProgress, session.getColor(currentSpeed), 32);
         }
+        
     }
 
     ofPopMatrix(); //**--> Drawing is UN-SHIFTED
@@ -181,7 +173,7 @@ void ofApp::draw(){
     layout.draw();
     
     if (appState == STATE_PLAYBACK){
-        session.drawButtonVids();
+        session.drawRecordedVids();
     }
     
     #ifdef DEBUG_HELPERS
@@ -278,13 +270,7 @@ void ofApp::mousePressed(int x, int y, int button){
             session.fastBtnPlayer.setSpeed(0.5);
         }
         
-        //restart videos
-        session.slowPlayer.firstFrame();
-        session.normPlayer.firstFrame();
-        session.fastPlayer.firstFrame();
-        session.slowBtnPlayer.firstFrame();
-        session.normBtnPlayer.firstFrame();
-        session.fastBtnPlayer.firstFrame();
+        session.restartVids();
         
     }
     
@@ -350,10 +336,7 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
         session.normBtnPlayer.setSpeed(1);
         session.fastBtnPlayer.setSpeed(1);
         
-        //Restart all video buttons
-        session.fastBtnPlayer.firstFrame();
-        session.normBtnPlayer.firstFrame();
-        session.slowBtnPlayer.firstFrame();
+        session.restartVids();
 
     } else {
         ofLogError("videoSavedEvent") << "Video save error: " << e.error;
@@ -452,39 +435,7 @@ void ofApp::Session::updateVids(){
 }
 
 //--------------------------------------------------------------
-void ofApp::Session::drawFeatureVids(){
-    /*
-    if(!normVid.empty()) {
-        ofSetColor(255,255,255,255);
-        normPlayer.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
-    }
-    
-    if(!slowVid.empty()) {
-        //Change opacity based on how many vids are displaying
-        if(fastVid.empty()) {
-            ofSetColor(255,255,255,140);
-        } else {
-            ofSetColor(255,255,255,100);
-        }
-        slowPlayer.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
-    }
-    
-    if(!fastVid.empty()) {
-        //Change opacity based on how many vids are displaying
-        if(slowVid.empty()) {
-            ofSetColor(255,255,255,140);
-        } else {
-            ofSetColor(255,255,255,100);
-        }
-        fastPlayer.draw(0,0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
-    }
-
-    ofSetColor(255,255,255);
-    */
-}
-
-//--------------------------------------------------------------
-void ofApp::Session::drawButtonVids(){
+void ofApp::Session::drawRecordedVids(){
     
     ofSetColor(255,255,255,255);
     
@@ -522,17 +473,20 @@ void ofApp::Session::drawButtonVids(){
 
 //--------------------------------------------------------------
 void ofApp::Session::restartVids(){
-    
+
     if(!slowVid.empty()) {
-        slowPlayer.play();
+        slowBtnPlayer.firstFrame();
+        slowBtnPlayer.play();
     }
     
     if(!normVid.empty()) {
-        normPlayer.play();
+        normBtnPlayer.firstFrame();
+        normBtnPlayer.play();
     }
 
     if(!fastVid.empty()) {
-        fastPlayer.play();
+        fastBtnPlayer.firstFrame();
+        fastBtnPlayer.play();
     }
     
 }
@@ -565,29 +519,17 @@ void ofApp::Session::clear(){
     //and sleep to allow any related callbacks
     //see http://goo.gl/Vz8zdx
     //also http://goo.gl/WJRc8O
-    
-    slowPlayer.stop();
-    normPlayer.stop();
-    fastPlayer.stop();
-    
+
     slowBtnPlayer.stop();
     normBtnPlayer.stop();
     fastBtnPlayer.stop();
-    
-    slowPlayer.update();
-    normPlayer.update();
-    fastPlayer.update();
-    
+
     slowBtnPlayer.update();
     normBtnPlayer.update();
     fastBtnPlayer.update();
     
     ofSleepMillis(50);
 
-    slowPlayer.close();
-    normPlayer.close();
-    fastPlayer.close();
-    
     slowBtnPlayer.close();
     normBtnPlayer.close();
     fastBtnPlayer.close();
