@@ -1,7 +1,7 @@
 # mm-0116-dance-math
 Track your dance moves at different speeds to learn about ratios.
 
-!! The below instructions are just notes, and must be finalized after project completion.
+!! The below instructions are temporary notes, and will be finalized after project completion.
 
 #Associated hardware
 1) 1920 x 1080 display
