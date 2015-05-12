@@ -8,8 +8,8 @@
 
 #include "Jukebox.h"
 
-
-void Jukebox::addSong(string id, string path, int duration, int intro, int tempo){
+//---------
+void Jukebox::addSong(string id, string path, string introPath, int duration, int intro, int tempo){
     
     Song s;
     s.id = id;
@@ -19,6 +19,7 @@ void Jukebox::addSong(string id, string path, int duration, int intro, int tempo
     s.tempo = tempo;
     
     s.player.loadSound(path);
+    s.introPlayer.loadSound(introPath);
     
     songs.insert(pair<string, Song>(id, s));
     
@@ -47,6 +48,7 @@ void Jukebox::switchSong(string id) {
     this->intro = s.intro;
     this->tempo = s.tempo;
     this->player = s.player;
+    this->introPlayer = s.introPlayer;
 
 }
 
@@ -61,5 +63,11 @@ void Jukebox::play(float rate) {
     this->rate = rate;
     this->player.setSpeed(rate);
     this->player.play();
+    
+}
+
+void Jukebox::playIntro() {
+    
+    this->introPlayer.play();
     
 }

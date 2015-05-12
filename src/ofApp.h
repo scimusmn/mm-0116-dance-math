@@ -11,14 +11,14 @@ using namespace ofxSimpleLayout;
 
 const int VID_SIZE_BIG_W = 1280;
 const int VID_SIZE_BIG_H = 720;
-const int VID_SIZE_SMALL_W = 320;
-const int VID_SIZE_SMALL_H = 180;
+const int VID_SIZE_SMALL_W = 640;
+const int VID_SIZE_SMALL_H = 360;
 
 enum AppState{
     STATE_NORMAL,
     STATE_PRE_COUNTDOWN,
     STATE_COUNTDOWN,
-    STATE_TRACKING,
+    STATE_RECORDING,
     STATE_PLAYBACK
 };
 
@@ -47,23 +47,20 @@ class ofApp : public ofBaseApp{
             string slowVid;
             string normVid;
             string fastVid;
-            ofVideoPlayer slowPlayer;
-            ofVideoPlayer normPlayer;
-            ofVideoPlayer fastPlayer;
             ofVideoPlayer slowBtnPlayer;
             ofVideoPlayer normBtnPlayer;
             ofVideoPlayer fastBtnPlayer;
             void saveData(float speed, string vid);
             void updateVids();
-            void drawFeatureVids();
-            void drawButtonVids();
+            void drawRecordedVids();
             void restartVids();
             void drawProgress(int startX, int endX, int y, float prog, int color, float barHeight);
             void drawProgress(int startX, int endX, int y, float prog, int color);
             int getColor(float speed);
             void clear();
+            
+            bool tempCombine;
         };
-    
         Session session;
         ofxCv::ContourFinder contourFinder;
         void initRecording();
@@ -84,6 +81,7 @@ class ofApp : public ofBaseApp{
         ofVideoPlayer vidPlayback;
         void startDanceCountdown();
         DMLayout layout;
+        ofSoundPlayer greatJobSnd;
     
         //Util
         void clearFiles();

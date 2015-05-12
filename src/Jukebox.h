@@ -20,14 +20,16 @@ public:
         int intro;
         int tempo;
         ofSoundPlayer player;
+        ofSoundPlayer introPlayer;
     };
     
-    void addSong(string id, string path, int duration, int intro, int tempo);
+    void addSong(string id, string path, string introPath, int duration, int intro, int tempo);
     void switchSong(string id);
     Song getSong(string id);
     
     void play();
     void play(float rate);
+    void playIntro();
     float rate;
     
     map<string, Song> songs;
@@ -39,6 +41,7 @@ public:
     int intro;
     int tempo;
     ofSoundPlayer player;
+    ofSoundPlayer introPlayer;
     
     
 protected:

@@ -10,27 +10,23 @@ void ofApp::setup(){
     vidRecorder = ofPtr<ofQTKitGrabber>( new ofQTKitGrabber() );
     camRaw.setGrabber(vidRecorder);
     camRaw.setDeviceID(0);
-    camRaw.initGrabber(1280,720);
+    camRaw.initGrabber(1280/2,720/2);
 
     ofAddListener(vidRecorder->videoSavedEvent, this, &ofApp::videoSaved); // Listen for video saved events
     vidRecorder->initRecording();
 
     //Load Sounds
-    /*
-    jukebox.addSong("jazz", "sounds/jazz.wav", 10801, 3707, 466);
-    jukebox.addSong("clicks", "sounds/clicks.wav", 14567, 7107, 943);
-    jukebox.addSong("waltz", "sounds/waltz.wav", 14567, 7107, 943);
-    jukebox.addSong("tango", "sounds/tango.wav", 10236, 3783, 466);
-     */
-    jukebox.addSong("jazz", "sounds/circle.wav", 14567, 7107, 943);
-    jukebox.addSong("clicks", "sounds/triangle.wav", 14567, 7107, 943);
-    jukebox.addSong("waltz", "sounds/square.wav", 14567, 7107, 943);
-    jukebox.addSong("tango", "sounds/clicks.wav", 14567, 7107, 943);
-
+    jukebox.addSong("circle", "sounds/circle.wav", "sounds/startCircle.wav", 14567, 7107, 943);
+    jukebox.addSong("triangle", "sounds/triangle.wav", "sounds/startTriangle.wav", 14567, 7107, 943);
+    jukebox.addSong("square", "sounds/square.wav", "sounds/startSquare.wav", 14567, 7107, 943);
+    jukebox.addSong("freestyle", "sounds/freestyle.wav", "sounds/startFreestyle.wav", 10769, 5103, 700);
+    greatJobSnd.loadSound("sounds/great.wav");
+    
     //Load/Setup UI
     layout.setupViews();
-    layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
+    layout.setView(DMLayout::VIEW_CHOOSE_PATTERN);
     appState = STATE_NORMAL;
+    session.tempCombine = false;
     
 }
 
@@ -39,7 +35,7 @@ void ofApp::initRecording(){
     
     //Tracking
     resetBeatTracking();
-    appState = STATE_TRACKING;
+    appState = STATE_RECORDING;
     
     //Video recording
     stringstream s;
@@ -66,9 +62,10 @@ void ofApp::startDanceCountdown(){
     countdown = 9;
     layout.setState("countdown", ofToString(countdown));
     
-    //Wait 5 seconds then count down.
+    //Wait 9 seconds then count down.
     resetBeatTracking();
     appState = STATE_PRE_COUNTDOWN;
+    if (currentSpeed == 1)jukebox.playIntro();
     
 }
 
@@ -93,7 +90,7 @@ void ofApp::update(){
     recordProgress = timeElapsed / ((jukebox.duration - jukebox.intro) / jukebox.rate);
 
     //Update tracking
-    if (appState == STATE_TRACKING){
+    if (appState == STATE_RECORDING){
 
         isNewBeat = false;
         
@@ -116,9 +113,11 @@ void ofApp::update(){
     //Wait for countdown
     if (appState == STATE_PRE_COUNTDOWN){
         
-        if (timeElapsed > 1000){
+        if (timeElapsed > 6000){
             isNewBeat = true;
             appState = STATE_COUNTDOWN;
+            layout.setView(DMLayout::VIEW_DANCE_VIEW); // TEMP: this shouldn't be necessary once interstital GetReady screen is its own thing
+            layout.setState("txtGetReady", "1");
             resetBeatTracking();
             jukebox.play(currentSpeed);
         }
@@ -132,7 +131,7 @@ void ofApp::update(){
             layout.setState("countdown", ofToString(countdown));
             
             if (countdown <= 0) {
-                layout.setState("txtGetReady", "1");
+                layout.setState("txtGetReady", "2");
                 initRecording();                
             }
             
@@ -141,7 +140,7 @@ void ofApp::update(){
     }
     
     //Loop playback
-    if (appState == STATE_PLAYBACK && session.normPlayer.getIsMovieDone() == true){
+    if (appState == STATE_PLAYBACK && session.normBtnPlayer.getIsMovieDone() == true){
         
         session.restartVids();
         resetBeatTracking();
@@ -157,22 +156,14 @@ void ofApp::draw(){
     ofPushMatrix();
     ofTranslate(-85, 0); //**--> Drawing is SHIFTED
     
-    if (appState == STATE_PLAYBACK){
-        session.drawFeatureVids();
-        if(!session.slowVid.empty()) {
-            session.drawProgress(0, VID_SIZE_BIG_W, VID_SIZE_BIG_H+0, session.normPlayer.getPosition(), session.getColor(0.5));
-        }
-        if(!session.normVid.empty()) {
-            session.drawProgress(0, VID_SIZE_BIG_W, VID_SIZE_BIG_H+8, session.normPlayer.getPosition(), session.getColor(1));
-        }
-        if(!session.fastVid.empty()) {
-            session.drawProgress(0, VID_SIZE_BIG_W, VID_SIZE_BIG_H+16, session.normPlayer.getPosition(), session.getColor(2));
-        }
-    } else {
+    if (appState != STATE_PLAYBACK){
+        
         camRaw.draw(0,0,1280,720);
-        if (appState == STATE_TRACKING) {
+        
+        if (appState == STATE_RECORDING) {
             session.drawProgress(0, 1280, 720, recordProgress, session.getColor(currentSpeed), 32);
         }
+        
     }
 
     ofPopMatrix(); //**--> Drawing is UN-SHIFTED
@@ -182,7 +173,7 @@ void ofApp::draw(){
     layout.draw();
     
     if (appState == STATE_PLAYBACK){
-        session.drawButtonVids();
+        session.drawRecordedVids();
     }
     
     #ifdef DEBUG_HELPERS
@@ -223,23 +214,40 @@ void ofApp::mousePressed(int x, int y, int button){
     
     string btn = layout.getSelected(x, y);
     
-    if (btn.substr(0,11) == "chose_dance") {
-        string dance = btn.substr(12);
-        layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
+    //Temp segragated playback
+    if (btn == "double_playback_speed"){
+        //speed up second vid
+        session.slowBtnPlayer.setSpeed(2);
+        session.slowBtnPlayer.firstFrame();
+        session.normBtnPlayer.firstFrame();
+        layout.setView(DMLayout::VIEW_PLAYBACK_2);
+    } else if (btn == "combine") {
+        //TODO set opacity and overlay
+        session.tempCombine = true;
+        layout.setView(DMLayout::VIEW_PLAYBACK_3);
     }
+
     
-    if (btn.substr(0,13) == "preview_music") {
-        string music = btn.substr(14);
-        jukebox.switchSong(music);
-        jukebox.play();
+    if (btn.substr(0,13) == "chose_pattern") {
+        string pattern = btn.substr(14);
+        ofLogNotice("pattern"+pattern);
+        if (pattern != "freestyle") {
+            jukebox.switchSong(pattern);
+            currentSpeed = 1;
+            startDanceCountdown();
+        } else {
+            //Show freestyle music selection screen
+            layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
+        }
     }
     
     if (btn.substr(0,11) == "chose_music") {
         string music = btn.substr(12);
+        
         jukebox.switchSong(music);
-        //Start first dance
         currentSpeed = 1;
         startDanceCountdown();
+
     }
     
     if (btn.substr(0,11) == "start_dance") {
@@ -262,13 +270,7 @@ void ofApp::mousePressed(int x, int y, int button){
             session.fastBtnPlayer.setSpeed(0.5);
         }
         
-        //restart videos
-        session.slowPlayer.firstFrame();
-        session.normPlayer.firstFrame();
-        session.fastPlayer.firstFrame();
-        session.slowBtnPlayer.firstFrame();
-        session.normBtnPlayer.firstFrame();
-        session.fastBtnPlayer.firstFrame();
+        session.restartVids();
         
     }
     
@@ -278,7 +280,7 @@ void ofApp::mousePressed(int x, int y, int button){
         resetBeatTracking();
         appState = STATE_NORMAL;
         
-        layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
+        layout.setView(DMLayout::VIEW_CHOOSE_PATTERN);
         vidPlayback.setLoopState(OF_LOOP_NORMAL);
         
         //delete all temp files
@@ -289,6 +291,8 @@ void ofApp::mousePressed(int x, int y, int button){
         
         //reset base time
         ofResetElapsedTimeCounter();
+        
+        session.tempCombine = false;
         
     }
     
@@ -311,22 +315,33 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
         resetBeatTracking();
         appState = STATE_PLAYBACK;
         
-        //Which playback pts to draw
-        layout.setView(DMLayout::VIEW_PLAYBACK);
+        //Which playback
+        if (currentSpeed == 1) {
+            //Finished first recording...
+            
+            //TEMP: should create separate view and countdown for second countdown?
+            currentSpeed = 0.5;
+            startDanceCountdown();
+            //
+            
+            greatJobSnd.play();
+            layout.setView(DMLayout::VIEW_GREAT_JOB);
+        } else {
+            //Finished second recording ...
+            layout.setView(DMLayout::VIEW_PLAYBACK_1);
+        }
         
-        //Default to adjusted speed
-        session.slowBtnPlayer.setSpeed(2);
+        //Default to orignal speeds
+        session.slowBtnPlayer.setSpeed(1);
         session.normBtnPlayer.setSpeed(1);
-        session.fastBtnPlayer.setSpeed(0.5);
+        session.fastBtnPlayer.setSpeed(1);
         
-        //Restart all video buttons
-        session.fastBtnPlayer.firstFrame();
-        session.normBtnPlayer.firstFrame();
-        session.slowBtnPlayer.firstFrame();
+        session.restartVids();
 
     } else {
         ofLogError("videoSavedEvent") << "Video save error: " << e.error;
     }
+    
 }
 
 //--------------------------------------------------------------
@@ -361,16 +376,6 @@ void ofApp::Session::drawProgress(int startX, int endX, int y, float prog, int c
     float progX = ofMap(prog, 1, 0, startX, endX);
     progX = (endX-startX) * prog;
     ofRect(startX, y, progX, barHeight);
-    
-    //draw ticks
-//    ofSetColor(99,99,99,150);
-//    ofSetLineWidth(2);
-//    ofLine(startX, y, startX, y + barHeight + 4); // start
-//    ofLine(endX, y, endX, y + barHeight + 4); // end
-//    ofLine((startX+endX)/2, y, (startX+endX)/2, y + barHeight + 4); // half
-//    ofLine((startX+endX)*.25, y, (startX+endX)*.25, y + barHeight + 4); // 1/4
-//    ofLine((startX+endX)*.75, y, (startX+endX)*.75, y + barHeight + 4); // 3/4
-    
     ofSetColor(255,255,255);
     
 }
@@ -379,40 +384,34 @@ void ofApp::Session::drawProgress(int startX, int endX, int y, float prog, int c
 void ofApp::Session::saveData(float speed, string vid){
     if (speed == 0.5) {
         slowVid = vid;
-        slowPlayer.stop();
-        slowPlayer.close();
-        slowPlayer.loadMovie(slowVid);
-        slowPlayer.play();
-        slowPlayer.setSpeed(2);
-        slowPlayer.setLoopState(OF_LOOP_NONE);
+        
         slowBtnPlayer.stop();
+        slowBtnPlayer.update();
+        ofSleepMillis(50);
         slowBtnPlayer.close();
         slowBtnPlayer.loadMovie(slowVid);
         slowBtnPlayer.play();
+        
     } else if (speed == 1) {
         normVid = vid;
-        normPlayer.stop();
-        normPlayer.close();
-        normPlayer.loadMovie(normVid);
-        normPlayer.play();
-        normPlayer.setSpeed(1);
-        normPlayer.setLoopState(OF_LOOP_NONE);
+        
         normBtnPlayer.stop();
+        normBtnPlayer.update();
+        ofSleepMillis(50);
         normBtnPlayer.close();
         normBtnPlayer.loadMovie(normVid);
         normBtnPlayer.play();
+        
     } else if (speed == 2) {
         fastVid = vid;
-        fastPlayer.stop();
-        fastPlayer.close();
-        fastPlayer.loadMovie(fastVid);
-        fastPlayer.play();
-        fastPlayer.setSpeed(0.5);
-        fastPlayer.setLoopState(OF_LOOP_NONE);
+        
         fastBtnPlayer.stop();
+        fastBtnPlayer.update();
+        ofSleepMillis(50);
         fastBtnPlayer.close();
         fastBtnPlayer.loadMovie(fastVid);
         fastBtnPlayer.play();
+        
     } else {
         ofLogError("Session") << "Can not save session. Unrecognized speed: " << speed;
     }
@@ -422,67 +421,47 @@ void ofApp::Session::saveData(float speed, string vid){
 void ofApp::Session::updateVids(){
     
     if(!normVid.empty()) {
-        normPlayer.update();
         normBtnPlayer.update();
     }
     
     if(!slowVid.empty()) {
-        slowPlayer.update();
         slowBtnPlayer.update();
     }
     
     if(!fastVid.empty()) {
-        fastPlayer.update();
         fastBtnPlayer.update();
     }
     
 }
 
 //--------------------------------------------------------------
-void ofApp::Session::drawFeatureVids(){
-    
-    if(!normVid.empty()) {
-        ofSetColor(255,255,255,255);
-        normPlayer.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
-    }
-    
-    if(!slowVid.empty()) {
-        //Change opacity based on how many vids are displaying
-        if(fastVid.empty()) {
-            ofSetColor(255,255,255,140);
-        } else {
-            ofSetColor(255,255,255,100);
-        }
-        slowPlayer.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
-    }
-    
-    if(!fastVid.empty()) {
-        //Change opacity based on how many vids are displaying
-        if(slowVid.empty()) {
-            ofSetColor(255,255,255,140);
-        } else {
-            ofSetColor(255,255,255,100);
-        }
-        fastPlayer.draw(0,0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
-    }
-
-    ofSetColor(255,255,255);
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::Session::drawButtonVids(){
+void ofApp::Session::drawRecordedVids(){
     
     ofSetColor(255,255,255,255);
     
+    //Draw combined
+    if (tempCombine==true){
+        normBtnPlayer.draw(680,300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        drawProgress(680, 680+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, normBtnPlayer.getPosition(), getColor(1));
+        ofSetColor(255,255,255,140);
+        slowBtnPlayer.draw(680,300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        drawProgress(680, 680+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, slowBtnPlayer.getPosition(), getColor(1));
+        return;
+    }
+    
     if(!slowVid.empty()) {
-        slowBtnPlayer.draw(1490,421, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        drawProgress(1490, 1490+VID_SIZE_SMALL_W, 421 + VID_SIZE_SMALL_H, slowBtnPlayer.getPosition(), getColor(0.5));
+        slowBtnPlayer.draw(1000,300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        drawProgress(1000, 1000+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, slowBtnPlayer.getPosition(), getColor(0.5));
     }
     
     if(!normVid.empty()) {
-        normBtnPlayer.draw(1490,180, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        drawProgress(1490, 1490+VID_SIZE_SMALL_W, 180 + VID_SIZE_SMALL_H, normBtnPlayer.getPosition(), getColor(1));
+        if (slowVid.empty()) {
+            normBtnPlayer.draw(680,300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+            drawProgress(680, 680+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, normBtnPlayer.getPosition(), getColor(1));
+        }else{
+            normBtnPlayer.draw(300,300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+            drawProgress(300, 300+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, normBtnPlayer.getPosition(), getColor(1));
+        }
     }
 
     if(!fastVid.empty()) {
@@ -494,26 +473,30 @@ void ofApp::Session::drawButtonVids(){
 
 //--------------------------------------------------------------
 void ofApp::Session::restartVids(){
-    
+
     if(!slowVid.empty()) {
-        slowPlayer.firstFrame();
-        slowPlayer.play();
+        slowBtnPlayer.firstFrame();
+        slowBtnPlayer.play();
     }
     
     if(!normVid.empty()) {
-        normPlayer.firstFrame();
-        normPlayer.play();
+        normBtnPlayer.firstFrame();
+        normBtnPlayer.play();
     }
 
     if(!fastVid.empty()) {
-        fastPlayer.firstFrame();
-        fastPlayer.play();
+        fastBtnPlayer.firstFrame();
+        fastBtnPlayer.play();
     }
     
 }
 
 //--------------------------------------------------------------
 int ofApp::Session::getColor(float speed){
+    
+    //temp
+    return ofHexToInt("FF0000");
+    
     if (speed == 0.5) {
         return ofHexToInt("FF0000");
     } else if (speed == 1) {
@@ -532,21 +515,21 @@ void ofApp::Session::clear(){
     
     //Note: Due to an OF bug, you cannot close an
     //ofVideoPlayer when current position is 0 so we
-    //stop all players before closing.
+    //stop all players before closing,
+    //and sleep to allow any related callbacks
     //see http://goo.gl/Vz8zdx
-    
-    slowPlayer.stop();
-    normPlayer.stop();
-    fastPlayer.stop();
-    
+    //also http://goo.gl/WJRc8O
+
     slowBtnPlayer.stop();
     normBtnPlayer.stop();
     fastBtnPlayer.stop();
 
-    slowPlayer.close();
-    normPlayer.close();
-    fastPlayer.close();
+    slowBtnPlayer.update();
+    normBtnPlayer.update();
+    fastBtnPlayer.update();
     
+    ofSleepMillis(50);
+
     slowBtnPlayer.close();
     normBtnPlayer.close();
     fastBtnPlayer.close();
