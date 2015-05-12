@@ -13,10 +13,10 @@ Track your dance moves at different speeds to learn about ratios.
 3) double-click file located at mm-0116-dance-math/bin/danceMath.app
 
 # To edit/build from source (Advanced)
-Download OpenFrameworks v0.8.4 for xcode into desired directory (As of May 12, 2015, this was the latest release)
+Download OpenFrameworks v0.8.4 for xcode into desired directory (As of May 12, 2015, v0.8.4 was the latest release)
 http://openframeworks.cc/download/
 
-Download this repo into the OpenFrameworks/apps/myApps directory.
+Clone this repo into the OpenFrameworks/apps/myApps directory.
 Your structure should look like this:
 of_v0.8.4_osx_release/apps/myApps/mm-0116-dance-math/
 
