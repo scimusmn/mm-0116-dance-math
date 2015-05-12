@@ -86,6 +86,7 @@ class ofApp : public ofBaseApp{
         ofVideoPlayer vidPlayback;
         void startDanceCountdown();
         DMLayout layout;
+        ofSoundPlayer greatJobSnd;
     
         //Util
         void clearFiles();

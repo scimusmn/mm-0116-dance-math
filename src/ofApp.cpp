@@ -16,16 +16,17 @@ void ofApp::setup(){
     vidRecorder->initRecording();
 
     //Load Sounds
-    jukebox.addSong("jazz", "sounds/circle.wav", 14567, 7107, 943);
-    jukebox.addSong("clicks", "sounds/triangle.wav", 14567, 7107, 943);
-    jukebox.addSong("waltz", "sounds/square.wav", 14567, 7107, 943);
-    jukebox.addSong("tango", "sounds/freestyle.wav", 10769, 5103, 700);
-
+    jukebox.addSong("circle", "sounds/circle.wav", "sounds/startCircle.wav", 14567, 7107, 943);
+    jukebox.addSong("triangle", "sounds/triangle.wav", "sounds/startTriangle.wav", 14567, 7107, 943);
+    jukebox.addSong("square", "sounds/square.wav", "sounds/startSquare.wav", 14567, 7107, 943);
+    jukebox.addSong("freestyle", "sounds/freestyle.wav", "sounds/startFreestyle.wav", 10769, 5103, 700);
+    greatJobSnd.loadSound("sounds/great.wav");
+    
     //Load/Setup UI
     layout.setupViews();
-    layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
+    layout.setView(DMLayout::VIEW_CHOOSE_PATTERN);
     appState = STATE_NORMAL;
-    session.tempCombine =false;
+    session.tempCombine = false;
     
 }
 
@@ -61,9 +62,10 @@ void ofApp::startDanceCountdown(){
     countdown = 9;
     layout.setState("countdown", ofToString(countdown));
     
-    //Wait 5 seconds then count down.
+    //Wait 9 seconds then count down.
     resetBeatTracking();
     appState = STATE_PRE_COUNTDOWN;
+    if (currentSpeed == 1)jukebox.playIntro();
     
 }
 
@@ -111,7 +113,7 @@ void ofApp::update(){
     //Wait for countdown
     if (appState == STATE_PRE_COUNTDOWN){
         
-        if (timeElapsed > 6500){
+        if (timeElapsed > 6000){
             isNewBeat = true;
             appState = STATE_COUNTDOWN;
             layout.setView(DMLayout::VIEW_DANCE_VIEW); // TEMP: this shouldn't be necessary once interstital GetReady screen is its own thing
@@ -226,30 +228,34 @@ void ofApp::mousePressed(int x, int y, int button){
         session.slowBtnPlayer.setSpeed(2);
         session.slowBtnPlayer.firstFrame();
         session.normBtnPlayer.firstFrame();
-        layout.setView("playback_3");
+        layout.setView(DMLayout::VIEW_PLAYBACK_2);
     } else if (btn == "combine") {
         //TODO set opacity and overlay
         session.tempCombine = true;
-        layout.setView("playback_4");
+        layout.setView(DMLayout::VIEW_PLAYBACK_3);
     }
+
     
-    if (btn.substr(0,11) == "chose_dance") {
-        string dance = btn.substr(12);
-        layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
-    }
-    
-    if (btn.substr(0,13) == "preview_music") {
-        string music = btn.substr(14);
-        jukebox.switchSong(music);
-        jukebox.play();
+    if (btn.substr(0,13) == "chose_pattern") {
+        string pattern = btn.substr(14);
+        ofLogNotice("pattern"+pattern);
+        if (pattern != "freestyle") {
+            jukebox.switchSong(pattern);
+            currentSpeed = 1;
+            startDanceCountdown();
+        } else {
+            //Show freestyle music selection screen
+            layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
+        }
     }
     
     if (btn.substr(0,11) == "chose_music") {
         string music = btn.substr(12);
+        
         jukebox.switchSong(music);
-        //Start first dance
         currentSpeed = 1;
         startDanceCountdown();
+
     }
     
     if (btn.substr(0,11) == "start_dance") {
@@ -288,7 +294,7 @@ void ofApp::mousePressed(int x, int y, int button){
         resetBeatTracking();
         appState = STATE_NORMAL;
         
-        layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
+        layout.setView(DMLayout::VIEW_CHOOSE_PATTERN);
         vidPlayback.setLoopState(OF_LOOP_NORMAL);
         
         //delete all temp files
@@ -328,14 +334,15 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
             //Finished first recording...
             
             //TEMP: should create separate view and countdown for second countdown?
-            startDanceCountdown();
             currentSpeed = 0.5;
+            startDanceCountdown();
             //
             
-            layout.setView("playback_1");
+            greatJobSnd.play();
+            layout.setView(DMLayout::VIEW_GREAT_JOB);
         } else {
             //Finished second recording ...
-            layout.setView("playback_2");
+            layout.setView(DMLayout::VIEW_PLAYBACK_1);
         }
         
         //Default to orignal speeds
@@ -431,17 +438,14 @@ void ofApp::Session::saveData(float speed, string vid){
 void ofApp::Session::updateVids(){
     
     if(!normVid.empty()) {
-//        normPlayer.update();
         normBtnPlayer.update();
     }
     
     if(!slowVid.empty()) {
-//        slowPlayer.update();
         slowBtnPlayer.update();
     }
     
     if(!fastVid.empty()) {
-//        fastPlayer.update();
         fastBtnPlayer.update();
     }
     
@@ -520,17 +524,14 @@ void ofApp::Session::drawButtonVids(){
 void ofApp::Session::restartVids(){
     
     if(!slowVid.empty()) {
-//        slowPlayer.firstFrame();
         slowPlayer.play();
     }
     
     if(!normVid.empty()) {
-//        normPlayer.firstFrame();
         normPlayer.play();
     }
 
     if(!fastVid.empty()) {
-//        fastPlayer.firstFrame();
         fastPlayer.play();
     }
     
