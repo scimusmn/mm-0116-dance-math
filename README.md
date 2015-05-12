@@ -16,12 +16,12 @@ Track your dance moves at different speeds to learn about ratios.
 Download OpenFrameworks v0.8.4 for xcode into desired directory (As of May 12, 2015, v0.8.4 was the latest release)
 http://openframeworks.cc/download/
 
-Clone this repo into the OpenFrameworks/apps/myApps directory.
-Your structure should look like this:
-of_v0.8.4_osx_release/apps/myApps/mm-0116-dance-math/
+Clone this repo into the <OpenFrameworks>/apps/myApps/mm-0116-dance-math/ directory.
 
 Open danceMath.xcodeproj in xcode.
 
-Install the "ofxSimpleLayour" addon using the directions found here:
+Install the "ofxSimpleLayout" addon:
+https://github.com/scimusmn/ofxSimpleLayout.git
+
+Need help installing addons? Instructions found here:
 http://www.ofxaddons.com/pages/howto
-Addon Repo: https://github.com/scimusmn/ofxSimpleLayout.git
