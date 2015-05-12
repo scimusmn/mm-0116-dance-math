@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ofxCv.h"
 #include "Jukebox.h"
 #include "DMLayout.h"
 
@@ -62,7 +61,6 @@ class ofApp : public ofBaseApp{
             bool tempCombine;
         };
         Session session;
-        ofxCv::ContourFinder contourFinder;
         void initRecording();
         void resetBeatTracking();
     
