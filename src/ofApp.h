@@ -43,12 +43,13 @@ class ofApp : public ofBaseApp{
         //Session
         class Session {
         public:
+            string title;
             string slowVid;
             string normVid;
             string fastVid;
-            ofVideoPlayer slowBtnPlayer;
-            ofVideoPlayer normBtnPlayer;
-            ofVideoPlayer fastBtnPlayer;
+            ofVideoPlayer slowVidPlayer;
+            ofVideoPlayer normVidPlayer;
+            ofVideoPlayer fastVidPlayer;
             void saveData(float speed, string vid);
             void updateVids();
             void drawRecordedVids();
@@ -76,6 +77,7 @@ class ofApp : public ofBaseApp{
         //UI
         AppState appState;
         int countdown;
+        int preCountdownDuration;
         ofVideoPlayer vidPlayback;
         void startDanceCountdown();
         DMLayout layout;

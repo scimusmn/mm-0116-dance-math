@@ -31,10 +31,10 @@ void DMLayout::setupViews(){
     //Choose your music (Advanced)
     image("main_bg");
     image("txtAdvancedMusicSelection");
-    button("button", 682, 433, "chose_music_freestyle");
-    button("button", 1100, 433, "chose_music_freestyle");
-    button("button", 682, 636, "chose_music_freestyle");
-    button("button", 1100, 636, "chose_music_freestyle");
+    button("btnSong1", 520, 300, "chose_music_fs_song1");
+    button("btnSong2", 520, 480, "chose_music_fs_song2");
+    button("btnSong3", 520, 660, "chose_music_fs_song3");
+    button("btnSong4", 520, 840, "chose_music_fs_song4");
     saveView(VIEW_CHOOSE_MUSIC);
     
     //Dance View
