@@ -16,6 +16,7 @@ string DMLayout::VIEW_GREAT_JOB = "view_great_job";
 string DMLayout::VIEW_PLAYBACK_1 = "view_playback_1";
 string DMLayout::VIEW_PLAYBACK_2 = "view_playback_2";
 string DMLayout::VIEW_PLAYBACK_3 = "view_playback_3";
+string DMLayout::VIEW_SCREENSAVER = "view_screensaver";
 
 void DMLayout::setupViews(){
 
@@ -35,6 +36,7 @@ void DMLayout::setupViews(){
     button("btnSong2", 520, 480, "chose_music_fs_song2");
     button("btnSong3", 520, 660, "chose_music_fs_song3");
     button("btnSong4", 520, 840, "chose_music_fs_song4");
+    button("btnStartOverSticky", 1813, 972, "start_over");
     saveView(VIEW_CHOOSE_MUSIC);
     
     //Dance View
@@ -68,6 +70,10 @@ void DMLayout::setupViews(){
     image("txtDoTheyMatch2");
     button("btnStartOver", 890, 800, "start_over");
     saveView(VIEW_PLAYBACK_3);
+    
+    //Screensaver
+    video("screensaver", 0, 0);
+    saveView(VIEW_SCREENSAVER);
 
 }
 

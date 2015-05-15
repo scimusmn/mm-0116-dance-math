@@ -125,7 +125,7 @@ void ofApp::update(){
             }
 
         }
-
+        
     }
     
     //Wait for countdown
@@ -150,7 +150,7 @@ void ofApp::update(){
             
             if (countdown <= 0) {
                 layout.setState("txtGetReady", "2");
-                initRecording();                
+                initRecording();
             }
             
         }
@@ -163,6 +163,18 @@ void ofApp::update(){
         session.restartVids();
         resetBeatTracking();
         
+    }
+    
+    //Screensaver
+    if (appState == STATE_PRE_COUNTDOWN || appState == STATE_COUNTDOWN || appState == STATE_RECORDING) {
+        inactivityCount = 0;
+    }
+    if (inactivityCount > SCREENSAVER_TIMEOUT){
+        appState = STATE_SCREENSAVER;
+        layout.setView(DMLayout::VIEW_SCREENSAVER);
+        inactivityCount = 0;
+    } else {
+        inactivityCount++;
     }
     
 }
@@ -294,31 +306,44 @@ void ofApp::mousePressed(int x, int y, int button){
     
     if (btn == "start_over") {
         
-        //clear all tracking
-        resetBeatTracking();
-        appState = STATE_NORMAL;
-        
-        layout.setView(DMLayout::VIEW_CHOOSE_PATTERN);
-        vidPlayback.setLoopState(OF_LOOP_NORMAL);
-        
-        //delete all temp files
-        clearFiles();
-        
-        //clear session data
-        session.clear();
-        
-        //reset base time
-        ofResetElapsedTimeCounter();
-        
-        session.tempCombine = false;
+        startOver();
         
     }
+    
+    if( appState == STATE_SCREENSAVER ) {
+        //Awake from screensaver
+        startOver();
+    }
+    
+    inactivityCount = 0;
     
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
 
+}
+
+//--------------------------------------------------------------
+void ofApp::startOver(){
+    
+    //clear all tracking
+    resetBeatTracking();
+    appState = STATE_NORMAL;
+    
+    layout.setView(DMLayout::VIEW_CHOOSE_PATTERN);
+    vidPlayback.setLoopState(OF_LOOP_NORMAL);
+    
+    //delete all temp files
+    clearFiles();
+    
+    //clear session data
+    session.clear();
+    
+    //reset base time
+    ofResetElapsedTimeCounter();
+    
+    session.tempCombine = false;
 }
 
 //--------------------------------------------------------------
@@ -355,7 +380,9 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
         session.fastVidPlayer.setSpeed(1);
         
         session.restartVids();
-
+        
+        inactivityCount = 0;
+        
     } else {
         ofLogError("videoSavedEvent") << "Video save error: " << e.error;
     }

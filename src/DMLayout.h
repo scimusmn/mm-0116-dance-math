@@ -19,6 +19,7 @@ public:
     static string VIEW_PLAYBACK_1;
     static string VIEW_PLAYBACK_2;
     static string VIEW_PLAYBACK_3;
+    static string VIEW_SCREENSAVER;
     
     void setupViews();
     

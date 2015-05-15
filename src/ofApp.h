@@ -13,12 +13,15 @@ const int VID_SIZE_BIG_H = 720;
 const int VID_SIZE_SMALL_W = 640;
 const int VID_SIZE_SMALL_H = 360;
 
+const int SCREENSAVER_TIMEOUT = 1800;
+
 enum AppState{
     STATE_NORMAL,
     STATE_PRE_COUNTDOWN,
     STATE_COUNTDOWN,
     STATE_RECORDING,
-    STATE_PLAYBACK
+    STATE_PLAYBACK,
+    STATE_SCREENSAVER
 };
 
 class ofApp : public ofBaseApp{
@@ -79,7 +82,10 @@ class ofApp : public ofBaseApp{
         int countdown;
         int preCountdownDuration;
         ofVideoPlayer vidPlayback;
+        int inactivityCount;
+    
         void startDanceCountdown();
+        void startOver();
         DMLayout layout;
         ofSoundPlayer greatJobSnd;
     
