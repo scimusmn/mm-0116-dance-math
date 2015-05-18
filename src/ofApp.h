@@ -13,7 +13,7 @@ const int VID_SIZE_BIG_H = 720;
 const int VID_SIZE_SMALL_W = 640;
 const int VID_SIZE_SMALL_H = 360;
 
-const int SCREENSAVER_TIMEOUT = 1800;
+const int SCREENSAVER_TIMEOUT = 3600;// 3600 frames, 60 secs
 
 enum AppState{
     STATE_NORMAL,
@@ -55,14 +55,12 @@ class ofApp : public ofBaseApp{
             ofVideoPlayer fastVidPlayer;
             void saveData(float speed, string vid);
             void updateVids();
-            void drawRecordedVids();
+            void drawRecordedVids(bool combine);
             void restartVids();
             void drawProgress(int startX, int endX, int y, float prog, int color, float barHeight);
             void drawProgress(int startX, int endX, int y, float prog, int color);
             int getColor(float speed);
             void clear();
-            
-            bool tempCombine;
         };
         Session session;
         void initRecording();

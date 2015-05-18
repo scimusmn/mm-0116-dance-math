@@ -43,7 +43,6 @@ public:
     ofSoundPlayer player;
     ofSoundPlayer introPlayer;
     
-    
 protected:
     
     

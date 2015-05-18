@@ -6,12 +6,11 @@ void ofApp::setup(){
     ofEnableSmoothing();
     ofBackground(30,30,30);
     
-    //Setup Cameras
+    //Setup Cameras & video recorder
     vidRecorder = ofPtr<ofQTKitGrabber>( new ofQTKitGrabber() );
     camRaw.setGrabber(vidRecorder);
     camRaw.setDeviceID(0);
     camRaw.initGrabber(1280/2,720/2);
-
     ofAddListener(vidRecorder->videoSavedEvent, this, &ofApp::videoSaved); // Listen for video saved events
     vidRecorder->initRecording();
 
@@ -29,41 +28,42 @@ void ofApp::setup(){
     layout.setupViews();
     layout.setView(DMLayout::VIEW_CHOOSE_PATTERN);
     appState = STATE_NORMAL;
-    session.tempCombine = false;
     
 }
 
 //--------------------------------------------------------------
 void ofApp::initRecording(){
     
-    //Tracking
+    //Switch app state
     resetBeatTracking();
     appState = STATE_RECORDING;
     
-    //Video recording
+    //Start new video file in /temp folder
     stringstream s;
-    s << "temp/xDM_" << ofGetUnixTime() << ".mov";
+    s << "temp/video_" << ofGetUnixTime() << ".mov";
     vidRecorder->startRecording(s.str());
-    
-    ofLogNotice("initRecording() ") << "Start recording: " << s;
     
 }
 
 //--------------------------------------------------------------
 void ofApp::resetBeatTracking(){
+    
+    //Remember current time to count beats after "now"
     timeStarted = prevBeatTime = ofGetElapsedTimeMillis();
     timeElapsed = recordProgress = 0;
+    
 }
 
 
 //--------------------------------------------------------------
 void ofApp::startDanceCountdown(){
     
+    //Show live camera feed and countdown panel
     layout.setView(DMLayout::VIEW_DANCE_VIEW);
-    
     countdown = 9;
     layout.setState("countdown", ofToString(countdown));
     
+    //Display intro message based on which pattern is chosen
     string stId = "0";
     if (jukebox.id.substr(0,2) == "fs") {
         stId = "0";
@@ -75,15 +75,27 @@ void ofApp::startDanceCountdown(){
         stId = "5";
     }
     layout.setState("txtGetReady", stId);
-    
-    resetBeatTracking();
+
+    //Pre-countdown sequence.
     preCountdownDuration = 6250;
-    if (jukebox.id.substr(0,2) == "fs" && currentSpeed == 1) {
-        //Need longer pre-countdown for freestyle instruction
-        preCountdownDuration = 9250;
+    if (currentSpeed == 1) {
+        
+        //Longer intro for freestyle
+        if (jukebox.id.substr(0,2) == "fs") {
+            preCountdownDuration = 9250;
+        }
+        
+       jukebox.playIntro();
+        
+    } else {
+        
+        //NOT first recording, so play "great job" audio.
+        greatJobSnd.play();
+        layout.setView(DMLayout::VIEW_GREAT_JOB);
+        
     }
+    resetBeatTracking();
     appState = STATE_PRE_COUNTDOWN;
-    if (currentSpeed == 1)jukebox.playIntro();
     
 }
 
@@ -134,7 +146,7 @@ void ofApp::update(){
         if (timeElapsed > preCountdownDuration){
             isNewBeat = true;
             appState = STATE_COUNTDOWN;
-            layout.setView(DMLayout::VIEW_DANCE_VIEW); // TODO: this shouldn't be necessary once interstital GetReady screen is its own thing
+            layout.setView(DMLayout::VIEW_DANCE_VIEW);
             layout.setState("txtGetReady", "1");
             resetBeatTracking();
             jukebox.play(currentSpeed);
@@ -203,7 +215,13 @@ void ofApp::draw(){
     layout.draw();
     
     if (appState == STATE_PLAYBACK){
-        session.drawRecordedVids();
+        if (layout.currentViewId == DMLayout::VIEW_PLAYBACK_3) {
+            //Combine videos
+            session.drawRecordedVids(true);
+        } else {
+            //Separate videos
+            session.drawRecordedVids(false);
+        }
     }
     
     #ifdef DEBUG_HELPERS
@@ -252,7 +270,6 @@ void ofApp::mousePressed(int x, int y, int button){
         session.normVidPlayer.firstFrame();
         layout.setView(DMLayout::VIEW_PLAYBACK_2);
     } else if (btn == "combine") {
-        session.tempCombine = true;
         layout.setView(DMLayout::VIEW_PLAYBACK_3);
     }
 
@@ -343,7 +360,6 @@ void ofApp::startOver(){
     //reset base time
     ofResetElapsedTimeCounter();
     
-    session.tempCombine = false;
 }
 
 //--------------------------------------------------------------
@@ -360,18 +376,16 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
         
         //Which playback
         if (currentSpeed == 1) {
-            //Finished first recording...
             
-            //TODO: should create separate view and countdown for second countdown?
+            //Finished first recording...
             currentSpeed = 0.5;
             startDanceCountdown();
-            //
-            
-            greatJobSnd.play();
-            layout.setView(DMLayout::VIEW_GREAT_JOB);
+
         } else {
+            
             //Finished second recording ...
             layout.setView(DMLayout::VIEW_PLAYBACK_1);
+            
         }
         
         //Default to orignal speeds
@@ -480,38 +494,30 @@ void ofApp::Session::updateVids(){
 }
 
 //--------------------------------------------------------------
-void ofApp::Session::drawRecordedVids(){
+void ofApp::Session::drawRecordedVids(bool combine){
     
     ofSetColor(255,255,255,255);
     
-    //Draw combined
-    if (tempCombine==true){
-        normVidPlayer.draw(680,300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+    if (combine == true){
+        
+        //Combined
+        ofSetColor(255,255,255,255);
+        normVidPlayer.draw(680, 300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
         drawProgress(680, 680+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, normVidPlayer.getPosition(), getColor(1));
-        ofSetColor(255,255,255,140);
-        slowVidPlayer.draw(680,300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        
+        ofSetColor(255, 255, 255, 140);
+        slowVidPlayer.draw(680, 300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
         drawProgress(680, 680+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, slowVidPlayer.getPosition(), getColor(1));
-        return;
-    }
-    
-    if(!slowVid.empty()) {
-        slowVidPlayer.draw(1000,300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        
+    } else {
+        
+        //Seperated
+        normVidPlayer.draw(300, 300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        drawProgress(300, 300+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, normVidPlayer.getPosition(), getColor(1));
+        
+        slowVidPlayer.draw(1000, 300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
         drawProgress(1000, 1000+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, slowVidPlayer.getPosition(), getColor(0.5));
-    }
-    
-    if(!normVid.empty()) {
-        if (slowVid.empty()) {
-            normVidPlayer.draw(680,300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-            drawProgress(680, 680+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, normVidPlayer.getPosition(), getColor(1));
-        }else{
-            normVidPlayer.draw(300,300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-            drawProgress(300, 300+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, normVidPlayer.getPosition(), getColor(1));
-        }
-    }
-
-    if(!fastVid.empty()) {
-//        fastVidPlayer.draw(1490,662, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-//        drawProgress(1490, 1490+VID_SIZE_SMALL_W, 662 + VID_SIZE_SMALL_H, fastVidPlayer.getPosition(), getColor(2));
+        
     }
     
 }
@@ -539,7 +545,7 @@ void ofApp::Session::restartVids(){
 //--------------------------------------------------------------
 int ofApp::Session::getColor(float speed){
     
-    //temp
+    //TODO: Do we still need this method if we aren't color coding?
     return ofHexToInt("FF0000");
     
     if (speed == 0.5) {
@@ -557,13 +563,16 @@ int ofApp::Session::getColor(float speed){
 void ofApp::Session::clear(){
     
     slowVid = normVid = fastVid = "";
-    
-    //Note: Due to an OF bug, you cannot close an
-    //ofVideoPlayer when current position is 0 so we
-    //stop all players before closing,
-    //and sleep to allow any related callbacks
-    //see http://goo.gl/Vz8zdx
-    //also http://goo.gl/WJRc8O
+
+    /**
+     * Due to an OF bug, you cannot close
+     * ofVideoPlayer when current position == 0,
+     * which happens occasionally by chance,
+     * so we stop all players before closing,
+     * and sleep to allow any related callbacks
+     * see http://goo.gl/Vz8zdx
+     * also http://goo.gl/WJRc8O
+     */
 
     slowVidPlayer.stop();
     normVidPlayer.stop();
