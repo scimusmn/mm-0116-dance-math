@@ -11,13 +11,21 @@ What does half-speed feel like? Record your movements at different speeds to lea
 ##Editing & Compiling Source (Advanced)
 #### 1. Download openFrameworks
 * [http://openframeworks.cc/download/](http://openframeworks.cc/download/)
-* This project was built using v0.8.4.
+* This project was built using v0.8.4.  If you're from the future, you may need to check [here.](http://openframeworks.cc/download/older.html)
 
-#### 2. Clone Dance-Math into myApps folder
-* Your folder structure should look like this: openFrameworks/apps/myApps/mm-0116-dance-math/
+#### 2. Download this project in myApps folder
+* Your folder structure should look like this:
+```
+openFrameworks/apps/myApps/mm-0116-dance-math/...
+```
+
 
 #### 3. Get ofxSimpleLayout addon
-* Download [ofxSimpleLayout](https://github.com/scimusmn/ofxSimpleLayout.git) into openFrameworks/addons/ directory.
+* Download [ofxSimpleLayout](https://github.com/scimusmn/ofxSimpleLayout.git) into addons directory.
+* Your folder structure should look like this:
+```
+openFrameworks/addons/ofxSimpleLayout/...
+```
 
 #### 3. Setup Xcode project
 1. Return to the dance math directory and open danceMath.xcodeproj in Xcode.
