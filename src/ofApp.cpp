@@ -305,16 +305,14 @@ void ofApp::mousePressed(int x, int y, int button){
     
     if (btn == "toggle_playback") {
         
-        if (session.slowVidPlayer.getSpeed()==2 || session.fastVidPlayer.getSpeed()==0.5){
+        if (session.slowVidPlayer.getSpeed() == 2){
             //Show original speed
             session.slowVidPlayer.setSpeed(1);
             session.normVidPlayer.setSpeed(1);
-            session.fastVidPlayer.setSpeed(1);
         } else {
             //Show adjusted speed
             session.slowVidPlayer.setSpeed(2);
             session.normVidPlayer.setSpeed(1);
-            session.fastVidPlayer.setSpeed(0.5);
         }
         
         session.restartVids();
@@ -388,10 +386,9 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
             
         }
         
-        //Default to orignal speeds
+        //Default to original speeds
         session.slowVidPlayer.setSpeed(1);
         session.normVidPlayer.setSpeed(1);
-        session.fastVidPlayer.setSpeed(1);
         
         session.restartVids();
         
@@ -461,16 +458,6 @@ void ofApp::Session::saveData(float speed, string vid){
         normVidPlayer.loadMovie(normVid);
         normVidPlayer.play();
         
-    } else if (speed == 2) {
-        fastVid = vid;
-        
-        fastVidPlayer.stop();
-        fastVidPlayer.update();
-        ofSleepMillis(50);
-        fastVidPlayer.close();
-        fastVidPlayer.loadMovie(fastVid);
-        fastVidPlayer.play();
-        
     } else {
         ofLogError("Session") << "Can not save session. Unrecognized speed: " << speed;
     }
@@ -485,10 +472,6 @@ void ofApp::Session::updateVids(){
     
     if(!slowVid.empty()) {
         slowVidPlayer.update();
-    }
-    
-    if(!fastVid.empty()) {
-        fastVidPlayer.update();
     }
     
 }
@@ -511,7 +494,7 @@ void ofApp::Session::drawRecordedVids(bool combine){
         
     } else {
         
-        //Seperated
+        //Separated
         normVidPlayer.draw(300, 300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
         drawProgress(300, 300+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, normVidPlayer.getPosition(), getColor(1));
         
@@ -535,34 +518,21 @@ void ofApp::Session::restartVids(){
         normVidPlayer.play();
     }
 
-    if(!fastVid.empty()) {
-        fastVidPlayer.firstFrame();
-        fastVidPlayer.play();
-    }
-    
 }
 
 //--------------------------------------------------------------
 int ofApp::Session::getColor(float speed){
     
-    //TODO: Do we still need this method if we aren't color coding?
+    //Note: Leaving this function in case we want
+    //to add color-coding later. -tnordberg
     return ofHexToInt("FF0000");
-    
-    if (speed == 0.5) {
-        return ofHexToInt("FF0000");
-    } else if (speed == 1) {
-        return ofHexToInt("00FF00");
-    } else if (speed == 2) {
-        return ofHexToInt("0000FF");
-    } else {
-        ofLogError("Session") << "Can not save session. Unrecognized speed: " << speed;
-    }
+
 }
 
 //--------------------------------------------------------------
 void ofApp::Session::clear(){
     
-    slowVid = normVid = fastVid = "";
+    slowVid = normVid = "";
 
     /**
      * Due to an OF bug, you cannot close
@@ -576,17 +546,14 @@ void ofApp::Session::clear(){
 
     slowVidPlayer.stop();
     normVidPlayer.stop();
-    fastVidPlayer.stop();
 
     slowVidPlayer.update();
     normVidPlayer.update();
-    fastVidPlayer.update();
     
     ofSleepMillis(50);
 
     slowVidPlayer.close();
     normVidPlayer.close();
-    fastVidPlayer.close();
     
 }
 

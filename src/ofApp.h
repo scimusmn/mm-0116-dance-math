@@ -49,10 +49,8 @@ class ofApp : public ofBaseApp{
             string title;
             string slowVid;
             string normVid;
-            string fastVid;
             ofVideoPlayer slowVidPlayer;
             ofVideoPlayer normVidPlayer;
-            ofVideoPlayer fastVidPlayer;
             void saveData(float speed, string vid);
             void updateVids();
             void drawRecordedVids(bool combine);

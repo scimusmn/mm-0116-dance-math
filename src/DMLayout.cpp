@@ -45,7 +45,7 @@ void DMLayout::setupViews(){
     stateObject("countdown", 1500, 500);
     saveView(VIEW_DANCE_VIEW);
     
-    //Interstitial HALF
+    //Interstitial (Great job)
     image("main_bg");
     image("txtHowDidYouDo");
     button("btnStartOverSticky", 1813, 972, "start_over");
