@@ -4,8 +4,6 @@
 #include "Jukebox.h"
 #include "DMLayout.h"
 
-//#define DEBUG_HELPERS		// uncomment to draw debug helpers
-
 using namespace ofxSimpleLayout;
 
 const int VID_SIZE_BIG_W = 1280;
@@ -30,16 +28,10 @@ class ofApp : public ofBaseApp{
 		void setup();
 		void update();
 		void draw();
-
-		void keyPressed(int key);
-		void keyReleased(int key);
-		void mouseMoved(int x, int y );
-		void mouseDragged(int x, int y, int button);
 		void mousePressed(int x, int y, int button);
-		void mouseReleased(int x, int y, int button);
     
         //Cameras
-        ofVideoGrabber camRaw;
+        ofVideoGrabber cam;
         ofPtr<ofQTKitGrabber> vidRecorder;
         void videoSaved(ofVideoSavedEventArgs& e);
 
@@ -66,31 +58,26 @@ class ofApp : public ofBaseApp{
     
         //Music
         Jukebox jukebox;
-        float currentSpeed;
+        ofSoundPlayer greatJobSnd;
         int timeStarted;
         int timeElapsed;
-        float recordProgress;
         int prevBeatTime;
+        float currentSpeed;
+        float recordProgress;
         bool isNewBeat;
     
         //UI
         AppState appState;
-        int countdown;
-        int preCountdownDuration;
+        DMLayout layout;
         ofVideoPlayer vidPlayback;
-        int inactivityCount;
-    
         void startDanceCountdown();
         void startOver();
-        DMLayout layout;
-        ofSoundPlayer greatJobSnd;
-    
+        void resetInactivity();
+        int countdown;
+        int preCountdownDuration;
+        int inactivityCount;
+
         //Util
         void clearFiles();
-    
-        //Temp/Debug
-        bool showOverlay;
-        int bpmRadius;
-        int prevT;
 		
 };

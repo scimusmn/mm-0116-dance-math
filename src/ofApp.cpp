@@ -3,14 +3,15 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     
+    //Set up graphics
     ofEnableSmoothing();
     ofBackground(30,30,30);
     
-    //Setup Cameras & video recorder
+    //Setup cameras & video recorder
     vidRecorder = ofPtr<ofQTKitGrabber>( new ofQTKitGrabber() );
-    camRaw.setGrabber(vidRecorder);
-    camRaw.setDeviceID(0);
-    camRaw.initGrabber(1280/2,720/2);
+    cam.setGrabber(vidRecorder);
+    cam.setDeviceID(0);//Assumes there is only one camera connected. (otherwise use different device id)
+    cam.initGrabber(VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
     ofAddListener(vidRecorder->videoSavedEvent, this, &ofApp::videoSaved); // Listen for video saved events
     vidRecorder->initRecording();
 
@@ -38,7 +39,7 @@ void ofApp::initRecording(){
     resetBeatTracking();
     appState = STATE_RECORDING;
     
-    //Start new video file in /temp folder
+    //New video file in /temp folder
     stringstream s;
     s << "temp/video_" << ofGetUnixTime() << ".mov";
     vidRecorder->startRecording(s.str());
@@ -54,6 +55,12 @@ void ofApp::resetBeatTracking(){
     
 }
 
+//--------------------------------------------------------------
+void ofApp::resetInactivity(){
+    
+    inactivityCount = 0;
+    
+}
 
 //--------------------------------------------------------------
 void ofApp::startDanceCountdown(){
@@ -89,7 +96,7 @@ void ofApp::startDanceCountdown(){
         
     } else {
         
-        //NOT first recording, so play "great job" audio.
+        //NOT first recording, play "great job" audio.
         greatJobSnd.play();
         layout.setView(DMLayout::VIEW_GREAT_JOB);
         
@@ -102,12 +109,14 @@ void ofApp::startDanceCountdown(){
 //--------------------------------------------------------------
 void ofApp::update(){
     
+    //Update all layout elements
     layout.update();
     
+    //Update videos or camera-feeds
     if (appState == STATE_PLAYBACK) {
         session.updateVids();
     } else {
-        camRaw.update();
+        cam.update();
     }
 
     //Update beat timer
@@ -115,11 +124,10 @@ void ofApp::update(){
         prevBeatTime = ofGetElapsedTimeMillis();
         isNewBeat = true;
     }
-    
     timeElapsed = ofGetElapsedTimeMillis() - timeStarted;
     recordProgress = timeElapsed / ((jukebox.duration - jukebox.intro) / jukebox.rate);
 
-    //Update tracking
+    //Update recording
     if (appState == STATE_RECORDING){
 
         isNewBeat = false;
@@ -179,12 +187,12 @@ void ofApp::update(){
     
     //Screensaver
     if (appState == STATE_PRE_COUNTDOWN || appState == STATE_COUNTDOWN || appState == STATE_RECORDING) {
-        inactivityCount = 0;
+        resetInactivity();
     }
     if (inactivityCount > SCREENSAVER_TIMEOUT){
         appState = STATE_SCREENSAVER;
         layout.setView(DMLayout::VIEW_SCREENSAVER);
-        inactivityCount = 0;
+        resetInactivity();
     } else {
         inactivityCount++;
     }
@@ -194,13 +202,13 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-    //Draw Cams/Vids
+    //Draw cams/Vids
     ofPushMatrix();
     ofTranslate(-85, 0); //**--> Drawing is SHIFTED
     
     if (appState != STATE_PLAYBACK){
         
-        camRaw.draw(0,0,1280,720);
+        cam.draw(0,0,1280,720);
         
         if (appState == STATE_RECORDING) {
             session.drawProgress(0, 1280, 720, recordProgress, session.getColor(currentSpeed), 32);
@@ -223,37 +231,6 @@ void ofApp::draw(){
             session.drawRecordedVids(false);
         }
     }
-    
-    #ifdef DEBUG_HELPERS
-        ofPushMatrix();
-        ofTranslate(0, 1000);
-        ofSetColor(255,100,0);
-        float timeSinceBeat = ofGetElapsedTimeMillis() - prevBeatTime;
-        ofCircle(200, 0, 50 - (timeSinceBeat * 0.025));
-        ofDrawBitmapString(ofToString(ofGetFrameRate())+"fps", 20, 30);
-        ofPopMatrix();
-        ofSetColor(255,255,255);
-    #endif
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::keyPressed(int key){
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::keyReleased(int key){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y ){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
 
 }
 
@@ -261,19 +238,7 @@ void ofApp::mouseDragged(int x, int y, int button){
 void ofApp::mousePressed(int x, int y, int button){
     
     string btn = layout.getSelected(x, y);
-    
-    //Temp segragated playback
-    if (btn == "double_playback_speed"){
-        //speed up second vid
-        session.slowVidPlayer.setSpeed(2);
-        session.slowVidPlayer.firstFrame();
-        session.normVidPlayer.firstFrame();
-        layout.setView(DMLayout::VIEW_PLAYBACK_2);
-    } else if (btn == "combine") {
-        layout.setView(DMLayout::VIEW_PLAYBACK_3);
-    }
 
-    
     if (btn.substr(0,13) == "chose_pattern") {
         
         string pattern = btn.substr(14);
@@ -303,20 +268,15 @@ void ofApp::mousePressed(int x, int y, int button){
         startDanceCountdown();
     }
     
-    if (btn == "toggle_playback") {
-        
-        if (session.slowVidPlayer.getSpeed() == 2){
-            //Show original speed
-            session.slowVidPlayer.setSpeed(1);
-            session.normVidPlayer.setSpeed(1);
-        } else {
-            //Show adjusted speed
-            session.slowVidPlayer.setSpeed(2);
-            session.normVidPlayer.setSpeed(1);
-        }
-        
-        session.restartVids();
-        
+    //Playback buttons
+    if (btn == "double_playback_speed"){
+        //Speed up second vid
+        session.slowVidPlayer.setSpeed(2);
+        session.slowVidPlayer.firstFrame();
+        session.normVidPlayer.firstFrame();
+        layout.setView(DMLayout::VIEW_PLAYBACK_2);
+    } else if (btn == "combine") {
+        layout.setView(DMLayout::VIEW_PLAYBACK_3);
     }
     
     if (btn == "start_over") {
@@ -330,13 +290,8 @@ void ofApp::mousePressed(int x, int y, int button){
         startOver();
     }
     
-    inactivityCount = 0;
+    resetInactivity();
     
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button){
-
 }
 
 //--------------------------------------------------------------
@@ -392,7 +347,7 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
         
         session.restartVids();
         
-        inactivityCount = 0;
+        resetInactivity();
         
     } else {
         ofLogError("videoSavedEvent") << "Video save error: " << e.error;
@@ -523,7 +478,7 @@ void ofApp::Session::restartVids(){
 //--------------------------------------------------------------
 int ofApp::Session::getColor(float speed){
     
-    //Note: Leaving this function in case we want
+    //Note: Leaving this function if we want
     //to add color-coding later. -tnordberg
     return ofHexToInt("FF0000");
 
