@@ -21,6 +21,9 @@ Release*/
 # Large media files
 *.mov
 
+# Intentionally committing main app file.
+!danceMath.app/
+
 #XCode
 *.pbxuser
 *.perspective
