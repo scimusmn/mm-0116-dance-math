@@ -35,5 +35,4 @@ What does half-speed feel like? Record your movements at different speeds to lea
 
 
 # Status
-These instructions need to be tested by someone other than [tnordberg](https://github.com/tnordberg), and on a fresh computer. Please let email him if you try these instructions and they break down at any point.
-@tnordberg
+These instructions need to be tested by someone other than [tnordberg](https://github.com/tnordberg), and on a fresh computer. Please message him if you try these instructions and they break down at any point.
