@@ -14,17 +14,17 @@ What does half-speed feel like? Record your movements at different speeds to lea
 * This project was built using v0.8.4.  If you come from the future, check [here.](http://openframeworks.cc/download/older.html)
 
 #### 2. Download project into myApps folder
-* Your folder structure should look like this:
+* Your folder structure should look like:
 ```
-openFrameworks/apps/myApps/mm-0116-dance-math/...
+[openFrameworks]/apps/myApps/mm-0116-dance-math/
 ```
 
 
 #### 3. Get ofxSimpleLayout addon
 * Download [ofxSimpleLayout](https://github.com/scimusmn/ofxSimpleLayout.git) into addons directory.
-* Your folder structure should look like this:
+* Your folder structure should look like:
 ```
-openFrameworks/addons/ofxSimpleLayout/...
+[openFrameworks]/addons/ofxSimpleLayout/
 ```
 
 #### 3. Open Xcode project
