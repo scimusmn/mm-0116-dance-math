@@ -22,7 +22,7 @@ Release*/
 *.mov
 
 # Intentionally committing main app file.
-!danceMath.app/
+!/bin/danceMath.app/
 
 #XCode
 *.pbxuser
