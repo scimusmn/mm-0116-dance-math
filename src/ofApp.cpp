@@ -16,17 +16,33 @@ void ofApp::setup(){
     vidRecorder->initRecording();
 
     //Load Sounds
-    jukebox.addSong("circle", "sounds/circle.wav", "sounds/startCircle.wav", 14567, 7107, 943);
-    jukebox.addSong("triangle", "sounds/triangle.wav", "sounds/startTriangle.wav", 14567, 7107, 943);
-    jukebox.addSong("square", "sounds/square.wav", "sounds/startSquare.wav", 14567, 7107, 943);
-    jukebox.addSong("fs_song1", "sounds/song1.wav", "sounds/startFreestyle.wav", 10769, 5103, 700); // HIP-HOP
-    jukebox.addSong("fs_song2", "sounds/song2.wav", "sounds/startFreestyle.wav", 10629, 5374, 672); // PIANO
-    jukebox.addSong("fs_song3", "sounds/song3.wav", "sounds/startFreestyle.wav", 9999, 5177, 642); // DUBSTEP
-    jukebox.addSong("fs_song4", "sounds/song4.wav", "sounds/startFreestyle.wav", 8650, 4513, 567); // ROCK & ROLL
+    jukebox.addSong("circle_en", "sounds/circle.wav", "sounds/startCircle.wav", 14567, 7107, 943); // CIRCLE (English)
+    jukebox.addSong("circle_es", "sounds/circle.wav", "sounds/startCircle.wav", 14567, 7107, 943); // CIRCLE (Spanish)
+    
+    jukebox.addSong("triangle_en", "sounds/triangle.wav", "sounds/startTriangle.wav", 14567, 7107, 943); // TRIANGLE (English)
+    jukebox.addSong("triangle_es", "sounds/triangle.wav", "sounds/startTriangle.wav", 14567, 7107, 943); // TRIANGLE (Spanish)
+    
+    jukebox.addSong("square_en", "sounds/square.wav", "sounds/startSquare.wav", 14567, 7107, 943); // SQUARE (English)
+    jukebox.addSong("square_es", "sounds/square.wav", "sounds/startSquare.wav", 14567, 7107, 943); // SQUARE (Spanish)
+    
+    jukebox.addSong("fs_song1_en", "sounds/song1.wav", "sounds/startFreestyle.wav", 10769, 5103, 700); // HIP-HOP (English)
+    jukebox.addSong("fs_song1_es", "sounds/song1.wav", "sounds/startFreestyle.wav", 10769, 5103, 700); // HIP-HOP (Spanish)
+    
+    jukebox.addSong("fs_song2_en", "sounds/song2.wav", "sounds/startFreestyle.wav", 10629, 5374, 672); // PIANO (English)
+    jukebox.addSong("fs_song2_en", "sounds/song2.wav", "sounds/startFreestyle.wav", 10629, 5374, 672); // PIANO (Spanish)
+    
+    jukebox.addSong("fs_song3_en", "sounds/song3.wav", "sounds/startFreestyle.wav", 9999, 5177, 642); // DUBSTEP (English)
+    jukebox.addSong("fs_song3_es", "sounds/song3.wav", "sounds/startFreestyle.wav", 9999, 5177, 642); // DUBSTEP (Spanish)
+    
+    jukebox.addSong("fs_song4_en", "sounds/song4.wav", "sounds/startFreestyle.wav", 8650, 4513, 567); // ROCK & ROLL (English)
+    jukebox.addSong("fs_song4_es", "sounds/song4.wav", "sounds/startFreestyle_es.wav", 8650, 4513, 567); // ROCK & ROLL (Spanish)
+    
     greatJobSnd.loadSound("sounds/great.wav");
     
     //Load/Setup UI
     layout.setupViews();
+    currentLanguage = LANGUAGE_SPANISH;
+    toggleLanguage();
     layout.setView(DMLayout::VIEW_CHOOSE_PATTERN);
     appState = STATE_NORMAL;
     
@@ -223,7 +239,7 @@ void ofApp::draw(){
     layout.draw();
     
     if (appState == STATE_PLAYBACK){
-        if (layout.currentViewId == DMLayout::VIEW_PLAYBACK_3) {
+        if (layout.baseViewId == DMLayout::VIEW_PLAYBACK_3) {
             //Combine videos
             session.drawRecordedVids(true);
         } else {
@@ -279,6 +295,12 @@ void ofApp::mousePressed(int x, int y, int button){
         layout.setView(DMLayout::VIEW_PLAYBACK_3);
     }
     
+    if (btn == "toggle_language") {
+        
+        toggleLanguage();
+        
+    }
+    
     if (btn == "start_over") {
         
         startOver();
@@ -286,6 +308,11 @@ void ofApp::mousePressed(int x, int y, int button){
     }
     
     if( appState == STATE_SCREENSAVER ) {
+        
+        //Revert language
+        currentLanguage = LANGUAGE_SPANISH;
+        toggleLanguage();
+        
         //Awake from screensaver
         startOver();
     }
@@ -312,6 +339,22 @@ void ofApp::startOver(){
     
     //reset base time
     ofResetElapsedTimeCounter();
+    
+}
+
+//--------------------------------------------------------------
+void ofApp::toggleLanguage(){
+    
+    if (currentLanguage == LANGUAGE_ENGLISH) {
+        currentLanguage = LANGUAGE_SPANISH;
+    } else if (currentLanguage == LANGUAGE_SPANISH) {
+        currentLanguage = LANGUAGE_ENGLISH;
+    } else {
+        currentLanguage = LANGUAGE_ENGLISH;
+    }
+    
+    jukebox.setLanguageKey(currentLanguage);
+    layout.updateLanguage(currentLanguage);
     
 }
 

@@ -10,6 +10,7 @@
 
 //View Constants
 string DMLayout::VIEW_CHOOSE_PATTERN = "view_choose_pattern";
+string DMLayout::VIEW_CHOOSE_PATTERN_SPANISH = "view_choose_pattern_es";
 string DMLayout::VIEW_CHOOSE_MUSIC = "view_choose_music";
 string DMLayout::VIEW_DANCE_VIEW = "view_dance_view";
 string DMLayout::VIEW_GREAT_JOB = "view_great_job";
@@ -27,7 +28,18 @@ void DMLayout::setupViews(){
     videoButton("triangle", 206, 636, "chose_pattern_triangle");
     videoButton("square", 682, 636, "chose_pattern_square");
     videoButton("freestyle", 1255, 636, "chose_pattern_freestyle");
+    button("btnLanguageToggle", 1680, 972, "toggle_language");
     saveView(VIEW_CHOOSE_PATTERN);
+    
+    //Choose a pattern (Spanish)
+    image("main_bg");
+    image("txtSelectionScreen_es");
+    videoButton("circle", 682, 233, "chose_pattern_circle");
+    videoButton("triangle", 206, 636, "chose_pattern_triangle");
+    videoButton("square", 682, 636, "chose_pattern_square");
+    videoButton("freestyle", 1255, 636, "chose_pattern_freestyle");
+    button("btnLanguageToggle", 1680, 972, "toggle_language");
+    saveView(VIEW_CHOOSE_PATTERN_SPANISH);
     
     //Choose your music (Advanced)
     image("main_bg");
@@ -75,6 +87,30 @@ void DMLayout::setupViews(){
     video("screensaver", 0, 0);
     saveView(VIEW_SCREENSAVER);
 
+}
+
+void DMLayout::setView(string name){
+    
+    baseViewId = name;
+    string newViewId = "" + baseViewId + languageKey;
+    
+    //Try using language specific view,
+    //fallback to language agnostic view.
+    if (viewExists(newViewId) == false) {
+        newViewId = "" + baseViewId;
+    }
+    
+    ofxSimpleLayout::Layout::setView(newViewId);
+    
+}
+
+void DMLayout::updateLanguage(string lang){
+    
+    languageKey = lang;
+    
+    //Refresh current view using language
+    this->setView(this->baseViewId);
+    
 }
 
 

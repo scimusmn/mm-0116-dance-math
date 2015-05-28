@@ -13,6 +13,9 @@ const int VID_SIZE_SMALL_H = 360;
 
 const int SCREENSAVER_TIMEOUT = 3600;// 3600 frames, 60 secs
 
+const string LANGUAGE_SPANISH = "_es";
+const string LANGUAGE_ENGLISH = "_en";
+
 enum AppState{
     STATE_NORMAL,
     STATE_PRE_COUNTDOWN,
@@ -73,6 +76,8 @@ class ofApp : public ofBaseApp{
         void startDanceCountdown();
         void startOver();
         void resetInactivity();
+        void toggleLanguage();
+        string currentLanguage;
         int countdown;
         int preCountdownDuration;
         int inactivityCount;

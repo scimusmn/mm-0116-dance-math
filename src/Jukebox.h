@@ -26,6 +26,9 @@ public:
     void addSong(string id, string path, string introPath, int duration, int intro, int tempo);
     void switchSong(string id);
     Song getSong(string id);
+    bool songExists(string id);
+    void setLanguageKey(string key);
+    string languageKey = "";
     
     void play();
     void play(float rate);

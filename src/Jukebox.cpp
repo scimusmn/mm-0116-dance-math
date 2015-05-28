@@ -39,9 +39,31 @@ Jukebox::Song Jukebox::getSong(string id) {
 }
 
 //---------
+bool Jukebox::songExists(string id) {
+    
+    auto findSong = this->songs.find(id);
+    
+    if (findSong != this->songs.end()) {
+        return true;
+    } else {
+        return false;
+    }
+    
+}
+
+//---------
 void Jukebox::switchSong(string id) {
     
-    Song s = getSong(id);
+    //Try language specific version first,
+    //fallback to language-agnostic version.
+    string songId = id + languageKey + "";
+    if (songExists(songId) == false) {
+        songId = id;
+    }
+    
+    ofLogNotice("switchSong", songId);
+    
+    Song s = getSong(songId);
     this->id = s.id;
     this->path = s.path;
     this->duration = s.duration;
@@ -50,6 +72,13 @@ void Jukebox::switchSong(string id) {
     this->player = s.player;
     this->introPlayer = s.introPlayer;
 
+}
+
+//---------
+void Jukebox::setLanguageKey(string key) {
+    
+    languageKey = key;
+    
 }
 
 //---------
