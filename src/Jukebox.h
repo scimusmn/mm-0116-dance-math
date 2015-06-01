@@ -20,22 +20,28 @@ public:
         int intro;
         int tempo;
         ofSoundPlayer player;
+        ofSoundPlayer halfSpeedPlayer;
         ofSoundPlayer introPlayer;
     };
     
-    void addSong(string id, string path, string introPath, int duration, int intro, int tempo);
+    void autoAddSong(string id, int duration, int intro, int tempo);
+    void addSong(string id, string path, string halfSpeedPath, string introPath, int duration, int intro, int tempo);
     void switchSong(string id);
     Song getSong(string id);
     bool songExists(string id);
-    void setLanguageKey(string key);
-    string languageKey = "";
-    
+
     void play();
     void play(float rate);
     void playIntro();
     float rate;
-    
     map<string, Song> songs;
+    
+    void loadSound(string id);
+    void playSound(string id);
+    map<string, ofSoundPlayer> sounds;
+    
+    void setLanguageKey(string key);
+    string languageKey = "";
     
     //These match whatever current song is set by switchSong().
     string id;
@@ -44,6 +50,7 @@ public:
     int intro;
     int tempo;
     ofSoundPlayer player;
+    ofSoundPlayer halfSpeedPlayer;
     ofSoundPlayer introPlayer;
     
 protected:

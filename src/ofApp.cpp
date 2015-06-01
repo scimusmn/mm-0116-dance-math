@@ -16,28 +16,15 @@ void ofApp::setup(){
     vidRecorder->initRecording();
 
     //Load Sounds
-    jukebox.addSong("circle_en", "sounds/circle.wav", "sounds/startCircle.wav", 14567, 7107, 943); // CIRCLE (English)
-    jukebox.addSong("circle_es", "sounds/circle.wav", "sounds/startCircle.wav", 14567, 7107, 943); // CIRCLE (Spanish)
+    jukebox.autoAddSong("circle", 14567, 7107, 943); // CIRCLE
+    jukebox.autoAddSong("triangle", 14567, 7107, 943); // TRIANGLE
+    jukebox.autoAddSong("square", 14567, 7107, 943); // SQUARE
+    jukebox.autoAddSong("freestyle_song1", 10769, 5103, 700); // HIP-HOP
+    jukebox.autoAddSong("freestyle_song2", 9999, 5177, 642); // DUBSTEP
+    jukebox.autoAddSong("freestyle_song3", 10629, 5374, 672); // PIANO
+    jukebox.autoAddSong("freestyle_song4", 8650, 4513, 567); // ROCK & ROLL
     
-    jukebox.addSong("triangle_en", "sounds/triangle.wav", "sounds/startTriangle.wav", 14567, 7107, 943); // TRIANGLE (English)
-    jukebox.addSong("triangle_es", "sounds/triangle.wav", "sounds/startTriangle.wav", 14567, 7107, 943); // TRIANGLE (Spanish)
-    
-    jukebox.addSong("square_en", "sounds/square.wav", "sounds/startSquare.wav", 14567, 7107, 943); // SQUARE (English)
-    jukebox.addSong("square_es", "sounds/square.wav", "sounds/startSquare.wav", 14567, 7107, 943); // SQUARE (Spanish)
-    
-    jukebox.addSong("fs_song1_en", "sounds/song1.wav", "sounds/startFreestyle.wav", 10769, 5103, 700); // HIP-HOP (English)
-    jukebox.addSong("fs_song1_es", "sounds/song1.wav", "sounds/startFreestyle.wav", 10769, 5103, 700); // HIP-HOP (Spanish)
-    
-    jukebox.addSong("fs_song2_en", "sounds/song2.wav", "sounds/startFreestyle.wav", 10629, 5374, 672); // PIANO (English)
-    jukebox.addSong("fs_song2_en", "sounds/song2.wav", "sounds/startFreestyle.wav", 10629, 5374, 672); // PIANO (Spanish)
-    
-    jukebox.addSong("fs_song3_en", "sounds/song3.wav", "sounds/startFreestyle.wav", 9999, 5177, 642); // DUBSTEP (English)
-    jukebox.addSong("fs_song3_es", "sounds/song3.wav", "sounds/startFreestyle.wav", 9999, 5177, 642); // DUBSTEP (Spanish)
-    
-    jukebox.addSong("fs_song4_en", "sounds/song4.wav", "sounds/startFreestyle.wav", 8650, 4513, 567); // ROCK & ROLL (English)
-    jukebox.addSong("fs_song4_es", "sounds/song4.wav", "sounds/startFreestyle_es.wav", 8650, 4513, 567); // ROCK & ROLL (Spanish)
-    
-    greatJobSnd.loadSound("sounds/great.wav");
+    jukebox.loadSound("great");
     
     //Load/Setup UI
     layout.setupViews();
@@ -87,24 +74,24 @@ void ofApp::startDanceCountdown(){
     layout.setState("countdown", ofToString(countdown));
     
     //Display intro message based on which pattern is chosen
-    string stId = "0";
-    if (jukebox.id.substr(0,2) == "fs") {
-        stId = "0";
-    } else if (jukebox.id == "circle") {
-        stId = "3";
-    } else if (jukebox.id == "square") {
-        stId = "4";
-    } else if (jukebox.id == "triangle") {
-        stId = "5";
+    string getReadyState = "0";
+    if (ofIsStringInString(jukebox.id, "freestyle")) {
+        getReadyState = "0";
+    } else if (ofIsStringInString(jukebox.id, "circle")) {
+        getReadyState = "3";
+    } else if (ofIsStringInString(jukebox.id, "square")) {
+        getReadyState = "4";
+    } else if (ofIsStringInString(jukebox.id, "triangle")) {
+        getReadyState = "5";
     }
-    layout.setState("txtGetReady", stId);
+    layout.setState("txtGetReady", getReadyState);
 
     //Pre-countdown sequence.
     preCountdownDuration = 6250;
     if (currentSpeed == 1) {
         
         //Longer intro for freestyle
-        if (jukebox.id.substr(0,2) == "fs") {
+        if (ofIsStringInString(jukebox.id, "freestyle")) {
             preCountdownDuration = 9250;
         }
         
@@ -112,8 +99,8 @@ void ofApp::startDanceCountdown(){
         
     } else {
         
-        //NOT first recording, play "great job" audio.
-        greatJobSnd.play();
+        //Not first recording, play "great job" audio.
+        jukebox.playSound("great");
         layout.setView(DMLayout::VIEW_GREAT_JOB);
         
     }

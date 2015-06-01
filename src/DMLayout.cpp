@@ -44,10 +44,10 @@ void DMLayout::setupViews(){
     //Choose your music (Advanced)
     image("main_bg");
     image("txtAdvancedMusicSelection");
-    button("btnSong1", 520, 300, "chose_music_fs_song1");
-    button("btnSong2", 520, 480, "chose_music_fs_song2");
-    button("btnSong3", 520, 660, "chose_music_fs_song3");
-    button("btnSong4", 520, 840, "chose_music_fs_song4");
+    button("btnSong1", 520, 300, "chose_music_freestyle_song1");
+    button("btnSong2", 520, 480, "chose_music_freestyle_song2");
+    button("btnSong3", 520, 660, "chose_music_freestyle_song3");
+    button("btnSong4", 520, 840, "chose_music_freestyle_song4");
     button("btnStartOverSticky", 1813, 972, "start_over");
     saveView(VIEW_CHOOSE_MUSIC);
     
@@ -90,7 +90,7 @@ void DMLayout::setupViews(){
 }
 
 void DMLayout::setView(string name){
-    
+        
     baseViewId = name;
     string newViewId = "" + baseViewId + languageKey;
     
@@ -109,7 +109,9 @@ void DMLayout::updateLanguage(string lang){
     languageKey = lang;
     
     //Refresh current view using language
-    this->setView(this->baseViewId);
+    if (!this->baseViewId.empty()){
+        this->setView(this->baseViewId);
+    }
     
 }
 
