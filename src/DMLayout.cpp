@@ -28,6 +28,7 @@ void DMLayout::setupViews(){
     videoButton("triangle", 206, 636, "chose_pattern_triangle");
     videoButton("square", 682, 636, "chose_pattern_square");
     videoButton("freestyle", 1255, 636, "chose_pattern_freestyle");
+    video("__pngmov", 335, 336);
     button("btnLanguageToggle", 1680, 972, "toggle_language");
     saveView(VIEW_CHOOSE_PATTERN);
     
@@ -55,6 +56,11 @@ void DMLayout::setupViews(){
     image("sidebar_bg");
     stateObject("txtGetReady", 0, 0);
     stateObject("countdown", 1500, 500);
+    
+    //temp
+    video("hdTestVid", 50, 50);
+    //
+    
     saveView(VIEW_DANCE_VIEW);
     
     //Interstitial (Great job)

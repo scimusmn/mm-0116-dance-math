@@ -1,10 +1,11 @@
 # Some general ignore patterns
 
 */bin/*
-!*/bin/data/
+/bin/data/
 # for bin folder in root
 /bin/*
-!/bin/data/
+/bin/data/
+bin/data/*
 
 build/
 obj/
@@ -20,6 +21,7 @@ Release*/
 
 # Large media files
 *.mov
+*.wav
 
 # Intentionally committing main app file.
 !/bin/danceMath.app/

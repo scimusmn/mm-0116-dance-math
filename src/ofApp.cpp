@@ -11,7 +11,7 @@ void ofApp::setup(){
     vidRecorder = ofPtr<ofQTKitGrabber>( new ofQTKitGrabber() );
     cam.setGrabber(vidRecorder);
     cam.setDeviceID(0);//Assumes there is only one camera connected. (otherwise use different device id)
-    cam.initGrabber(VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+    cam.initGrabber(1920, 1080);
     ofAddListener(vidRecorder->videoSavedEvent, this, &ofApp::videoSaved); // Listen for video saved events
     vidRecorder->initRecording();
 
@@ -207,14 +207,15 @@ void ofApp::draw(){
 
     //Draw cams/Vids
     ofPushMatrix();
+    //ofScale(-1, 1); //**--> Drawing is MIRRORED
     ofTranslate(-85, 0); //**--> Drawing is SHIFTED
     
     if (appState != STATE_PLAYBACK){
         
-        cam.draw(0,0,1280,720);
+        cam.draw(0,0,1920,1080);
         
         if (appState == STATE_RECORDING) {
-            session.drawProgress(0, 1280, 720, recordProgress, session.getColor(currentSpeed), 32);
+            session.drawProgress(0, 1920,1080, recordProgress, session.getColor(currentSpeed), 32);
         }
         
     }
@@ -470,11 +471,11 @@ void ofApp::Session::drawRecordedVids(bool combine){
         
         //Combined
         ofSetColor(255,255,255,255);
-        normVidPlayer.draw(680, 300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        normVidPlayer.draw(-111, -111, 1920,1080);
         drawProgress(680, 680+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, normVidPlayer.getPosition(), getColor(1));
         
         ofSetColor(255, 255, 255, 140);
-        slowVidPlayer.draw(680, 300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        slowVidPlayer.draw(-111, -111, 1920,1080);
         drawProgress(680, 680+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, slowVidPlayer.getPosition(), getColor(1));
         
     } else {
