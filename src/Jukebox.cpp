@@ -9,58 +9,58 @@
 #include "Jukebox.h"
 
 //---------
-void Jukebox::autoAddSong(string id, int duration, int intro, int tempo){
+void Jukebox::autoAddTrack(string id, int normPre, int normDur, int halfPre, int halfDur){
     
-    string path = "sounds/EN_" + id + "_normal.wav";
-    string halfSpeedPath = "sounds/EN_" + id + "_half.wav";
-    string introPath = "sounds/EN_" + id + "_intro.wav";
+    string path = "video/record_" + id + "_en.mov";
+    string halfSpeedPath = "video/record_" + id + "_half_en.mov";
+    string introPath = "video/record_" + id + "_intro_en.mov";
     
-    string pathSpanish = "sounds/ES_" + id + "_normal.wav";
-    string halfSpeedPathSpanish = "sounds/ES_" + id + "_half.wav";
-    string introPathSpanish = "sounds/ES_" + id + "_intro.wav";
+    string pathSpanish = "video/record_" + id + "_es.mov";
+    string halfSpeedPathSpanish = "video/record_" + id + "_half_es.mov";
+    string introPathSpanish = "video/record_" + id + "_intro_es.mov";
     
-    this->addSong(id + "_en", path, halfSpeedPath, introPath, duration, intro, tempo);
-    this->addSong(id + "_es", pathSpanish, halfSpeedPathSpanish, introPathSpanish, duration, intro, tempo);
+    this->addTrack(id + "_en", path, halfSpeedPath, introPath, normPre, normDur, halfPre, halfDur);
+    this->addTrack(id + "_es", pathSpanish, halfSpeedPathSpanish, introPathSpanish, normPre, normDur, halfPre, halfDur);
     
 }
 
 //---------
-void Jukebox::addSong(string id, string path, string halfSpeedPath, string introPath, int duration, int intro, int tempo){
+void Jukebox::addTrack(string id, string path, string halfSpeedPath, string introPath, int normPre, int normDur, int halfPre, int halfDur){
     
-    Song s;
+    Track s;
     s.id = id;
     s.path = path;
-    s.duration = duration;
-    s.intro = intro;
-    s.tempo = tempo;
+    s.normPreRecordDuration = normPre;
+    s.normRecordDuration = normDur;
+    s.halfPreRecordDuration = halfPre;
+    s.halfRecordDuration = halfDur;
     
-    s.player.loadSound(path);
-    s.halfSpeedPlayer.loadSound(halfSpeedPath);
-    s.introPlayer.loadSound(introPath);
-    
-    songs.insert(pair<string, Song>(id, s));
+    s.player.setPixelFormat(OF_PIXELS_RGBA); // Allow alpha channel
+    s.player.loadMovie(path);
+
+    tracks.insert(pair<string, Track>(id, s));
     
 }
 
 //---------
-Jukebox::Song Jukebox::getSong(string id) {
+Jukebox::Track Jukebox::getTrack(string id) {
     
-    auto findSong = this->songs.find(id);
+    auto findTrack = this->tracks.find(id);
     
-    if (findSong != this->songs.end()) {
-        return findSong->second;
+    if (findTrack != this->tracks.end()) {
+        return findTrack->second;
     } else {
-        ofLogError("Jukebox ") << "Requested song'" << id << "' not found";
+        ofLogError("Jukebox ") << "Requested track'" << id << "' not found";
     }
     
 }
 
 //---------
-bool Jukebox::songExists(string id) {
+bool Jukebox::trackExists(string id) {
     
-    auto findSong = this->songs.find(id);
+    auto findTrack = this->tracks.find(id);
     
-    if (findSong != this->songs.end()) {
+    if (findTrack != this->tracks.end()) {
         return true;
     } else {
         return false;
@@ -69,26 +69,25 @@ bool Jukebox::songExists(string id) {
 }
 
 //---------
-void Jukebox::switchSong(string id) {
+void Jukebox::switchTrack(string id) {
     
     //Try language specific version first,
     //fallback to language-agnostic version.
-    string songId = id + languageKey + "";
-    if (songExists(songId) == false) {
-        songId = id;
+    string trackId = id + languageKey + "";
+    if (trackExists(trackId) == false) {
+        trackId = id;
     }
     
-    ofLogNotice("switchSong", songId);
+    ofLogNotice("switchTrack", trackId);
     
-    Song s = getSong(songId);
+    Track s = getTrack(trackId);
     this->id = s.id;
     this->path = s.path;
-    this->duration = s.duration;
-    this->intro = s.intro;
-    this->tempo = s.tempo;
+    this->normPreRecordDuration = s.normPreRecordDuration;
+    this->normRecordDuration = s.normRecordDuration;
+    this->halfPreRecordDuration = s.halfPreRecordDuration;
+    this->halfRecordDuration = s.halfRecordDuration;
     this->player = s.player;
-    this->halfSpeedPlayer = s.halfSpeedPlayer;
-    this->introPlayer = s.introPlayer;
 
 }
 
@@ -112,31 +111,19 @@ void Jukebox::play(float rate) {
     //NOTE: We are no longer programmatically
     //slowing down sounds, but instead choosing
     //different files based on desired playback speed.
-    
-    if (rate == 0.5) {
-        this->halfSpeedPlayer.play();
-    } else {
-        this->player.play();
-    }
-    
-}
-
-void Jukebox::playIntro() {
-    
-    ofLogNotice("playIntro", this->id);
-    this->introPlayer.play();
+    this->player.play();
     
 }
 
 
-//Sounds are not tied to any specific song.
+//Sounds are not tied to any specific track.
 //Should be used for bi-lingual sound effects
 //and other independent sounds.
 //--------
 void Jukebox::loadSound(string id){
     
-    string path = "sounds/EN_" + id + ".wav";
-    string pathSpanish = "sounds/ES_" + id + ".wav";
+    string path = "audio/" + id + ".wav";
+    string pathSpanish = "audio/" + id + ".wav";
     
     ofSoundPlayer player;
     ofSoundPlayer playerSpanish;
