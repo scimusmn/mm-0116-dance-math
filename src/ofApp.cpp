@@ -16,7 +16,7 @@ void ofApp::setup(){
     vidRecorder->initRecording();
 
     //Load Sounds
-    jukebox.autoAddTrack("circle", 15000, 10000, 15000, 25000); // CIRCLE
+    jukebox.autoAddTrack("circle", 2000, 4000, 6000, 8000); // CIRCLE
     jukebox.autoAddTrack("triangle", 5000, 10000, 15000, 25000); // TRIANGLE
     jukebox.autoAddTrack("square", 5000, 10000, 15000, 25000); // SQUARE
     jukebox.autoAddTrack("freestyle1", 5000, 10000, 15000, 25000); // HIP-HOP
@@ -200,7 +200,7 @@ void ofApp::mousePressed(int x, int y, int button){
             //Show freestyle music selection screen
             layout.setView(DMLayout::VIEW_SELECT_TRACK);
         }
-        
+
     }
     
     if (btn.substr(0,11) == "chose_music") {
@@ -234,6 +234,11 @@ void ofApp::mousePressed(int x, int y, int button){
         
     }
     
+    //trigger generic button sound
+    if (btn != ""){
+//        jukebox.playSound("btnPress");
+    }
+    
     if( appState == STATE_SCREENSAVER ) {
         
         //Revert language
@@ -242,6 +247,7 @@ void ofApp::mousePressed(int x, int y, int button){
         
         //Awake from screensaver
         startOver();
+        
     }
     
     resetInactivity();
@@ -255,7 +261,7 @@ void ofApp::startOver(){
     resetTimeTracking();
     appState = STATE_NORMAL;
     
-    layout.setView(DMLayout::VIEW_SELECT_TRACK);
+    layout.setView(DMLayout::VIEW_SELECT);
     
     //delete all temp files
     clearFiles();
@@ -291,21 +297,25 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
     if(e.error.empty()){
         
         string vidPath = e.videoPath;
-        session.saveData(appState, vidPath);
-        
         ofLogNotice("Success: videoSaved()", ofToString(vidPath));
         
         if (appState == STATE_PRE_RECORD_HALF) {
             
+            session.saveData(false, vidPath);
+            
             //Second recording is underway...
             
         } else if (appState == STATE_PLAYBACK) {
+            
+            session.saveData(true, vidPath);
             
             //Default to original speeds
             session.slowVidPlayer.setSpeed(1);
             session.normVidPlayer.setSpeed(1);
             
             session.restartVids();
+            
+            layout.setView(DMLayout::VIEW_PLAYBACK_1);
             
         }
 

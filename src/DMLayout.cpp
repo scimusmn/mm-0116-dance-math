@@ -32,32 +32,31 @@ void DMLayout::setupViews(){
 
     //Choose your music (Advanced)
     video("selectTrack_bg_en", 0, 0);
-    button("selectTrack_tab1_en", 520, 300, "chose_music_freestyle_song1");
-    button("selectTrack_tab2_en", 520, 480, "chose_music_freestyle_song2");
-    button("selectTrack_tab3_en", 520, 660, "chose_music_freestyle_song3");
-    button("selectTrack_tab4_en", 520, 840, "chose_music_freestyle_song4");
+    button("selectTrack_tab1_en", 520, 300, "chose_music_freestyle1");
+    button("selectTrack_tab2_en", 520, 480, "chose_music_freestyle2");
+    button("selectTrack_tab3_en", 520, 660, "chose_music_freestyle3");
+    button("selectTrack_tab4_en", 520, 840, "chose_music_freestyle4");
     saveView(VIEW_SELECT_TRACK);
     
     //Record View (Populated dynamically)
     saveView(VIEW_RECORD);
 
     //Playback 1 (Diff Speeds)
-    image("playback1_bg_en");
+    video("playback1_bg_en", 0, 0);
     image("playback_tabRight1_en", 0, 0);
     image("playback_tabLeft1_en", 800, 0);
-    button("playback_btnSpeed_en", 1225, 830, "double_playback_speed");
+    button("playback_btnSpeed_en", 100, 100, "double_playback_speed");
     saveView(VIEW_PLAYBACK_1);
     
     //Playback 2 (Sped up to match)
-    image("playback2_bg_en");
+    video("playback2_bg_en", 0, 0);
     image("playback_tabRight2_en", 0, 0);
     image("playback_tabLeft2_en", 800, 0);
-    button("playback_btnCombine_en", 1225, 830, "combine");
+    button("playback_btnCombine_en", 100, 110, "combine");
     saveView(VIEW_PLAYBACK_2);
     
     //Playback 3 (Combined Fullscreen)
-    button("btnLang_en", 80, 972, "toggle_language");
-    button("btnStartOver_en", 980, 972, "start_over");
+    button("btnStartOver_en", 100, 970, "start_over");
     saveView(VIEW_PLAYBACK_3);
     
     //Screensaver
@@ -76,6 +75,8 @@ void DMLayout::setView(string name){
         //Fallback to language agnostic view.
         newViewId = "" + baseViewId;
     }
+    
+    ofLogNotice("setView()", newViewId);
     
     ofxSimpleLayout::Layout::setView(newViewId);
     

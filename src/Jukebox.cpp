@@ -39,7 +39,7 @@ void Jukebox::addTrack(string id, string path, string halfSpeedPath, string intr
     s.player.loadMovie(path);
 
     tracks.insert(pair<string, Track>(id, s));
-    
+    ofLogNotice("addTrack: ", id);
 }
 
 //---------
@@ -74,11 +74,14 @@ void Jukebox::switchTrack(string id) {
     //Try language specific version first,
     //fallback to language-agnostic version.
     string trackId = id + languageKey + "";
-    if (trackExists(trackId) == false) {
-        trackId = id;
-    }
     
     ofLogNotice("switchTrack", trackId);
+    
+    if (trackExists(trackId) == false) {
+        trackId = id;
+        ofLogNotice("switchTrack fallback: ", trackId);
+    }
+    
     
     Track s = getTrack(trackId);
     this->id = s.id;
