@@ -17,7 +17,7 @@ void ofApp::setup(){
 
     //Load Sounds
     jukebox.autoAddTrack("circle", 2000, 4000, 6000, 8000); // CIRCLE
-    jukebox.autoAddTrack("triangle", 5000, 10000, 15000, 25000); // TRIANGLE
+    jukebox.autoAddTrack("triangle", 9951, 18242, 39442, 56023); // TRIANGLE
     jukebox.autoAddTrack("square", 5000, 10000, 15000, 25000); // SQUARE
     jukebox.autoAddTrack("freestyle1", 5000, 10000, 15000, 25000); // HIP-HOP
     jukebox.autoAddTrack("freestyle2", 5000, 10000, 15000, 25000); // DUBSTEP
@@ -67,10 +67,14 @@ void ofApp::startRecordSequence(){
     //Show live camera feed and overlay guide video
     layout.setView(DMLayout::VIEW_RECORD);
     appState = STATE_PRE_RECORD_NORM;
-    resetTimeTracking();
+    
+    ofLogNotice("start sequence: ", ofToString(ofGetElapsedTimeMillis()));
     
     //Start guide overlay video
     jukebox.playFromStart();
+    resetTimeTracking();
+    
+    ofLogNotice("sequnce has started: ", ofToString(ofGetElapsedTimeMillis()));
     
 }
 
@@ -178,6 +182,14 @@ void ofApp::draw(){
     //Draw layout
     ofSetColor(255,255,255);
     layout.draw();
+    
+    //TEMP DEBUG
+    if (appState == STATE_RECORD_NORM || appState == STATE_RECORD_HALF) {
+        ofSetColor(255,0,0);
+        ofCircle(1100, 900, 50);
+        ofSetColor(255,255,255);
+    }
+    
     
     //Update guide video during recording
     if (!jukebox.id.empty()){
