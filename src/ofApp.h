@@ -8,8 +8,8 @@ using namespace ofxSimpleLayout;
 
 const int VID_SIZE_BIG_W = 1920;
 const int VID_SIZE_BIG_H = 1080;
-const int VID_SIZE_SMALL_W = 640;
-const int VID_SIZE_SMALL_H = 360;
+const int VID_SIZE_SMALL_W = 864;
+const int VID_SIZE_SMALL_H = 486;
 
 const int SCREENSAVER_TIMEOUT = 3600;// 3600 frames, 60 secs
 

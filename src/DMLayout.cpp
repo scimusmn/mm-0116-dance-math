@@ -20,43 +20,44 @@ string DMLayout::VIEW_SCREENSAVER = "view_screensaver";
 void DMLayout::setupViews(){
 
     //Select Screen
-    image("select_bg_en");
-    image("select_tabLeft_en");
-    image("select_tabRight_en");
-    videoButton("select_btnCircle_en", 682, 233, "chose_pattern_circle");
-    videoButton("select_btnTriangle_en", 206, 636, "chose_pattern_triangle");
-    videoButton("select_btnSquare_en", 682, 636, "chose_pattern_square");
-    videoButton("select_btnFreestyle_en", 1255, 636, "chose_pattern_freestyle");
-    button("btnLang_en", 80, 972, "toggle_language");
+    image("select_bg_en", 0, 0);
+    image("select_tabLeft_en", -46, 246);
+    image("select_tabRight_en", 1375, 246);
+    videoButton("select_btnCircle_en", 478, 407, "chose_pattern_circle");
+    videoButton("select_btnTriangle_en", 47, 407, "chose_pattern_triangle");
+    videoButton("select_btnSquare_en", 912, 407, "chose_pattern_square");
+    videoButton("select_btnFreestyle_en", 1418, 407, "chose_pattern_freestyle");
+    button("btnLang_en", 44, 952, "toggle_language");
     saveView(VIEW_SELECT);
 
     //Choose your music (Advanced)
     video("selectTrack_bg_en", 0, 0);
-    button("selectTrack_tab1_en", 520, 300, "chose_music_freestyle1");
-    button("selectTrack_tab2_en", 520, 480, "chose_music_freestyle2");
-    button("selectTrack_tab3_en", 520, 660, "chose_music_freestyle3");
-    button("selectTrack_tab4_en", 520, 840, "chose_music_freestyle4");
+    button("selectTrack_tab1_en", 1117, 254, "chose_music_freestyle1");
+    button("selectTrack_tab2_en", 1117, 432, "chose_music_freestyle2");
+    button("selectTrack_tab3_en", 1117, 610, "chose_music_freestyle3");
+    button("selectTrack_tab4_en", 1117, 788, "chose_music_freestyle4");
     saveView(VIEW_SELECT_TRACK);
     
     //Record View (Populated dynamically)
     saveView(VIEW_RECORD);
 
     //Playback 1 (Diff Speeds)
-    video("playback1_bg_en", 0, 0);
-    image("playback_tabRight1_en", 0, 0);
-    image("playback_tabLeft1_en", 800, 0);
-    button("playback_btnSpeed_en", 100, 100, "double_playback_speed");
+    video("playback1_bg_en", 0, 0, false);
+    image("playback_tabRight1_en", 970, 239);
+    image("playback_tabLeft_en", -250, 245);
+    button("playback_btnSpeed_en", 970, 911, "double_playback_speed");
     saveView(VIEW_PLAYBACK_1);
     
     //Playback 2 (Sped up to match)
-    video("playback2_bg_en", 0, 0);
-    image("playback_tabRight2_en", 0, 0);
-    image("playback_tabLeft2_en", 800, 0);
-    button("playback_btnCombine_en", 100, 110, "combine");
+    video("playback2_bg_en", 0, 0, false);
+    image("playback_tabRight2_en", 970, 239);
+    image("playback_tabLeft_en", -250, 245);
+    button("playback_btnCombine_en", 485, 912, "combine");
     saveView(VIEW_PLAYBACK_2);
     
     //Playback 3 (Combined Fullscreen)
-    button("btnStartOver_en", 100, 970, "start_over");
+    video("playback3_bg_en", 0, 0, false);
+    button("btnStartOver_en", 1521, 962, "start_over");
     saveView(VIEW_PLAYBACK_3);
     
     //Screensaver

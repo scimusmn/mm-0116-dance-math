@@ -35,6 +35,10 @@ void Jukebox::addTrack(string id, string path, string halfSpeedPath, string intr
     s.halfPreRecordDuration = halfPre;
     s.halfRecordDuration = halfDur;
     
+    //NOTE: Currently loading ALL "guide" videos up front,
+    //which is going to eat a lot of RAM. If we run into memory issues,
+    //we should consider loading on the fly when the track is changed. -tn
+    
     s.player.setPixelFormat(OF_PIXELS_RGBA); // Allow alpha channel
     s.player.loadMovie(path);
 
@@ -69,6 +73,19 @@ bool Jukebox::trackExists(string id) {
 }
 
 //---------
+void Jukebox::playFromStart() {
+    
+    if (!this->id.empty()){
+        ofLogWarning("playFromStart()", ofToString(this->id));
+        this->player.firstFrame();
+        this->player.play();
+    }else {
+        ofLogWarning("playFromStart(): No track loaded.");
+    }
+
+}
+
+//---------
 void Jukebox::switchTrack(string id) {
     
     //Try language specific version first,
@@ -95,29 +112,28 @@ void Jukebox::switchTrack(string id) {
 }
 
 //---------
+void Jukebox::clearTrack() {
+
+    this->id = "";
+    this->path = "";
+    this->normPreRecordDuration = 0;
+    this->normRecordDuration = 0;
+    this->halfPreRecordDuration = 0;
+    this->halfRecordDuration = 0;
+    
+    this->player.stop();
+    this->player.update();
+//    ofSleepMillis(50);
+//    this->player.close();
+    
+}
+
+//---------
 void Jukebox::setLanguageKey(string key) {
     
     languageKey = key;
     
 }
-
-//---------
-void Jukebox::play() {
-    this->play(1);
-};
-
-void Jukebox::play(float rate) {
-    
-    ofSoundStopAll();
-    this->rate = rate;
-
-    //NOTE: We are no longer programmatically
-    //slowing down sounds, but instead choosing
-    //different files based on desired playback speed.
-    this->player.play();
-    
-}
-
 
 //Sounds are not tied to any specific track.
 //Should be used for bi-lingual sound effects

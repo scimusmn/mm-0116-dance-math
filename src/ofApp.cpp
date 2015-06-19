@@ -64,11 +64,13 @@ void ofApp::resetInactivity(){
 //--------------------------------------------------------------
 void ofApp::startRecordSequence(){
     
-    ofLogNotice("startRecordSequence()");
     //Show live camera feed and overlay guide video
     layout.setView(DMLayout::VIEW_RECORD);
     appState = STATE_PRE_RECORD_NORM;
     resetTimeTracking();
+    
+    //Start guide overlay video
+    jukebox.playFromStart();
     
 }
 
@@ -81,8 +83,16 @@ void ofApp::update(){
     //Update videos or camera-feeds
     if (appState == STATE_PLAYBACK) {
         session.updateVids();
-    } else {
+    }
+    
+    //Draw camera feed unless on last playback screen or screensaver
+    if (layout.baseViewId != DMLayout::VIEW_PLAYBACK_3 && appState != STATE_SCREENSAVER) {
         cam.update();
+    }
+    
+    //Update guide video during recording
+    if (!jukebox.id.empty()){
+        jukebox.player.update();
     }
 
     timeElapsed = ofGetElapsedTimeMillis() - timeStarted;
@@ -131,12 +141,11 @@ void ofApp::update(){
         appState = STATE_PLAYBACK;
         
     }
+    
 
     //Loop playback
     if (appState == STATE_PLAYBACK && session.normVidPlayer.getIsMovieDone() == true){
-        
         session.restartVids();
-        
     }
     
     //Screensaver
@@ -156,31 +165,28 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-    //Draw cams/Vids
-    ofPushMatrix();
-    //ofScale(-1, 1); //**--> Drawing is MIRRORED
-    ofTranslate(-85, 0); //**--> Drawing is SHIFTED
-    
-    if (appState != STATE_PLAYBACK){
-        
-        cam.draw(0,0,1920,1080);
-        
+    //Draw cams/Vids except on last playback screen && screensaver
+    if (layout.baseViewId != DMLayout::VIEW_PLAYBACK_3 && appState != STATE_SCREENSAVER) {
+        cam.draw(VID_SIZE_BIG_W, 0, 0 - VID_SIZE_BIG_W, VID_SIZE_BIG_H);
     }
-
-    ofPopMatrix(); //**--> Drawing is UN-SHIFTED
+    
+    //Draw combined videos on final playback screen
+    if (appState == STATE_PLAYBACK && layout.baseViewId == DMLayout::VIEW_PLAYBACK_3){
+        session.drawVids(true);
+    }
     
     //Draw layout
     ofSetColor(255,255,255);
     layout.draw();
     
-    if (appState == STATE_PLAYBACK){
-        if (layout.baseViewId == DMLayout::VIEW_PLAYBACK_3) {
-            //Combine videos
-            session.drawVids(true);
-        } else {
-            //Separate videos
-            session.drawVids(false);
-        }
+    //Update guide video during recording
+    if (!jukebox.id.empty()){
+        jukebox.player.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
+    }
+    
+    //Draw seperated videos on first two playback screens
+    if (appState == STATE_PLAYBACK && layout.baseViewId != DMLayout::VIEW_PLAYBACK_3){
+        session.drawVids(false);
     }
 
 }
@@ -269,6 +275,9 @@ void ofApp::startOver(){
     //clear session data
     session.clear();
     
+    //Reset jukebox track
+    jukebox.clearTrack();
+    
     //reset base time
     ofResetElapsedTimeCounter();
     
@@ -308,6 +317,9 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
         } else if (appState == STATE_PLAYBACK) {
             
             session.saveData(true, vidPath);
+            
+            //Clear jukebox
+            jukebox.clearTrack();
             
             //Default to original speeds
             session.slowVidPlayer.setSpeed(1);
@@ -392,18 +404,18 @@ void ofApp::Session::drawVids(bool combine){
     
     if (combine == true){
         
-        //Combined
+        //Combined (mirrored)
         ofSetColor(255,255,255,255);
-        normVidPlayer.draw(-111, -111, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
+        normVidPlayer.draw(VID_SIZE_BIG_W, 0, 0 - VID_SIZE_BIG_W, VID_SIZE_BIG_H);
         
         ofSetColor(255, 255, 255, 140);
-        slowVidPlayer.draw(-111, -111, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
+        slowVidPlayer.draw(VID_SIZE_BIG_W, 0, 0 - VID_SIZE_BIG_W, VID_SIZE_BIG_H);
         
     } else {
         
-        //Separated
-        normVidPlayer.draw(300, 300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        slowVidPlayer.draw(1000, 300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        //Separated (mirrored)
+        normVidPlayer.draw(42 + VID_SIZE_SMALL_W, 381, 0 - VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        slowVidPlayer.draw(1016 + VID_SIZE_SMALL_W, 381, 0 - VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
         
     }
     
