@@ -11,36 +11,32 @@ void ofApp::setup(){
     vidRecorder = ofPtr<ofQTKitGrabber>( new ofQTKitGrabber() );
     cam.setGrabber(vidRecorder);
     cam.setDeviceID(0);//Assumes there is only one camera connected. (otherwise use different device id)
-    cam.initGrabber(VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+    cam.initGrabber(VID_SIZE_BIG_W, VID_SIZE_BIG_H);
     ofAddListener(vidRecorder->videoSavedEvent, this, &ofApp::videoSaved); // Listen for video saved events
     vidRecorder->initRecording();
 
     //Load Sounds
-    jukebox.autoAddSong("circle", 14567, 7107, 943); // CIRCLE
-    jukebox.autoAddSong("triangle", 14567, 7107, 943); // TRIANGLE
-    jukebox.autoAddSong("square", 14567, 7107, 943); // SQUARE
-    jukebox.autoAddSong("freestyle_song1", 10769, 5103, 700); // HIP-HOP
-    jukebox.autoAddSong("freestyle_song2", 9999, 5177, 642); // DUBSTEP
-    jukebox.autoAddSong("freestyle_song3", 10629, 5374, 672); // PIANO
-    jukebox.autoAddSong("freestyle_song4", 8650, 4513, 567); // ROCK & ROLL
+    jukebox.autoAddTrack("circle", 2000, 4000, 6000, 8000); // CIRCLE
+    jukebox.autoAddTrack("triangle", 9951, 18242, 39442, 56023); // TRIANGLE
+    jukebox.autoAddTrack("square", 5000, 10000, 15000, 25000); // SQUARE
+    jukebox.autoAddTrack("freestyle1", 5000, 10000, 15000, 25000); // HIP-HOP
+    jukebox.autoAddTrack("freestyle2", 5000, 10000, 15000, 25000); // DUBSTEP
+    jukebox.autoAddTrack("freestyle3", 5000, 10000, 15000, 25000); // PIANO
+    jukebox.autoAddTrack("freestyle4", 5000, 10000, 15000, 25000); // ROCK & ROLL
     
-    jukebox.loadSound("great");
+    jukebox.loadSound("btnPress");
     
     //Load/Setup UI
     layout.setupViews();
     currentLanguage = LANGUAGE_SPANISH;
     toggleLanguage();
-    layout.setView(DMLayout::VIEW_CHOOSE_PATTERN);
+    layout.setView(DMLayout::VIEW_SELECT);
     appState = STATE_NORMAL;
     
 }
 
 //--------------------------------------------------------------
 void ofApp::initRecording(){
-    
-    //Switch app state
-    resetBeatTracking();
-    appState = STATE_RECORDING;
     
     //New video file in /temp folder
     stringstream s;
@@ -50,11 +46,11 @@ void ofApp::initRecording(){
 }
 
 //--------------------------------------------------------------
-void ofApp::resetBeatTracking(){
+void ofApp::resetTimeTracking(){
     
     //Remember current time to count beats after "now"
-    timeStarted = prevBeatTime = ofGetElapsedTimeMillis();
-    timeElapsed = recordProgress = 0;
+    timeStarted = ofGetElapsedTimeMillis();
+    timeElapsed = 0;
     
 }
 
@@ -66,46 +62,19 @@ void ofApp::resetInactivity(){
 }
 
 //--------------------------------------------------------------
-void ofApp::startDanceCountdown(){
+void ofApp::startRecordSequence(){
     
-    //Show live camera feed and countdown panel
-    layout.setView(DMLayout::VIEW_DANCE_VIEW);
-    countdown = 9;
-    layout.setState("countdown", ofToString(countdown));
+    //Show live camera feed and overlay guide video
+    layout.setView(DMLayout::VIEW_RECORD);
+    appState = STATE_PRE_RECORD_NORM;
     
-    //Display intro message based on which pattern is chosen
-    string getReadyState = "0";
-    if (ofIsStringInString(jukebox.id, "freestyle")) {
-        getReadyState = "0";
-    } else if (ofIsStringInString(jukebox.id, "circle")) {
-        getReadyState = "3";
-    } else if (ofIsStringInString(jukebox.id, "square")) {
-        getReadyState = "4";
-    } else if (ofIsStringInString(jukebox.id, "triangle")) {
-        getReadyState = "5";
-    }
-    layout.setState("txtGetReady", getReadyState);
-
-    //Pre-countdown sequence.
-    preCountdownDuration = 6250;
-    if (currentSpeed == 1) {
-        
-        //Longer intro for freestyle
-        if (ofIsStringInString(jukebox.id, "freestyle")) {
-            preCountdownDuration = 9250;
-        }
-        
-       jukebox.playIntro();
-        
-    } else {
-        
-        //Not first recording, play "great job" audio.
-        jukebox.playSound("great");
-        layout.setView(DMLayout::VIEW_GREAT_JOB);
-        
-    }
-    resetBeatTracking();
-    appState = STATE_PRE_COUNTDOWN;
+    ofLogNotice("start sequence: ", ofToString(ofGetElapsedTimeMillis()));
+    
+    //Start guide overlay video
+    jukebox.playFromStart();
+    resetTimeTracking();
+    
+    ofLogNotice("sequnce has started: ", ofToString(ofGetElapsedTimeMillis()));
     
 }
 
@@ -118,78 +87,73 @@ void ofApp::update(){
     //Update videos or camera-feeds
     if (appState == STATE_PLAYBACK) {
         session.updateVids();
-    } else {
+    }
+    
+    //Draw camera feed unless on last playback screen or screensaver
+    if (layout.baseViewId != DMLayout::VIEW_PLAYBACK_3 && appState != STATE_SCREENSAVER) {
         cam.update();
     }
-
-    //Update beat timer
-    if ((ofGetElapsedTimeMillis() - prevBeatTime) >= (jukebox.tempo / jukebox.rate)){
-        prevBeatTime = ofGetElapsedTimeMillis();
-        isNewBeat = true;
+    
+    //Update guide video during recording
+    if (!jukebox.id.empty()){
+        jukebox.player.update();
     }
+
     timeElapsed = ofGetElapsedTimeMillis() - timeStarted;
-    recordProgress = timeElapsed / ((jukebox.duration - jukebox.intro) / jukebox.rate);
-
-    //Update recording
-    if (appState == STATE_RECORDING){
-
-        isNewBeat = false;
+    
+    
+    //Start normal-speed recording
+    if (appState == STATE_PRE_RECORD_NORM && timeElapsed >= jukebox.normPreRecordDuration){
         
-        //End recording
-        if (recordProgress >= 1) {
-            
-            appState = STATE_NORMAL;
+        ofLogNotice("Start normal-speed recording", ofToString(timeElapsed));
+        initRecording();
+        appState = STATE_RECORD_NORM;
 
-            //Attempt saving RGB video, and wait for success callback
-            if(vidRecorder->isRecording()){
-                vidRecorder->stopRecording();
-            } else {
-                ofLogError("Cannot save video") << "video was still recording: " << vidRecorder->isRecording();
-            }
-
+    }
+    //End normal-speed recording
+    else if (appState == STATE_RECORD_NORM && timeElapsed >= jukebox.normRecordDuration){
+        
+        ofLogNotice("End normal-speed recording", ofToString(timeElapsed));
+        
+        if(vidRecorder->isRecording()){
+            vidRecorder->stopRecording();
+        } else {
+            ofLogError("Cannot save video") << "video was still recording: " << vidRecorder->isRecording();
         }
+    
+        appState = STATE_PRE_RECORD_HALF;
+
+    }
+    //Start half-speed recording
+    else if (appState == STATE_PRE_RECORD_HALF && timeElapsed >= jukebox.halfPreRecordDuration){
+        
+        ofLogNotice("Start half-speed recording", ofToString(timeElapsed));
+        initRecording();
+        appState = STATE_RECORD_HALF;
+        
+    }
+    //End half-speed recording
+    else if (appState == STATE_RECORD_HALF && timeElapsed >= jukebox.halfRecordDuration){
+        
+        ofLogNotice("End half-speed recording", ofToString(timeElapsed));
+        if(vidRecorder->isRecording()){
+            vidRecorder->stopRecording();
+        } else {
+            ofLogError("Cannot save video") << "video was still recording: " << vidRecorder->isRecording();
+        }
+        
+        appState = STATE_PLAYBACK;
         
     }
     
-    //Wait for countdown
-    if (appState == STATE_PRE_COUNTDOWN){
-        
-        if (timeElapsed > preCountdownDuration){
-            isNewBeat = true;
-            appState = STATE_COUNTDOWN;
-            layout.setView(DMLayout::VIEW_DANCE_VIEW);
-            layout.setState("txtGetReady", "1");
-            resetBeatTracking();
-            jukebox.play(currentSpeed);
-        }
-        
-    } else if (appState == STATE_COUNTDOWN){
-        
-        if (isNewBeat == true){
-            
-            countdown--;
-            isNewBeat = false;
-            layout.setState("countdown", ofToString(countdown));
-            
-            if (countdown <= 0) {
-                layout.setState("txtGetReady", "2");
-                initRecording();
-            }
-            
-        }
 
-    }
-    
     //Loop playback
     if (appState == STATE_PLAYBACK && session.normVidPlayer.getIsMovieDone() == true){
-        
         session.restartVids();
-        resetBeatTracking();
-        
     }
     
     //Screensaver
-    if (appState == STATE_PRE_COUNTDOWN || appState == STATE_COUNTDOWN || appState == STATE_RECORDING) {
+    if (appState == STATE_RECORD_NORM || appState == STATE_RECORD_HALF) {
         resetInactivity();
     }
     if (inactivityCount > SCREENSAVER_TIMEOUT){
@@ -205,34 +169,36 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 
-    //Draw cams/Vids
-    ofPushMatrix();
-    ofTranslate(-85, 0); //**--> Drawing is SHIFTED
-    
-    if (appState != STATE_PLAYBACK){
-        
-        cam.draw(0,0,1280,720);
-        
-        if (appState == STATE_RECORDING) {
-            session.drawProgress(0, 1280, 720, recordProgress, session.getColor(currentSpeed), 32);
-        }
-        
+    //Draw cams/Vids except on last playback screen && screensaver
+    if (layout.baseViewId != DMLayout::VIEW_PLAYBACK_3 && appState != STATE_SCREENSAVER) {
+        cam.draw(VID_SIZE_BIG_W, 0, 0 - VID_SIZE_BIG_W, VID_SIZE_BIG_H);
     }
-
-    ofPopMatrix(); //**--> Drawing is UN-SHIFTED
+    
+    //Draw combined videos on final playback screen
+    if (appState == STATE_PLAYBACK && layout.baseViewId == DMLayout::VIEW_PLAYBACK_3){
+        session.drawVids(true);
+    }
     
     //Draw layout
     ofSetColor(255,255,255);
     layout.draw();
     
-    if (appState == STATE_PLAYBACK){
-        if (layout.baseViewId == DMLayout::VIEW_PLAYBACK_3) {
-            //Combine videos
-            session.drawRecordedVids(true);
-        } else {
-            //Separate videos
-            session.drawRecordedVids(false);
-        }
+    //TEMP DEBUG
+    if (appState == STATE_RECORD_NORM || appState == STATE_RECORD_HALF) {
+        ofSetColor(255,0,0);
+        ofCircle(1100, 900, 50);
+        ofSetColor(255,255,255);
+    }
+    
+    
+    //Update guide video during recording
+    if (!jukebox.id.empty()){
+        jukebox.player.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
+    }
+    
+    //Draw seperated videos on first two playback screens
+    if (appState == STATE_PLAYBACK && layout.baseViewId != DMLayout::VIEW_PLAYBACK_3){
+        session.drawVids(false);
     }
 
 }
@@ -246,29 +212,21 @@ void ofApp::mousePressed(int x, int y, int button){
         
         string pattern = btn.substr(14);
         if (pattern != "freestyle") {
-            jukebox.switchSong(pattern);
-            currentSpeed = 1;
-            startDanceCountdown();
+            jukebox.switchTrack(pattern);
+            startRecordSequence();
         } else {
             //Show freestyle music selection screen
-            layout.setView(DMLayout::VIEW_CHOOSE_MUSIC);
+            layout.setView(DMLayout::VIEW_SELECT_TRACK);
         }
-        
+
     }
     
     if (btn.substr(0,11) == "chose_music") {
         string music = btn.substr(12);
         
-        jukebox.switchSong(music);
-        currentSpeed = 1;
-        startDanceCountdown();
+        jukebox.switchTrack(music);
+        startRecordSequence();
 
-    }
-    
-    if (btn.substr(0,11) == "start_dance") {
-        string speed = btn.substr(12);
-        currentSpeed = ofToFloat(speed);
-        startDanceCountdown();
     }
     
     //Playback buttons
@@ -294,6 +252,11 @@ void ofApp::mousePressed(int x, int y, int button){
         
     }
     
+    //trigger generic button sound
+    if (btn != ""){
+//        jukebox.playSound("btnPress");
+    }
+    
     if( appState == STATE_SCREENSAVER ) {
         
         //Revert language
@@ -302,6 +265,7 @@ void ofApp::mousePressed(int x, int y, int button){
         
         //Awake from screensaver
         startOver();
+        
     }
     
     resetInactivity();
@@ -312,17 +276,19 @@ void ofApp::mousePressed(int x, int y, int button){
 void ofApp::startOver(){
     
     //clear all tracking
-    resetBeatTracking();
+    resetTimeTracking();
     appState = STATE_NORMAL;
     
-    layout.setView(DMLayout::VIEW_CHOOSE_PATTERN);
-    vidPlayback.setLoopState(OF_LOOP_NORMAL);
+    layout.setView(DMLayout::VIEW_SELECT);
     
     //delete all temp files
     clearFiles();
     
     //clear session data
     session.clear();
+    
+    //Reset jukebox track
+    jukebox.clearTrack();
     
     //reset base time
     ofResetElapsedTimeCounter();
@@ -352,33 +318,31 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
     if(e.error.empty()){
         
         string vidPath = e.videoPath;
-        session.saveData(currentSpeed, vidPath);
+        ofLogNotice("Success: videoSaved()", ofToString(vidPath));
         
-        resetBeatTracking();
-        appState = STATE_PLAYBACK;
-        
-        //Which playback
-        if (currentSpeed == 1) {
+        if (appState == STATE_PRE_RECORD_HALF) {
             
-            //Finished first recording...
-            currentSpeed = 0.5;
-            startDanceCountdown();
-
-        } else {
+            session.saveData(false, vidPath);
             
-            //Finished second recording ...
+            //Second recording is underway...
+            
+        } else if (appState == STATE_PLAYBACK) {
+            
+            session.saveData(true, vidPath);
+            
+            //Clear jukebox
+            jukebox.clearTrack();
+            
+            //Default to original speeds
+            session.slowVidPlayer.setSpeed(1);
+            session.normVidPlayer.setSpeed(1);
+            
+            session.restartVids();
+            
             layout.setView(DMLayout::VIEW_PLAYBACK_1);
             
         }
-        
-        //Default to original speeds
-        session.slowVidPlayer.setSpeed(1);
-        session.normVidPlayer.setSpeed(1);
-        
-        session.restartVids();
-        
-        resetInactivity();
-        
+
     } else {
         ofLogError("videoSavedEvent") << "Video save error: " << e.error;
     }
@@ -406,24 +370,8 @@ void ofApp::clearFiles() {
 }
 
 //--------------------------------------------------------------
-void ofApp::Session::drawProgress(int startX, int endX, int y, float prog, int color) {
-    drawProgress(startX, endX, y, prog, color, 8);
-}
-
-//--------------------------------------------------------------
-void ofApp::Session::drawProgress(int startX, int endX, int y, float prog, int color, float barHeight) {
-    
-    ofSetHexColor(color);
-    float progX = ofMap(prog, 1, 0, startX, endX);
-    progX = (endX-startX) * prog;
-    ofRect(startX, y, progX, barHeight);
-    ofSetColor(255,255,255);
-    
-}
-
-//--------------------------------------------------------------
-void ofApp::Session::saveData(float speed, string vid){
-    if (speed == 0.5) {
+void ofApp::Session::saveData(bool halfSpeed, string vid){
+    if (halfSpeed == true) {
         slowVid = vid;
         
         slowVidPlayer.stop();
@@ -433,7 +381,7 @@ void ofApp::Session::saveData(float speed, string vid){
         slowVidPlayer.loadMovie(slowVid);
         slowVidPlayer.play();
         
-    } else if (speed == 1) {
+    } else if (halfSpeed == false) {
         normVid = vid;
         
         normVidPlayer.stop();
@@ -444,7 +392,7 @@ void ofApp::Session::saveData(float speed, string vid){
         normVidPlayer.play();
         
     } else {
-        ofLogError("Session") << "Can not save session. Unrecognized speed: " << speed;
+        ofLogError("Session") << "Can not save session. Unrecognized state: " << halfSpeed;
     }
 }
 
@@ -462,29 +410,24 @@ void ofApp::Session::updateVids(){
 }
 
 //--------------------------------------------------------------
-void ofApp::Session::drawRecordedVids(bool combine){
+void ofApp::Session::drawVids(bool combine){
     
     ofSetColor(255,255,255,255);
     
     if (combine == true){
         
-        //Combined
+        //Combined (mirrored)
         ofSetColor(255,255,255,255);
-        normVidPlayer.draw(680, 300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        drawProgress(680, 680+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, normVidPlayer.getPosition(), getColor(1));
+        normVidPlayer.draw(VID_SIZE_BIG_W, 0, 0 - VID_SIZE_BIG_W, VID_SIZE_BIG_H);
         
         ofSetColor(255, 255, 255, 140);
-        slowVidPlayer.draw(680, 300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        drawProgress(680, 680+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, slowVidPlayer.getPosition(), getColor(1));
+        slowVidPlayer.draw(VID_SIZE_BIG_W, 0, 0 - VID_SIZE_BIG_W, VID_SIZE_BIG_H);
         
     } else {
         
-        //Separated
-        normVidPlayer.draw(300, 300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        drawProgress(300, 300+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, normVidPlayer.getPosition(), getColor(1));
-        
-        slowVidPlayer.draw(1000, 300, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        drawProgress(1000, 1000+VID_SIZE_SMALL_W, 300 + VID_SIZE_SMALL_H, slowVidPlayer.getPosition(), getColor(0.5));
+        //Separated (mirrored)
+        normVidPlayer.draw(42 + VID_SIZE_SMALL_W, 381, 0 - VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        slowVidPlayer.draw(1016 + VID_SIZE_SMALL_W, 381, 0 - VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
         
     }
     
@@ -502,15 +445,6 @@ void ofApp::Session::restartVids(){
         normVidPlayer.firstFrame();
         normVidPlayer.play();
     }
-
-}
-
-//--------------------------------------------------------------
-int ofApp::Session::getColor(float speed){
-    
-    //Note: Leaving this function if we want
-    //to add color-coding later. -tnordberg
-    return ofHexToInt("FF0000");
 
 }
 

@@ -6,35 +6,32 @@
 //
 //
 #include "ofSoundPlayer.h"
+#include "ofVideoPlayer.h"
 #include <map>
 
 class Jukebox {
     
 public:
     
-    class Song {
+    class Track {
     public:
         string id;
         string path;
-        int duration;
-        int intro;
-        int tempo;
-        ofSoundPlayer player;
-        ofSoundPlayer halfSpeedPlayer;
-        ofSoundPlayer introPlayer;
+        int normPreRecordDuration;
+        int normRecordDuration;
+        int halfPreRecordDuration;
+        int halfRecordDuration;
+        ofVideoPlayer player;
     };
     
-    void autoAddSong(string id, int duration, int intro, int tempo);
-    void addSong(string id, string path, string halfSpeedPath, string introPath, int duration, int intro, int tempo);
-    void switchSong(string id);
-    Song getSong(string id);
-    bool songExists(string id);
-
-    void play();
-    void play(float rate);
-    void playIntro();
-    float rate;
-    map<string, Song> songs;
+    void autoAddTrack(string id, int normPre, int normDur, int halfPre, int halfDur);
+    void addTrack(string id, string path, string halfSpeedPath, string introPath, int normPre, int normDur, int halfPre, int halfDur);
+    void switchTrack(string id);
+    void clearTrack();
+    Track getTrack(string id);
+    bool trackExists(string id);
+    void playFromStart();
+    map<string, Track> tracks;
     
     void loadSound(string id);
     void playSound(string id);
@@ -43,15 +40,14 @@ public:
     void setLanguageKey(string key);
     string languageKey = "";
     
-    //These match whatever current song is set by switchSong().
+    //These match whatever current track is set by switchTrack().
     string id;
     string path;
-    int duration;
-    int intro;
-    int tempo;
-    ofSoundPlayer player;
-    ofSoundPlayer halfSpeedPlayer;
-    ofSoundPlayer introPlayer;
+    int normPreRecordDuration;
+    int normRecordDuration;
+    int halfPreRecordDuration;
+    int halfRecordDuration;
+    ofVideoPlayer player;
     
 protected:
     
