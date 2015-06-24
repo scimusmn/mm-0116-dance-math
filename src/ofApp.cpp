@@ -16,15 +16,19 @@ void ofApp::setup(){
     vidRecorder->initRecording();
 
     //Load Sounds
-    jukebox.autoAddTrack("circle", 2000, 4000, 6000, 8000); // CIRCLE
-    jukebox.autoAddTrack("triangle", 9951, 18242, 39442, 56023); // TRIANGLE
-    jukebox.autoAddTrack("square", 5000, 10000, 15000, 25000); // SQUARE
-    jukebox.autoAddTrack("freestyle1", 5000, 10000, 15000, 25000); // HIP-HOP
-    jukebox.autoAddTrack("freestyle2", 5000, 10000, 15000, 25000); // DUBSTEP
-    jukebox.autoAddTrack("freestyle3", 5000, 10000, 15000, 25000); // PIANO
-    jukebox.autoAddTrack("freestyle4", 5000, 10000, 15000, 25000); // ROCK & ROLL
-    
+    jukebox.autoAddTrack("circle", 9911, 18386, 28096, 45046); // CIRCLE
+    jukebox.autoAddTrack("triangle", 9911, 18386, 28096, 45046); // TRIANGLE
+    jukebox.autoAddTrack("square", 9951, 18286, 28063, 44812); // SQUARE
+    jukebox.autoAddTrack("freestyle1", 5507, 11612, 21790, 34002); // HIP and HOPPY
+    jukebox.autoAddTrack("freestyle2", 5340, 11629, 21690, 34269); // WALKIN THE KEYS
+    jukebox.autoAddTrack("freestyle3", 5107, 10962, 20722, 32433); // STOMP AND SHUFFLE
+    jukebox.autoAddTrack("freestyle4", 4639,  9728, 18753, 28930); // ROCK & ROLL
     jukebox.loadSound("btnPress");
+    jukebox.loadSound("select_en");
+    jukebox.loadSound("selectTrack_en");
+    jukebox.loadSound("playback1_en");
+    jukebox.loadSound("playback2_en");
+    jukebox.loadSound("playback3_en");
     
     //Load/Setup UI
     layout.setupViews();
@@ -32,6 +36,12 @@ void ofApp::setup(){
     toggleLanguage();
     layout.setView(DMLayout::VIEW_SELECT);
     appState = STATE_NORMAL;
+    
+    //Hide cursor (comment out if on touch screen)
+    ofHideCursor();
+    
+    ofLogToFile("log.txt", true);
+    ofSetLogLevel(OF_LOG_WARNING);
     
 }
 
@@ -64,17 +74,15 @@ void ofApp::resetInactivity(){
 //--------------------------------------------------------------
 void ofApp::startRecordSequence(){
     
+    ofLogWarning("startRecordSequence()", ofToString(jukebox.id) );
+
     //Show live camera feed and overlay guide video
     layout.setView(DMLayout::VIEW_RECORD);
     appState = STATE_PRE_RECORD_NORM;
     
-    ofLogNotice("start sequence: ", ofToString(ofGetElapsedTimeMillis()));
-    
     //Start guide overlay video
     jukebox.playFromStart();
     resetTimeTracking();
-    
-    ofLogNotice("sequnce has started: ", ofToString(ofGetElapsedTimeMillis()));
     
 }
 
@@ -142,7 +150,30 @@ void ofApp::update(){
             ofLogError("Cannot save video") << "video was still recording: " << vidRecorder->isRecording();
         }
         
-        appState = STATE_PLAYBACK;
+        appState = STATE_PRE_PLAYBACK;
+        
+    }
+    //Half-speed recording has finished. Wait for guide video to end
+    else if (appState == STATE_PRE_PLAYBACK) {
+        
+        if (vidRecorder->isRecording() == false){
+            
+            if (jukebox.player.getIsMovieDone() == true) {
+                
+                ofLogNotice("Guide movie finished");
+                
+                //Clear jukebox
+                jukebox.clearTrack();
+                
+                //Show playback screen
+                //(recorded vids may or may not already be loaded)
+                appState = STATE_PLAYBACK;
+                layout.setView(DMLayout::VIEW_PLAYBACK_1);
+                jukebox.playSound("playback1_en");
+                
+            }
+            
+        }
         
     }
     
@@ -162,6 +193,14 @@ void ofApp::update(){
         resetInactivity();
     } else {
         inactivityCount++;
+        
+        //TEMP/DEBUG
+//        if (inactivityCount > 5){
+//            //Simulate mouse press at random point on screen
+//            mousePressed(ofRandomWidth(), ofRandomHeight(), 1);
+//            inactivityCount = 0;
+//        }
+        
     }
     
 }
@@ -184,11 +223,11 @@ void ofApp::draw(){
     layout.draw();
     
     //TEMP DEBUG
-    if (appState == STATE_RECORD_NORM || appState == STATE_RECORD_HALF) {
-        ofSetColor(255,0,0);
-        ofCircle(1100, 900, 50);
-        ofSetColor(255,255,255);
-    }
+//    if (appState == STATE_RECORD_NORM || appState == STATE_RECORD_HALF) {
+//        ofSetColor(255,0,0);
+//        ofCircle(1100, 900, 50);
+//        ofSetColor(255,255,255);
+//    }
     
     
     //Update guide video during recording
@@ -207,6 +246,12 @@ void ofApp::draw(){
 void ofApp::mousePressed(int x, int y, int button){
     
     string btn = layout.getSelected(x, y);
+    
+    //trigger generic button sound
+    if (btn != ""){
+        ofSoundStopAll();
+        jukebox.playSound("btnPress");
+    }
 
     if (btn.substr(0,13) == "chose_pattern") {
         
@@ -217,6 +262,7 @@ void ofApp::mousePressed(int x, int y, int button){
         } else {
             //Show freestyle music selection screen
             layout.setView(DMLayout::VIEW_SELECT_TRACK);
+            jukebox.playSound("selectTrack_en");
         }
 
     }
@@ -236,8 +282,10 @@ void ofApp::mousePressed(int x, int y, int button){
         session.slowVidPlayer.firstFrame();
         session.normVidPlayer.firstFrame();
         layout.setView(DMLayout::VIEW_PLAYBACK_2);
+        jukebox.playSound("playback2_en");
     } else if (btn == "combine") {
         layout.setView(DMLayout::VIEW_PLAYBACK_3);
+        jukebox.playSound("playback3_en");
     }
     
     if (btn == "toggle_language") {
@@ -250,11 +298,6 @@ void ofApp::mousePressed(int x, int y, int button){
         
         startOver();
         
-    }
-    
-    //trigger generic button sound
-    if (btn != ""){
-//        jukebox.playSound("btnPress");
     }
     
     if( appState == STATE_SCREENSAVER ) {
@@ -280,6 +323,7 @@ void ofApp::startOver(){
     appState = STATE_NORMAL;
     
     layout.setView(DMLayout::VIEW_SELECT);
+    jukebox.playSound("select_en");
     
     //delete all temp files
     clearFiles();
@@ -318,6 +362,7 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
     if(e.error.empty()){
         
         string vidPath = e.videoPath;
+        
         ofLogNotice("Success: videoSaved()", ofToString(vidPath));
         
         if (appState == STATE_PRE_RECORD_HALF) {
@@ -326,25 +371,26 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
             
             //Second recording is underway...
             
-        } else if (appState == STATE_PLAYBACK) {
+        } else if (appState == STATE_PRE_PLAYBACK || appState == STATE_PLAYBACK) {
             
             session.saveData(true, vidPath);
-            
-            //Clear jukebox
-            jukebox.clearTrack();
-            
+           
             //Default to original speeds
             session.slowVidPlayer.setSpeed(1);
             session.normVidPlayer.setSpeed(1);
             
             session.restartVids();
+
+        } else {
             
-            layout.setView(DMLayout::VIEW_PLAYBACK_1);
+            ofLogError("videoSaved") << "Appstate unexpected: " << appState;
             
         }
 
     } else {
+        
         ofLogError("videoSavedEvent") << "Video save error: " << e.error;
+        
     }
     
 }
@@ -371,6 +417,7 @@ void ofApp::clearFiles() {
 
 //--------------------------------------------------------------
 void ofApp::Session::saveData(bool halfSpeed, string vid){
+    
     if (halfSpeed == true) {
         slowVid = vid;
         
@@ -379,6 +426,7 @@ void ofApp::Session::saveData(bool halfSpeed, string vid){
         ofSleepMillis(50);
         slowVidPlayer.close();
         slowVidPlayer.loadMovie(slowVid);
+        slowVidPlayer.setLoopState(OF_LOOP_NONE);
         slowVidPlayer.play();
         
     } else if (halfSpeed == false) {
@@ -389,11 +437,13 @@ void ofApp::Session::saveData(bool halfSpeed, string vid){
         ofSleepMillis(50);
         normVidPlayer.close();
         normVidPlayer.loadMovie(normVid);
+        normVidPlayer.setLoopState(OF_LOOP_NONE);
         normVidPlayer.play();
         
     } else {
         ofLogError("Session") << "Can not save session. Unrecognized state: " << halfSpeed;
     }
+    
 }
 
 //--------------------------------------------------------------
@@ -437,11 +487,13 @@ void ofApp::Session::drawVids(bool combine){
 void ofApp::Session::restartVids(){
 
     if(!slowVid.empty()) {
+        ofLogNotice("-restart slow");
         slowVidPlayer.firstFrame();
         slowVidPlayer.play();
     }
     
     if(!normVid.empty()) {
+        ofLogNotice("-restart norm");
         normVidPlayer.firstFrame();
         normVidPlayer.play();
     }

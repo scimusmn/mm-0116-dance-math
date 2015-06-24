@@ -2,7 +2,7 @@
 What does half-speed feel like? Record your movements at different speeds to learn about ratios.
 
 ##Launching Application
-1. Copy all folders and files from smb://smm-nas-1/Shared/Projects/Math Core/Multimedia/0116 Dance Math/04_Programming/00_media into the mm-0116-dance-math/bin/data directory.
+1. Copy all folders and files from smb://smm-files.smm.org/Shared/Projects/Math Moves - SMM/Multimedia/0116 Dance Math/04_Programming/00_media Dance Math/04_Programming/00_media into the mm-0116-dance-math/bin/data directory.
 1. Double-click app file located at mm-0116-dance-math/bin/danceMath.app
 
 ## Required Hardware

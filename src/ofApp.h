@@ -22,6 +22,7 @@ enum AppState{
     STATE_RECORD_NORM,
     STATE_PRE_RECORD_HALF,
     STATE_RECORD_HALF,
+    STATE_PRE_PLAYBACK,
     STATE_PLAYBACK,
     STATE_SCREENSAVER
 };
@@ -65,7 +66,6 @@ class ofApp : public ofBaseApp{
         //UI
         AppState appState;
         DMLayout layout;
-        ofVideoPlayer guideVidPlayer;
         void startOver();
         void startRecordSequence();
         void resetInactivity();

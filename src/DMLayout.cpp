@@ -27,7 +27,7 @@ void DMLayout::setupViews(){
     videoButton("select_btnTriangle_en", 47, 407, "chose_pattern_triangle");
     videoButton("select_btnSquare_en", 912, 407, "chose_pattern_square");
     videoButton("select_btnFreestyle_en", 1418, 407, "chose_pattern_freestyle");
-    button("btnLang_en", 44, 952, "toggle_language");
+//    button("btnLang_en", 44, 952, "toggle_language");
     saveView(VIEW_SELECT);
 
     //Choose your music (Advanced)
@@ -57,7 +57,7 @@ void DMLayout::setupViews(){
     
     //Playback 3 (Combined Fullscreen)
     video("playback3_bg_en", 0, 0, false);
-    button("btnStartOver_en", 1521, 962, "start_over");
+    button("btnStartOver_en", 1490, 955, "start_over");
     saveView(VIEW_PLAYBACK_3);
     
     //Screensaver
@@ -81,7 +81,7 @@ void DMLayout::setView(string name){
     
     ofxSimpleLayout::Layout::setView(newViewId);
     
-    setupTweens(baseViewId);
+//    setupTweens(baseViewId);
     
 }
 
@@ -103,18 +103,18 @@ void DMLayout::setupTweens(string viewId){
 
 void DMLayout::draw(){
     
-    if (baseViewId == VIEW_SELECT_TRACK) {
-        
-        //Slide in track tabs.
-        float tx = multitween.update();
-        getByName("selectTrack_tab1_en").box.setX( tx );
-        getByName("selectTrack_tab2_en").box.setX( tx );
-        getByName("selectTrack_tab3_en").box.setX( tx );
-        getByName("selectTrack_tab4_en").box.setX( tx );
-        
-        ofRect(20,430,multitween.getTarget(1),20);
-        
-    }
+//    if (baseViewId == VIEW_SELECT_TRACK) {
+//        
+//        //Slide in track tabs.
+//        float tx = multitween.update();
+//        getByName("selectTrack_tab1_en").box.setX( tx );
+//        getByName("selectTrack_tab2_en").box.setX( tx );
+//        getByName("selectTrack_tab3_en").box.setX( tx );
+//        getByName("selectTrack_tab4_en").box.setX( tx );
+//        
+//        ofRect(20,430,multitween.getTarget(1),20);
+//        
+//    }
     
     Layout::draw();
     
