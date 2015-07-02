@@ -210,7 +210,7 @@ void ofApp::draw(){
 
     //Draw cams/Vids except on last playback screen && screensaver
     if (layout.baseViewId != DMLayout::VIEW_PLAYBACK_3 && appState != STATE_SCREENSAVER) {
-        cam.draw(VID_SIZE_BIG_W, 0, 0 - VID_SIZE_BIG_W, VID_SIZE_BIG_H);
+        cam.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
     }
     
     //Draw combined videos on final playback screen
@@ -221,14 +221,6 @@ void ofApp::draw(){
     //Draw layout
     ofSetColor(255,255,255);
     layout.draw();
-    
-    //TEMP DEBUG
-//    if (appState == STATE_RECORD_NORM || appState == STATE_RECORD_HALF) {
-//        ofSetColor(255,0,0);
-//        ofCircle(1100, 900, 50);
-//        ofSetColor(255,255,255);
-//    }
-    
     
     //Update guide video during recording
     if (!jukebox.id.empty()){
@@ -468,16 +460,16 @@ void ofApp::Session::drawVids(bool combine){
         
         //Combined (mirrored)
         ofSetColor(255,255,255,255);
-        normVidPlayer.draw(VID_SIZE_BIG_W, 0, 0 - VID_SIZE_BIG_W, VID_SIZE_BIG_H);
+        normVidPlayer.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
         
         ofSetColor(255, 255, 255, 140);
-        slowVidPlayer.draw(VID_SIZE_BIG_W, 0, 0 - VID_SIZE_BIG_W, VID_SIZE_BIG_H);
+        slowVidPlayer.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
         
     } else {
         
         //Separated (mirrored)
-        normVidPlayer.draw(42 + VID_SIZE_SMALL_W, 381, 0 - VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
-        slowVidPlayer.draw(1016 + VID_SIZE_SMALL_W, 381, 0 - VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        normVidPlayer.draw(42, 381, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
+        slowVidPlayer.draw(1016, 381, VID_SIZE_SMALL_W, VID_SIZE_SMALL_H);
         
     }
     
