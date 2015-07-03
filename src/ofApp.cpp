@@ -408,9 +408,9 @@ bool ofApp::listCamDevices() {
     
     for(int i = 0; i < devices.size(); i++){
         if( devices[i].bAvailable ){
-            ofLogWarning(ofToString(devices[i].id) + ": " + ofToString(devices[i].deviceName + " - available "));
+            ofLogWarning(ofToString(devices[i].id), ofToString(devices[i].deviceName + " - available "));
         }else{
-            ofLogWarning(ofToString(devices[i].id) + ": " + ofToString(devices[i].deviceName + " - unavailable "));
+            ofLogWarning(ofToString(devices[i].id), ofToString(devices[i].deviceName + " - unavailable "));
         }
     }
     
@@ -470,7 +470,7 @@ void ofApp::Session::saveData(bool halfSpeed, string vid){
         slowVid = vid;
         
         slowVidPlayer.stop();
-        slowVidPlayer.update();
+        slowVidPlayer.update(); // This update throws error, but do not remove
         ofSleepMillis(50);
         slowVidPlayer.close();
         slowVidPlayer.loadMovie(slowVid);
@@ -481,7 +481,7 @@ void ofApp::Session::saveData(bool halfSpeed, string vid){
         normVid = vid;
         
         normVidPlayer.stop();
-        normVidPlayer.update();
+        normVidPlayer.update(); // This update throws error, but do not remove
         ofSleepMillis(50);
         normVidPlayer.close();
         normVidPlayer.loadMovie(normVid);
