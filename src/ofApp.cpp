@@ -3,18 +3,22 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     
+    ofLogToFile("log.txt", true);
+    ofSetLogLevel(OF_LOG_WARNING);
+    ofLogWarning("Setup...");
+    
+    //Halt program until we have access to a camera
+    while (listCamDevices() == false) {
+        ofSleepMillis(5000);
+    }
+    
     //Set up graphics
     ofEnableSmoothing();
     ofBackground(30,30,30);
-    
-    //Setup cameras & video recorder
-    vidRecorder = ofPtr<ofQTKitGrabber>( new ofQTKitGrabber() );
-    cam.setGrabber(vidRecorder);
-    cam.setDeviceID(0);//Assumes there is only one camera connected. (otherwise use different device id)
-    cam.initGrabber(VID_SIZE_BIG_W, VID_SIZE_BIG_H);
-    ofAddListener(vidRecorder->videoSavedEvent, this, &ofApp::videoSaved); // Listen for video saved events
-    vidRecorder->initRecording();
 
+    //Setup cameras & video recorder
+    initCamera();
+    
     //Load Sounds
     jukebox.autoAddTrack("circle", 9911, 18386, 28096, 45046); // CIRCLE
     jukebox.autoAddTrack("triangle", 9911, 18386, 28096, 45046); // TRIANGLE
@@ -39,10 +43,7 @@ void ofApp::setup(){
     
     //Hide cursor (comment out if on touch screen)
     ofHideCursor();
-    
-    ofLogToFile("log.txt", true);
-    ofSetLogLevel(OF_LOG_WARNING);
-    
+
 }
 
 //--------------------------------------------------------------
@@ -194,12 +195,14 @@ void ofApp::update(){
     } else {
         inactivityCount++;
         
-        //TEMP/DEBUG
-//        if (inactivityCount > 5){
-//            //Simulate mouse press at random point on screen
-//            mousePressed(ofRandomWidth(), ofRandomHeight(), 1);
-//            inactivityCount = 0;
-//        }
+        //Uncomment to simulate user input for debugging.
+        /*
+        if (inactivityCount > 5){
+            //Simulate mouse press at random point on screen
+            mousePressed(ofRandomWidth(), ofRandomHeight(), 1);
+            inactivityCount = 0;
+        }
+         */
         
     }
     
@@ -383,7 +386,59 @@ void ofApp::videoSaved(ofVideoSavedEventArgs& e){
         
         ofLogError("videoSavedEvent") << "Video save error: " << e.error;
         
+        //We may have received an error here
+        //because the camera disconnected, so we
+        //will attempt to reconnect if there
+        //is one available.
+        if (listCamDevices() == true) {
+            initCamera();
+        };
+        
     }
+    
+}
+
+//--------------------------------------------------------------
+bool ofApp::listCamDevices() {
+    
+    //we can now get back a list of devices.
+    vector<ofVideoDevice> devices = cam.listDevices();
+    
+    ofLogWarning("List Camera Devices");
+    
+    for(int i = 0; i < devices.size(); i++){
+        if( devices[i].bAvailable ){
+            ofLogWarning(ofToString(devices[i].id) + ": " + ofToString(devices[i].deviceName + " - available "));
+        }else{
+            ofLogWarning(ofToString(devices[i].id) + ": " + ofToString(devices[i].deviceName + " - unavailable "));
+        }
+    }
+    
+    if (devices.size() > 0){
+        return true;
+    } else {
+        return false;
+    }
+
+}
+
+void ofApp::initCamera() {
+    
+    ofLogWarning("initCamera(). isInitialized", ofToString(cam.isInitialized()));
+    
+    if (cam.isInitialized() == true) {
+        cam.close();
+        ofSleepMillis(150);
+    }
+    
+    vidRecorder = ofPtr<ofQTKitGrabber>( new ofQTKitGrabber() );
+    
+    cam.setGrabber(vidRecorder);
+    cam.setDeviceID(0);//Assumes there is only one camera connected. (otherwise use different device id)
+    cam.initGrabber(VID_SIZE_BIG_W, VID_SIZE_BIG_H);
+    
+    ofAddListener(vidRecorder->videoSavedEvent, this, &ofApp::videoSaved); // Listen for video saved events
+    vidRecorder->initRecording();
     
 }
 
@@ -500,7 +555,7 @@ void ofApp::Session::clear(){
     /**
      * Due to an OF bug, you cannot close
      * ofVideoPlayer when current position == 0,
-     * which happens occasionally by chance,
+     * which happens rarely but consistently by chance,
      * so we stop all players before closing,
      * and sleep to allow any related callbacks
      * see http://goo.gl/Vz8zdx

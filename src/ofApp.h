@@ -39,6 +39,7 @@ class ofApp : public ofBaseApp{
         ofVideoGrabber cam;
         ofPtr<ofQTKitGrabber> vidRecorder;
         void videoSaved(ofVideoSavedEventArgs& e);
+        void initCamera();
 
         //Session
         class Session {
@@ -76,6 +77,7 @@ class ofApp : public ofBaseApp{
         int inactivityCount;
 
         //Util
+        bool listCamDevices();
         void clearFiles();
 		
 };
