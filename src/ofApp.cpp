@@ -427,6 +427,7 @@ void ofApp::initCamera() {
     ofLogWarning("initCamera(). isInitialized", ofToString(cam.isInitialized()));
     
     if (cam.isInitialized() == true) {
+        ofLogWarning("Attempting to reconnect camera feed.");
         cam.close();
         ofSleepMillis(150);
     }
