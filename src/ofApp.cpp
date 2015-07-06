@@ -5,10 +5,11 @@ void ofApp::setup(){
     
     ofLogToFile("log.txt", true);
     ofSetLogLevel(OF_LOG_WARNING);
-    ofLogWarning("Setup...");
+    ofLogWarning("Setup", ofGetTimestampString("%w, %h:%M%a"));
     
     //Halt program until we have access to a camera
     while (listCamDevices() == false) {
+        ofLogWarning("Waiting for camera to become available...", ofToString(ofGetTimestampString()) );
         ofSleepMillis(5000);
     }
     
@@ -41,7 +42,7 @@ void ofApp::setup(){
     layout.setView(DMLayout::VIEW_SELECT);
     appState = STATE_NORMAL;
     
-    //Hide cursor (comment out if on touch screen)
+    //Hide cursor (comment out if not on touch screen)
     ofHideCursor();
 
 }
@@ -75,7 +76,7 @@ void ofApp::resetInactivity(){
 //--------------------------------------------------------------
 void ofApp::startRecordSequence(){
     
-    ofLogWarning("startRecordSequence()", ofToString(jukebox.id) );
+    ofLogWarning("startRecordSequence()", ofToString(jukebox.id) + ", " + ofToString(ofGetTimestampString()) );
 
     //Show live camera feed and overlay guide video
     layout.setView(DMLayout::VIEW_RECORD);
@@ -161,8 +162,6 @@ void ofApp::update(){
             
             if (jukebox.player.getIsMovieDone() == true) {
                 
-                ofLogNotice("Guide movie finished");
-                
                 //Clear jukebox
                 jukebox.clearTrack();
                 
@@ -189,6 +188,8 @@ void ofApp::update(){
         resetInactivity();
     }
     if (inactivityCount > SCREENSAVER_TIMEOUT){
+        
+        ofLogWarning("Displaying Screensaver", ofToString(ofGetTimestampString()) );
         appState = STATE_SCREENSAVER;
         layout.setView(DMLayout::VIEW_SCREENSAVER);
         resetInactivity();
@@ -258,6 +259,8 @@ void ofApp::mousePressed(int x, int y, int button){
             //Show freestyle music selection screen
             layout.setView(DMLayout::VIEW_SELECT_TRACK);
             jukebox.playSound("selectTrack_en");
+            
+            
         }
 
     }
@@ -427,7 +430,7 @@ void ofApp::initCamera() {
     ofLogWarning("initCamera(). isInitialized", ofToString(cam.isInitialized()));
     
     if (cam.isInitialized() == true) {
-        ofLogWarning("Attempting to reconnect camera feed.");
+        ofLogWarning("Attempting to reconnect camera feed.", ofToString(ofGetTimestampString()));
         cam.close();
         ofSleepMillis(150);
     }
@@ -535,13 +538,11 @@ void ofApp::Session::drawVids(bool combine){
 void ofApp::Session::restartVids(){
 
     if(!slowVid.empty()) {
-        ofLogNotice("-restart slow");
         slowVidPlayer.firstFrame();
         slowVidPlayer.play();
     }
     
     if(!normVid.empty()) {
-        ofLogNotice("-restart norm");
         normVidPlayer.firstFrame();
         normVidPlayer.play();
     }
