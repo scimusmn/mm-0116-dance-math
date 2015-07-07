@@ -6,10 +6,13 @@ void ofApp::setup(){
     ofLogToFile("log.txt", true);
     ofSetLogLevel(OF_LOG_WARNING);
     ofLogWarning("Setup", ofGetTimestampString("%w, %h:%M%a"));
+    
+    //Hide cursor (comment out if not on touch screen)
+    ofHideCursor();
 
     //Set up graphics
+    ofSetFrameRate(30);
     ofEnableSmoothing();
-    ofBackground(30,30,30);
 
     //Setup cameras & video recorder
     initCamera();
@@ -35,19 +38,16 @@ void ofApp::setup(){
     toggleLanguage();
     layout.setView(DMLayout::VIEW_SELECT);
     appState = STATE_NORMAL;
-    
-    //Hide cursor (comment out if not on touch screen)
-    ofHideCursor();
 
 }
 
 //--------------------------------------------------------------
 void ofApp::initRecording(){
-    
-    //New video file in /temp folder
-    stringstream s;
-    s << "temp/video_" << ofGetUnixTime() << ".mov";
-    vidRecorder->startRecording(s.str());
+
+    //Start recording new video file in /temp folder (video only)
+    currentVidPath = "temp/video_"+ofGetTimestampString()+".mov";
+    vidRecorder.setup(currentVidPath, vidGrabber.getWidth(), vidGrabber.getHeight(), 30);
+    vidRecorder.start();
     
 }
 
@@ -95,7 +95,15 @@ void ofApp::update(){
     
     //Draw camera feed unless on last playback screen or screensaver
     if (layout.baseViewId != DMLayout::VIEW_PLAYBACK_3 && appState != STATE_SCREENSAVER) {
-        cam.update();
+        
+        //Update during recording
+        vidGrabber.update();
+        
+        //Add frame if we are currently recording.
+        if(vidGrabber.isFrameNew() && vidRecorder.isRecording()){
+            vidRecorder.addFrame(vidGrabber.getPixelsRef());
+        }
+        
     }
     
     //Update guide video during recording
@@ -119,13 +127,13 @@ void ofApp::update(){
         
         ofLogNotice("End normal-speed recording", ofToString(timeElapsed));
         
-        if(vidRecorder->isRecording()){
-            vidRecorder->stopRecording();
+        if(vidRecorder.isRecording()){
+            vidRecorder.close();
+            appState = STATE_PRE_RECORD_HALF;
+            this->videoSaved();
         } else {
-            ofLogError("Cannot save video") << "video was still recording: " << vidRecorder->isRecording();
+            ofLogError("Cannot save video") << "video was still recording: " << vidRecorder.isRecording();
         }
-    
-        appState = STATE_PRE_RECORD_HALF;
 
     }
     //Start half-speed recording
@@ -140,19 +148,19 @@ void ofApp::update(){
     else if (appState == STATE_RECORD_HALF && timeElapsed >= jukebox.halfRecordDuration){
         
         ofLogNotice("End half-speed recording", ofToString(timeElapsed));
-        if(vidRecorder->isRecording()){
-            vidRecorder->stopRecording();
+        if(vidRecorder.isRecording()){
+            vidRecorder.close();
+            appState = STATE_PRE_PLAYBACK;
+            this->videoSaved();
         } else {
-            ofLogError("Cannot save video") << "video was still recording: " << vidRecorder->isRecording();
+            ofLogError("Cannot save video") << "video was still recording: " << vidRecorder.isRecording();
         }
-        
-        appState = STATE_PRE_PLAYBACK;
-        
+ 
     }
     //Half-speed recording has finished. Wait for guide video to end
     else if (appState == STATE_PRE_PLAYBACK) {
         
-        if (vidRecorder->isRecording() == false){
+        if (vidRecorder.isRecording() == false){
             
             if (jukebox.player.getIsMovieDone() == true) {
                 
@@ -197,7 +205,7 @@ void ofApp::update(){
             mousePressed(ofRandomWidth(), ofRandomHeight(), 1);
             inactivityCount = 0;
         }
-         */
+        */
         
     }
     
@@ -208,7 +216,7 @@ void ofApp::draw(){
 
     //Draw cams/Vids except on last playback screen && screensaver
     if (layout.baseViewId != DMLayout::VIEW_PLAYBACK_3 && appState != STATE_SCREENSAVER) {
-        cam.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
+        vidGrabber.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
     }
     
     //Draw combined videos on final playback screen
@@ -253,8 +261,7 @@ void ofApp::mousePressed(int x, int y, int button){
             //Show freestyle music selection screen
             layout.setView(DMLayout::VIEW_SELECT_TRACK);
             jukebox.playSound("selectTrack_en");
-            
-            
+
         }
 
     }
@@ -348,58 +355,39 @@ void ofApp::toggleLanguage(){
 }
 
 //--------------------------------------------------------------
-void ofApp::videoSaved(ofVideoSavedEventArgs& e){
-    
-    // ofQTKitGrabber sends a message with the file name and any errors when the video is done recording
-    if(e.error.empty()){
-        
-        string vidPath = e.videoPath;
-        
-        ofLogNotice("Success: videoSaved()", ofToString(vidPath));
-        
-        if (appState == STATE_PRE_RECORD_HALF) {
-            
-            session.saveData(false, vidPath);
-            
-            //Second recording is underway...
-            
-        } else if (appState == STATE_PRE_PLAYBACK || appState == STATE_PLAYBACK) {
-            
-            session.saveData(true, vidPath);
-           
-            //Default to original speeds
-            session.slowVidPlayer.setSpeed(1);
-            session.normVidPlayer.setSpeed(1);
-            
-            session.restartVids();
+void ofApp::videoSaved(){
 
-        } else {
-            
-            ofLogError("videoSaved") << "Appstate unexpected: " << appState;
-            
-        }
+    ofLogNotice("Success: videoSaved()", ofToString(currentVidPath));
+    
+    if (appState == STATE_PRE_RECORD_HALF) {
+        
+        session.saveData(false, currentVidPath);
+        
+        //Second recording is underway...
+        
+    } else if (appState == STATE_PRE_PLAYBACK || appState == STATE_PLAYBACK) {
+        
+        session.saveData(true, currentVidPath);
+       
+        //Default to original speeds
+        session.slowVidPlayer.setSpeed(1);
+        session.normVidPlayer.setSpeed(1);
+        
+        session.restartVids();
 
     } else {
         
-        ofLogError("videoSavedEvent") << "Video save error: " << e.error;
-        
-        //We may have received an error here
-        //because the camera disconnected, so we
-        //will attempt to reconnect if there
-        //is one available.
-        if (listCamDevices() == true) {
-            initCamera();
-        };
+        ofLogError("videoSaved") << "Appstate unexpected: " << appState;
         
     }
-    
+
 }
 
 //--------------------------------------------------------------
 bool ofApp::listCamDevices() {
     
     //we can now get back a list of devices.
-    vector<ofVideoDevice> devices = cam.listDevices();
+    vector<ofVideoDevice> devices = vidGrabber.listDevices();
     
     ofLogWarning("List Camera Devices");
     
@@ -421,23 +409,21 @@ bool ofApp::listCamDevices() {
 
 void ofApp::initCamera() {
     
-    ofLogWarning("initCamera(). isInitialized", ofToString(cam.isInitialized()));
+    ofLogWarning("initCamera(). isInitialized", ofToString(vidGrabber.isInitialized()));
     
-    if (cam.isInitialized() == true) {
+    if (vidGrabber.isInitialized() == true) {
         ofLogWarning("Attempting to reconnect camera feed.", ofToString(ofGetTimestampString()));
-        cam.close();
+        vidGrabber.close();
+        vidRecorder.close();
         ofSleepMillis(150);
     }
     
-    vidRecorder = ofPtr<ofQTKitGrabber>( new ofQTKitGrabber() );
-    
-    cam.setGrabber(vidRecorder);
-    cam.setDeviceID(0);//Assumes there is only one camera connected. (otherwise use different device id)
-    cam.initGrabber(VID_SIZE_BIG_W, VID_SIZE_BIG_H);
-    
-    ofAddListener(vidRecorder->videoSavedEvent, this, &ofApp::videoSaved); // Listen for video saved events
-    vidRecorder->initRecording();
-    
+    vidGrabber.setDesiredFrameRate(30);
+    vidGrabber.setDeviceID(0);//Assumes there is only one camera connected. (otherwise use different device id)
+    vidGrabber.initGrabber(VID_SIZE_BIG_W, VID_SIZE_BIG_H);
+    vidRecorder.setVideoCodec("mpeg4");
+    vidRecorder.setVideoBitrate("1200k");
+
 }
 
 //--------------------------------------------------------------

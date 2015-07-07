@@ -10,6 +10,7 @@
 		74AD5E672F48211FE09C2B09 /* ofxSimpleLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 376C4C360806907A36697DD7 /* ofxSimpleLayout.cpp */; };
 		BBAB23CB13894F3D00AA2426 /* GLUT.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = BBAB23BE13894E4700AA2426 /* GLUT.framework */; };
 		BF4B74081B474CF1006F75B2 /* ofxWatchdog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF4B74061B474CF1006F75B2 /* ofxWatchdog.cpp */; };
+		BF4B740E1B4C44FB006F75B2 /* ofxVideoRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF4B740C1B4C44FB006F75B2 /* ofxVideoRecorder.cpp */; };
 		BF763D5A1B34C77A00F124EA /* ofxEasing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF763D401B34C77A00F124EA /* ofxEasing.cpp */; };
 		BF763D5B1B34C77A00F124EA /* ofxEasingBack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF763D421B34C77A00F124EA /* ofxEasingBack.cpp */; };
 		BF763D5C1B34C77A00F124EA /* ofxEasingBounce.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF763D441B34C77A00F124EA /* ofxEasingBounce.cpp */; };
@@ -81,6 +82,8 @@
 		BBAB23BE13894E4700AA2426 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = ../../../libs/glut/lib/osx/GLUT.framework; sourceTree = "<group>"; };
 		BF4B74061B474CF1006F75B2 /* ofxWatchdog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxWatchdog.cpp; path = ../../../addons/ofxWatchdog/src/ofxWatchdog.cpp; sourceTree = "<group>"; };
 		BF4B74071B474CF1006F75B2 /* ofxWatchdog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxWatchdog.h; path = ../../../addons/ofxWatchdog/src/ofxWatchdog.h; sourceTree = "<group>"; };
+		BF4B740C1B4C44FB006F75B2 /* ofxVideoRecorder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxVideoRecorder.cpp; path = ../../../addons/ofxVideoRecorder/src/ofxVideoRecorder.cpp; sourceTree = "<group>"; };
+		BF4B740D1B4C44FB006F75B2 /* ofxVideoRecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxVideoRecorder.h; path = ../../../addons/ofxVideoRecorder/src/ofxVideoRecorder.h; sourceTree = "<group>"; };
 		BF763D3F1B34C77A00F124EA /* easing_terms_of_use.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = easing_terms_of_use.html; sourceTree = "<group>"; };
 		BF763D401B34C77A00F124EA /* ofxEasing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxEasing.cpp; sourceTree = "<group>"; };
 		BF763D411B34C77A00F124EA /* ofxEasing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxEasing.h; sourceTree = "<group>"; };
@@ -175,6 +178,7 @@
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				BF4B740F1B4C4503006F75B2 /* ofxVideoRecorder */,
 				BF4B74091B474CF5006F75B2 /* ofxWatchdog */,
 				BF763D671B34C78200F124EA /* ofxTween */,
 				E0A0690D43CA6CE398F64F45 /* ofxSimpleLayout */,
@@ -218,6 +222,15 @@
 				BF4B74071B474CF1006F75B2 /* ofxWatchdog.h */,
 			);
 			name = ofxWatchdog;
+			sourceTree = "<group>";
+		};
+		BF4B740F1B4C4503006F75B2 /* ofxVideoRecorder */ = {
+			isa = PBXGroup;
+			children = (
+				BF4B740C1B4C44FB006F75B2 /* ofxVideoRecorder.cpp */,
+				BF4B740D1B4C44FB006F75B2 /* ofxVideoRecorder.h */,
+			);
+			name = ofxVideoRecorder;
 			sourceTree = "<group>";
 		};
 		BF763D3E1B34C77A00F124EA /* Easings */ = {
@@ -414,6 +427,7 @@
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
 				BF763D661B34C77A00F124EA /* ofxTween.cpp in Sources */,
 				E4B69E210A3A1BDC003C02F2 /* ofApp.cpp in Sources */,
+				BF4B740E1B4C44FB006F75B2 /* ofxVideoRecorder.cpp in Sources */,
 				BFFBB5A01AC5E5580004F7B0 /* DMLayout.cpp in Sources */,
 				BF763D5E1B34C77A00F124EA /* ofxEasingCubic.cpp in Sources */,
 				BFB5149C1AD881E5003BF056 /* Jukebox.cpp in Sources */,

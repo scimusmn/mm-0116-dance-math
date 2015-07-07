@@ -20,8 +20,10 @@ Release*/
 # IDE-specific ignore patterns (e.g. user-specific files)
 
 # Large media files
+*.app/*
 *.mov
 *.wav
+*/Contents*
 
 # Intentionally committing main app file.
 !/bin/danceMath.app/
@@ -91,3 +93,5 @@ Desktop.ini
 *.log
 *.sql
 *.sqlite
+
+
