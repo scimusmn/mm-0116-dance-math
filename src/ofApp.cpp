@@ -6,13 +6,7 @@ void ofApp::setup(){
     ofLogToFile("log.txt", true);
     ofSetLogLevel(OF_LOG_WARNING);
     ofLogWarning("Setup", ofGetTimestampString("%w, %h:%M%a"));
-    
-    //Halt program until we have access to a camera
-    while (listCamDevices() == false) {
-        ofLogWarning("Waiting for camera to become available...", ofToString(ofGetTimestampString()) );
-        ofSleepMillis(5000);
-    }
-    
+
     //Set up graphics
     ofEnableSmoothing();
     ofBackground(30,30,30);
