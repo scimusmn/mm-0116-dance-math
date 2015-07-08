@@ -13,7 +13,7 @@ void ofApp::setup(){
     //Set up graphics
     ofSetFrameRate(30);
     ofEnableSmoothing();
-
+ 
     //Setup cameras & video recorder
     initCamera();
     
@@ -38,6 +38,8 @@ void ofApp::setup(){
     toggleLanguage();
     layout.setView(DMLayout::VIEW_SELECT);
     appState = STATE_NORMAL;
+    
+    startOver();
 
 }
 
@@ -186,7 +188,7 @@ void ofApp::update(){
     }
     
     //Screensaver
-    if (appState == STATE_RECORD_NORM || appState == STATE_RECORD_HALF) {
+    if (appState == STATE_RECORD_NORM || appState == STATE_RECORD_HALF || appState == STATE_SCREENSAVER) {
         resetInactivity();
     }
     if (inactivityCount > SCREENSAVER_TIMEOUT){
@@ -195,6 +197,7 @@ void ofApp::update(){
         appState = STATE_SCREENSAVER;
         layout.setView(DMLayout::VIEW_SCREENSAVER);
         resetInactivity();
+        
     } else {
         inactivityCount++;
         
@@ -418,12 +421,13 @@ void ofApp::initCamera() {
         ofSleepMillis(150);
     }
     
-    vidGrabber.setDesiredFrameRate(30);
-    vidGrabber.setDeviceID(0);//Assumes there is only one camera connected. (otherwise use different device id)
-    vidGrabber.initGrabber(VID_SIZE_BIG_W, VID_SIZE_BIG_H);
-    vidRecorder.setVideoCodec("mpeg4");
-    vidRecorder.setVideoBitrate("1200k");
-
+    if (listCamDevices() == true) {
+        vidGrabber.setDeviceID(0);//Assumes there is only one camera connected. (otherwise use different device id)
+        vidGrabber.initGrabber(VID_SIZE_BIG_W, VID_SIZE_BIG_H);
+        vidRecorder.setVideoCodec("mpeg4");
+        vidRecorder.setVideoBitrate("1200k");
+    }
+    
 }
 
 //--------------------------------------------------------------
@@ -442,6 +446,10 @@ void ofApp::clearFiles() {
             ofLogWarning("Trying to delete non-existant file: " + ofToString(files[i].getBaseName()));
         }
         
+    }
+    
+    if (dir.doesDirectoryExist("temp") == false) {
+        dir.createDirectory("temp");
     }
 
 }

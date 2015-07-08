@@ -6,6 +6,8 @@
 //========================================================================
 int main( ){
     
+    ofSetWorkingDirectoryToDefault();
+    
     // ofxWatchdog::watch(msec, reboot, override, verbose)
     // If a process takes more than 7 secs, ofxWatchdog will restart app
     ofxWatchdog::watch(7000, true, true, true);
