@@ -3,15 +3,15 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     
-    ofLogToFile("log.txt", true);
-    ofSetLogLevel(OF_LOG_WARNING);
+//    ofLogToFile("log.txt", true);
+//    ofSetLogLevel(OF_LOG_WARNING);
     ofLogWarning("Setup", ofGetTimestampString("%w, %h:%M%a"));
     
     //Hide cursor (comment out if not on touch screen)
     ofHideCursor();
 
     //Set up graphics
-    ofSetFrameRate(30);
+    ofSetFrameRate(60);
     ofEnableSmoothing();
  
     //Setup cameras & video recorder
@@ -48,9 +48,14 @@ void ofApp::initRecording(){
 
     //Start recording new video file in /temp folder (video only)
     currentVidPath = "temp/video_"+ofGetTimestampString()+".mov";
-    vidRecorder.setup(currentVidPath, vidGrabber.getWidth(), vidGrabber.getHeight(), 30);
+//    vidRecorder.setup(currentVidPath, vidGrabber.getWidth(), vidGrabber.getHeight(), 30);
+    vidRecorder.setup(currentVidPath, vidGrabber.getWidth(), vidGrabber.getHeight(), 30, 41000, 2);
     vidRecorder.start();
     
+}
+
+void ofApp::audioIn(float *input, int bufferSize, int nChannels){
+    if(vidRecorder.isRecording()) vidRecorder.addAudioSamples(input, bufferSize, nChannels);
 }
 
 //--------------------------------------------------------------
@@ -422,10 +427,17 @@ void ofApp::initCamera() {
     }
     
     if (listCamDevices() == true) {
+        
+        soundStream.listDevices();
+        soundStream.setDeviceID(1);
+        soundStream.setup(this, 0, 2, 44100, 256, 4);
         vidGrabber.setDeviceID(0);//Assumes there is only one camera connected. (otherwise use different device id)
         vidGrabber.initGrabber(VID_SIZE_BIG_W, VID_SIZE_BIG_H);
         vidRecorder.setVideoCodec("mpeg4");
         vidRecorder.setVideoBitrate("1200k");
+        vidRecorder.setAudioCodec("mp3");
+        vidRecorder.setAudioBitrate("192k");
+
     }
     
 }

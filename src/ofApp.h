@@ -39,6 +39,8 @@ class ofApp : public ofBaseApp{
         //Cameras
         ofVideoGrabber      vidGrabber;
         ofxVideoRecorder    vidRecorder;
+        ofSoundStream       soundStream;
+        void audioIn(float * input, int bufferSize, int nChannels);
         string currentVidPath;
         void videoSaved();
         void initCamera();
