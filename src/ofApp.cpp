@@ -6,6 +6,9 @@ void ofApp::setup(){
     ofLogToFile("log.txt", true);
     ofSetLogLevel(OF_LOG_WARNING);
     ofLogWarning("Setup", ofGetTimestampString("%w, %h:%M%a"));
+    
+    //Hide cursor (comment out if not on touch screen)
+    ofHideCursor();
 
     //Set up graphics
     ofEnableSmoothing();
@@ -36,8 +39,8 @@ void ofApp::setup(){
     layout.setView(DMLayout::VIEW_SELECT);
     appState = STATE_NORMAL;
     
-    //Hide cursor (comment out if not on touch screen)
-    ofHideCursor();
+    
+    startOver();
 
 }
 
@@ -178,7 +181,7 @@ void ofApp::update(){
     }
     
     //Screensaver
-    if (appState == STATE_RECORD_NORM || appState == STATE_RECORD_HALF) {
+    if (appState == STATE_RECORD_NORM || appState == STATE_RECORD_HALF || appState == STATE_SCREENSAVER) {
         resetInactivity();
     }
     if (inactivityCount > SCREENSAVER_TIMEOUT){
@@ -456,6 +459,10 @@ void ofApp::clearFiles() {
             ofLogWarning("Trying to delete non-existant file: " + ofToString(files[i].getBaseName()));
         }
         
+    }
+
+    if (dir.doesDirectoryExist("temp") == false) {
+        dir.createDirectory("temp");
     }
 
 }

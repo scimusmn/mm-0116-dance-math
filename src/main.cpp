@@ -5,15 +5,11 @@
 //========================================================================
 int main( ){
     
-    // ofxWatchdog::watch(msec, reboot, override, verbose)
-    //
-    //     msec : how long does the watchdog wait, when the process hangs-up in milli seconds
-    //   reboot : automatically restart the process
-    // override : use internal signal handler (optional)
-    //  verbose : print more log information (optional)
+    ofSetWorkingDirectoryToDefault();
     
+    //Tell watchdog to restart app if a process
+    //lasts more than seven seconds.
     ofxWatchdog::watch(7000, true, true, true);
-    
     
 	ofSetupOpenGL(1920,1080,OF_FULLSCREEN);			// <-------- setup the GL context
 
