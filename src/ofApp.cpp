@@ -11,6 +11,7 @@ void ofApp::setup(){
     ofHideCursor();
 
     //Set up graphics
+    ofSetFrameRate(30);
     ofEnableSmoothing();
     ofBackground(30,30,30);
 
@@ -179,17 +180,33 @@ void ofApp::update(){
     if (appState == STATE_PLAYBACK && session.normVidPlayer.getIsMovieDone() == true){
         session.restartVids();
     }
-    
+    //Auto-advance playback screens
+    if (appState == STATE_PLAYBACK && inactivityCount > ceil(SCREENSAVER_TIMEOUT * 0.5)) {
+        
+        if (layout.currentViewId == DMLayout::VIEW_PLAYBACK_1) {
+            ofLogWarning("Auto-advance from", ofToString(layout.currentViewId) );
+            mousePressed(975, 916, 1);
+            resetInactivity();
+        }
+        else if (layout.currentViewId == DMLayout::VIEW_PLAYBACK_2) {
+            ofLogWarning("Auto-advance from", ofToString(layout.currentViewId) );
+            mousePressed(490, 917, 1);
+            resetInactivity();
+        }
+        
+    }
+
     //Screensaver
     if (appState == STATE_RECORD_NORM || appState == STATE_RECORD_HALF || appState == STATE_SCREENSAVER) {
         resetInactivity();
     }
     if (inactivityCount > SCREENSAVER_TIMEOUT){
-        
-        ofLogWarning("Displaying Screensaver", ofToString(ofGetTimestampString()) );
+
+        ofLogWarning("Display Screensaver", ofToString(ofGetTimestampString()) );
         appState = STATE_SCREENSAVER;
         layout.setView(DMLayout::VIEW_SCREENSAVER);
         resetInactivity();
+        
     } else {
         inactivityCount++;
         
