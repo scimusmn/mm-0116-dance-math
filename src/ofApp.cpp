@@ -206,18 +206,19 @@ void ofApp::update(){
         appState = STATE_SCREENSAVER;
         layout.setView(DMLayout::VIEW_SCREENSAVER);
         resetInactivity();
+        clearData();
         
     } else {
         inactivityCount++;
         
         //Uncomment to simulate user input for debugging.
         /*
-        if (inactivityCount > 5){
+        if (inactivityCount > 15){
             //Simulate mouse press at random point on screen
             mousePressed(ofRandomWidth(), ofRandomHeight(), 1);
             inactivityCount = 0;
         }
-         */
+        */
         
     }
     
@@ -260,7 +261,7 @@ void ofApp::mousePressed(int x, int y, int button){
     //trigger generic button sound
     if (btn != ""){
         ofSoundStopAll();
-        jukebox.playSound("btnPress");
+        jukebox.playSound("btnPress");        
     }
 
     if (btn.substr(0,13) == "chose_pattern") {
@@ -336,6 +337,13 @@ void ofApp::startOver(){
     
     layout.setView(DMLayout::VIEW_SELECT);
     jukebox.playSound("select_en");
+    
+    clearData();
+    
+}
+
+//--------------------------------------------------------------
+void ofApp::clearData(){
     
     //delete all temp files
     clearFiles();

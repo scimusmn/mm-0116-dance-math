@@ -68,6 +68,7 @@ class ofApp : public ofBaseApp{
         AppState appState;
         DMLayout layout;
         void startOver();
+        void clearData();
         void startRecordSequence();
         void resetInactivity();
         void toggleLanguage();
