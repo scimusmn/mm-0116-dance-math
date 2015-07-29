@@ -76,10 +76,10 @@ bool Jukebox::trackExists(string id) {
 //---------
 void Jukebox::playFromStart() {
 
-    if (!this->id.empty()){
-        this->player.firstFrame();
-        this->player.play();
-        this->player.setLoopState(OF_LOOP_NONE);
+    if (trackLoaded == true){
+        this->current.player.firstFrame();
+        this->current.player.play();
+        this->current.player.setLoopState(OF_LOOP_NONE);
     }else {
         ofLogError("playFromStart(): No track loaded.");
     }
@@ -99,35 +99,18 @@ void Jukebox::switchTrack(string id) {
         trackId = id;
         ofLogNotice("switchTrack fallback: ", trackId);
     }
-
-
-    Track s = getTrack(trackId);
-    this->id = s.id;
-    this->path = s.path;
-    this->normPreRecordDuration = s.normPreRecordDuration;
-    this->normRecordDuration = s.normRecordDuration;
-    this->halfPreRecordDuration = s.halfPreRecordDuration;
-    this->halfRecordDuration = s.halfRecordDuration;
-    this->player = s.player;
-    this->player.setLoopState(OF_LOOP_NONE);
+    
+    current = getTrack(trackId);
+    trackLoaded = true;
 
 }
 
 //---------
 void Jukebox::clearTrack() {
 
-    this->id = "";
-    this->path = "";
-    this->normPreRecordDuration = 0;
-    this->normRecordDuration = 0;
-    this->halfPreRecordDuration = 0;
-    this->halfRecordDuration = 0;
-
-    this->player.stop();
-    this->player.update();
-//    ofSleepMillis(50);
-//    this->player.close();
-    this->player.setLoopState(OF_LOOP_NONE);
+    this->current.player.stop();
+    trackLoaded = false;
+    
 }
 
 //---------

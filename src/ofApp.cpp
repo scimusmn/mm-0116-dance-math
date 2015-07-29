@@ -40,7 +40,6 @@ void ofApp::setup(){
     layout.setView(DMLayout::VIEW_SELECT);
     appState = STATE_NORMAL;
     
-    
     startOver();
 
 }
@@ -74,7 +73,7 @@ void ofApp::resetInactivity(){
 //--------------------------------------------------------------
 void ofApp::startRecordSequence(){
     
-    ofLogWarning("startRecordSequence()", ofToString(jukebox.id) + ", " + ofToString(ofGetTimestampString()) );
+    ofLogWarning("startRecordSequence()", ofToString(jukebox.current.id) + ", " + ofToString(ofGetTimestampString()) );
 
     //Show live camera feed and overlay guide video
     layout.setView(DMLayout::VIEW_RECORD);
@@ -103,15 +102,15 @@ void ofApp::update(){
     }
     
     //Update guide video during recording
-    if (!jukebox.id.empty()){
-        jukebox.player.update();
+    if (jukebox.trackLoaded == true){
+        jukebox.current.player.update();
     }
 
     timeElapsed = ofGetElapsedTimeMillis() - timeStarted;
     
     
     //Start normal-speed recording
-    if (appState == STATE_PRE_RECORD_NORM && timeElapsed >= jukebox.normPreRecordDuration){
+    if (appState == STATE_PRE_RECORD_NORM && timeElapsed >= jukebox.current.normPreRecordDuration){
         
         ofLogNotice("Start normal-speed recording", ofToString(timeElapsed));
         initRecording();
@@ -119,7 +118,7 @@ void ofApp::update(){
 
     }
     //End normal-speed recording
-    else if (appState == STATE_RECORD_NORM && timeElapsed >= jukebox.normRecordDuration){
+    else if (appState == STATE_RECORD_NORM && timeElapsed >= jukebox.current.normRecordDuration){
         
         ofLogNotice("End normal-speed recording", ofToString(timeElapsed));
         
@@ -133,7 +132,7 @@ void ofApp::update(){
 
     }
     //Start half-speed recording
-    else if (appState == STATE_PRE_RECORD_HALF && timeElapsed >= jukebox.halfPreRecordDuration){
+    else if (appState == STATE_PRE_RECORD_HALF && timeElapsed >= jukebox.current.halfPreRecordDuration){
         
         ofLogNotice("Start half-speed recording", ofToString(timeElapsed));
         initRecording();
@@ -141,7 +140,7 @@ void ofApp::update(){
         
     }
     //End half-speed recording
-    else if (appState == STATE_RECORD_HALF && timeElapsed >= jukebox.halfRecordDuration){
+    else if (appState == STATE_RECORD_HALF && timeElapsed >= jukebox.current.halfRecordDuration){
         
         ofLogNotice("End half-speed recording", ofToString(timeElapsed));
         if(vidRecorder->isRecording()){
@@ -158,7 +157,7 @@ void ofApp::update(){
         
         if (vidRecorder->isRecording() == false){
             
-            if (jukebox.player.getIsMovieDone() == true) {
+            if (jukebox.current.player.getIsMovieDone() == true) {
                 
                 //Clear jukebox
                 jukebox.clearTrack();
@@ -242,8 +241,8 @@ void ofApp::draw(){
     layout.draw();
     
     //Update guide video during recording
-    if (!jukebox.id.empty()){
-        jukebox.player.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
+    if (jukebox.trackLoaded == true){
+        jukebox.current.player.draw(0, 0, VID_SIZE_BIG_W, VID_SIZE_BIG_H);
     }
     
     //Draw seperated videos on first two playback screens

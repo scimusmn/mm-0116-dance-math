@@ -39,15 +39,9 @@ public:
     
     void setLanguageKey(string key);
     string languageKey = "";
-    
-    //These match whatever current track is set by switchTrack().
-    string id;
-    string path;
-    int normPreRecordDuration;
-    int normRecordDuration;
-    int halfPreRecordDuration;
-    int halfRecordDuration;
-    ofVideoPlayer player;
+
+    Track current;
+    bool trackLoaded = false;
     
 protected:
     
