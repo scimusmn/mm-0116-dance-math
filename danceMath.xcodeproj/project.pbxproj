@@ -24,6 +24,7 @@
 		BF4447961B4EE6AD0049C819 /* ofxEasingQuint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF4447881B4EE6AD0049C819 /* ofxEasingQuint.cpp */; };
 		BF4447971B4EE6AD0049C819 /* ofxEasingSine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF44478A1B4EE6AD0049C819 /* ofxEasingSine.cpp */; };
 		BFB5149C1AD881E5003BF056 /* Jukebox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFB5149A1AD881E5003BF056 /* Jukebox.cpp */; };
+		BFBC96B91B71796C00B11ACF /* ofxVideoRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFBC96B81B71796C00B11ACF /* ofxVideoRecorder.cpp */; };
 		BFFBB5A01AC5E5580004F7B0 /* DMLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFBB59E1AC5E5580004F7B0 /* DMLayout.cpp */; };
 		E4328149138ABC9F0047C5CB /* openFrameworksDebug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E4328148138ABC890047C5CB /* openFrameworksDebug.a */; };
 		E45BE97B0E8CC7DD009D7055 /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E45BE9710E8CC7DD009D7055 /* AGL.framework */; };
@@ -110,6 +111,8 @@
 		BF44478B1B4EE6AD0049C819 /* ofxEasingSine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxEasingSine.h; sourceTree = "<group>"; };
 		BFB5149A1AD881E5003BF056 /* Jukebox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Jukebox.cpp; sourceTree = "<group>"; };
 		BFB5149B1AD881E5003BF056 /* Jukebox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Jukebox.h; sourceTree = "<group>"; };
+		BFBC96B71B71796C00B11ACF /* ofxVideoRecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxVideoRecorder.h; path = src/ofxVideoRecorder.h; sourceTree = "<group>"; };
+		BFBC96B81B71796C00B11ACF /* ofxVideoRecorder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxVideoRecorder.cpp; path = src/ofxVideoRecorder.cpp; sourceTree = "<group>"; };
 		BFFBB59E1AC5E5580004F7B0 /* DMLayout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DMLayout.cpp; sourceTree = "<group>"; };
 		BFFBB59F1AC5E5580004F7B0 /* DMLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DMLayout.h; sourceTree = "<group>"; };
 		E4328143138ABC890047C5CB /* openFrameworksLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = openFrameworksLib.xcodeproj; path = ../../../libs/openFrameworksCompiled/project/osx/openFrameworksLib.xcodeproj; sourceTree = SOURCE_ROOT; };
@@ -175,6 +178,7 @@
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				BFBC96BA1B71797200B11ACF /* ofxVideoRecorder */,
 				BF4B74091B474CF5006F75B2 /* ofxWatchdog */,
 				BF763D671B34C78200F124EA /* ofxTween */,
 				E0A0690D43CA6CE398F64F45 /* ofxSimpleLayout */,
@@ -261,6 +265,15 @@
 				BF44476D1B4EE68C0049C819 /* ofxTween.h */,
 			);
 			name = ofxTween;
+			sourceTree = "<group>";
+		};
+		BFBC96BA1B71797200B11ACF /* ofxVideoRecorder */ = {
+			isa = PBXGroup;
+			children = (
+				BFBC96B71B71796C00B11ACF /* ofxVideoRecorder.h */,
+				BFBC96B81B71796C00B11ACF /* ofxVideoRecorder.cpp */,
+			);
+			name = ofxVideoRecorder;
 			sourceTree = "<group>";
 		};
 		E0A0690D43CA6CE398F64F45 /* ofxSimpleLayout */ = {
@@ -414,6 +427,7 @@
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
 				BF4447971B4EE6AD0049C819 /* ofxEasingSine.cpp in Sources */,
 				BF4447941B4EE6AD0049C819 /* ofxEasingQuad.cpp in Sources */,
+				BFBC96B91B71796C00B11ACF /* ofxVideoRecorder.cpp in Sources */,
 				BF4447711B4EE6A40049C819 /* ofxWatchdog.cpp in Sources */,
 				BF44478C1B4EE6AD0049C819 /* ofxEasing.cpp in Sources */,
 				BF44476E1B4EE68C0049C819 /* ofxTween.cpp in Sources */,

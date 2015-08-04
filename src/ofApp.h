@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "Jukebox.h"
 #include "DMLayout.h"
+#include "ofxVideoRecorder.h"
 
 using namespace ofxSimpleLayout;
 
@@ -36,9 +37,10 @@ class ofApp : public ofBaseApp{
 		void mousePressed(int x, int y, int button);
     
         //Cameras
-        ofVideoGrabber cam;
-        ofPtr<ofQTKitGrabber> vidRecorder;
-        void videoSaved(ofVideoSavedEventArgs& e);
+        ofVideoGrabber      vidGrabber;
+        ofxVideoRecorder    vidRecorder;
+        string currentVidPath;
+        void videoSaved();
         void initCamera();
 
         //Session
