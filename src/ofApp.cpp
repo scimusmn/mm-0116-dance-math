@@ -11,7 +11,7 @@ void ofApp::setup(){
     ofHideCursor();
 
     //Set up graphics
-    ofSetFrameRate(30);
+    ofSetFrameRate(60);
     ofEnableSmoothing();
     ofBackground(30,30,30);
 
