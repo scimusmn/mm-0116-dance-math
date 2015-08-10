@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "Poco/Condition.h"
 #include <set>
 
 template <typename T>
@@ -58,6 +59,7 @@ public:
     void setup(string filePath, lockFreeQueue<ofPixels *> * q);
     void threadedFunction();
     void signal();
+    void setPipeNonBlocking();
     bool isWriting() { return bIsWriting; }
     void close() { bClose = true; stopThread(); signal(); }
 private:
@@ -78,6 +80,7 @@ public:
     void setup(string filePath, lockFreeQueue<audioFrameShort *> * q);
     void threadedFunction();
     void signal();
+    void setPipeNonBlocking();
     bool isWriting() { return bIsWriting; }
     void close() { bClose = true; stopThread(); signal();  }
 private:

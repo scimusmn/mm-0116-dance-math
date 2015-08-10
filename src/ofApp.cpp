@@ -3,9 +3,9 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     
-    ofLogToFile("log.txt", true);
-    ofSetLogLevel(OF_LOG_WARNING);
-    ofLogWarning("Setup", ofGetTimestampString("%w, %h:%M%a"));
+//    ofLogToFile("log.txt", true);
+//    ofSetLogLevel(OF_LOG_WARNING);
+//    ofLogWarning("Setup", ofGetTimestampString("%w, %h:%M%a"));
     
     //Hide cursor (comment out if not on touch screen)
     ofHideCursor();
@@ -49,7 +49,10 @@ void ofApp::initRecording(){
 
     //Start recording new video file in /temp folder (video only)
     currentVidPath = "temp/video_"+ofGetTimestampString()+".mov";
-    vidRecorder.setup(currentVidPath, vidGrabber.getWidth(), vidGrabber.getHeight(), 30);
+    
+    //Setup to record 6fps, with no sound, and use the system clock to sync videos
+    vidRecorder.setup(currentVidPath, vidGrabber.getWidth(), vidGrabber.getHeight(), 6, 0, 0, true, true);
+    
     vidRecorder.start();
     
 }
@@ -75,7 +78,7 @@ void ofApp::startRecordSequence(){
     
     ofLogWarning("startRecordSequence()", ofToString(jukebox.current.id) + ", " + ofToString(ofGetTimestampString()) );
 
-    //Show live camera feed and overlay guide video
+    //Show live camera feed and overlay video guide
     layout.setView(DMLayout::VIEW_RECORD);
     appState = STATE_PRE_RECORD_NORM;
     
@@ -91,6 +94,9 @@ void ofApp::update(){
     //Update all layout elements
     layout.update();
     
+    //Update time elapsed since last reset.
+    timeElapsed = ofGetElapsedTimeMillis() - timeStarted;
+    
     //Update videos or camera-feeds
     if (appState == STATE_PLAYBACK) {
         session.updateVids();
@@ -104,7 +110,9 @@ void ofApp::update(){
         
         //Add frame if we are currently recording.
         if(vidGrabber.isFrameNew() && vidRecorder.isRecording()){
+            
             vidRecorder.addFrame(vidGrabber.getPixelsRef());
+            
         }
         
     }
@@ -113,9 +121,6 @@ void ofApp::update(){
     if (jukebox.trackLoaded == true){
         jukebox.current.player.update();
     }
-
-    timeElapsed = ofGetElapsedTimeMillis() - timeStarted;
-    
     
     //Start normal-speed recording
     if (appState == STATE_PRE_RECORD_NORM && timeElapsed >= jukebox.current.normPreRecordDuration){
@@ -131,6 +136,7 @@ void ofApp::update(){
         ofLogNotice("End normal-speed recording", ofToString(timeElapsed));
         
         if(vidRecorder.isRecording()){
+            ofLogWarning("NORM RECORDED frames", ofToString(vidRecorder.getNumVideoFramesRecorded()));
             vidRecorder.close();
             appState = STATE_PRE_RECORD_HALF;
             this->videoSaved();
@@ -154,6 +160,7 @@ void ofApp::update(){
         
         ofLogNotice("End half-speed recording", ofToString(timeElapsed));
         if(vidRecorder.isRecording()){
+            ofLogWarning("NORM RECORDED frames", ofToString(vidRecorder.getNumVideoFramesRecorded()));
             vidRecorder.close();
             appState = STATE_PRE_PLAYBACK;
             this->videoSaved();
@@ -340,6 +347,11 @@ void ofApp::mousePressed(int x, int y, int button){
 }
 
 //--------------------------------------------------------------
+void ofApp::exit() {
+    vidRecorder.close();
+}
+
+//--------------------------------------------------------------
 void ofApp::startOver(){
     
     //clear all tracking
@@ -451,11 +463,10 @@ void ofApp::initCamera() {
     }
     
     vidGrabber.setDesiredFrameRate(30);
-    vidGrabber.setDeviceID(0);//Assumes there is only one camera connected. (otherwise use different device id)
+    vidGrabber.setDeviceID(0);//Assumes there is only one camera connected.
     vidGrabber.initGrabber(VID_SIZE_BIG_W, VID_SIZE_BIG_H);
-    vidRecorder.setVideoCodec("mpeg4");
-    vidRecorder.setVideoBitrate("1200k");
-    
+    vidRecorder.setVideoCodec("mpeg4");//default is "mpeg4"
+    vidRecorder.setVideoBitrate("12000k");//default is "2000k"
 }
 
 //--------------------------------------------------------------
