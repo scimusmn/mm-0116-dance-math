@@ -40,8 +40,9 @@ void Jukebox::addTrack(string id, string path, string halfSpeedPath, string intr
     //we should consider loading on the fly when the track is changed. -tn
 
     s.player.setPixelFormat(OF_PIXELS_RGBA); // Allow alpha channel
-    s.player.loadMovie(path);
+    s.player.loadMovie(path);//, OF_QTKIT_DECODE_TEXTURE_ONLY);
     s.player.setLoopState(OF_LOOP_NONE);
+//    s.player.setSynchronousSeeking(false);
 
     tracks.insert(pair<string, Track>(id, s));
 

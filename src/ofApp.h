@@ -4,6 +4,7 @@
 #include "Jukebox.h"
 #include "DMLayout.h"
 #include "ofxVideoRecorder.h"
+#include "ofQTKitPlayer.h"
 
 using namespace ofxSimpleLayout;
 
@@ -49,8 +50,8 @@ class ofApp : public ofBaseApp{
         public:
             string slowVid;
             string normVid;
-            ofVideoPlayer slowVidPlayer;
-            ofVideoPlayer normVidPlayer;
+            ofQTKitPlayer slowVidPlayer;
+            ofQTKitPlayer normVidPlayer;
             void saveData(bool halfSpeed, string vid);
             void updateVids();
             void drawVids(bool combine);

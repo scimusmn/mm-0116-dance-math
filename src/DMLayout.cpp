@@ -80,42 +80,11 @@ void DMLayout::setView(string name){
     ofLogNotice("setView()", newViewId);
     
     ofxSimpleLayout::Layout::setView(newViewId);
-    
-//    setupTweens(baseViewId);
-    
-}
-
-void DMLayout::setupTweens(string viewId){
-    
-    ofLogNotice("setupTweens() ", viewId);
-    
-    if (viewId == VIEW_SELECT_TRACK) {
-        
-        //Slide in track tabs.
-        float startX = getByName("selectTrack_tab1_en").box.getX() + getByName("selectTrack_tab1_en").box.getWidth();
-        float endX = getByName("selectTrack_tab1_en").box.getX();
-        int dur = 1000;
-        multitween.setParameters( easingquart, ofxTween::easeOut, startX, endX, dur, 0);
-        
-    }
 
 }
 
 void DMLayout::draw(){
-    
-//    if (baseViewId == VIEW_SELECT_TRACK) {
-//        
-//        //Slide in track tabs.
-//        float tx = multitween.update();
-//        getByName("selectTrack_tab1_en").box.setX( tx );
-//        getByName("selectTrack_tab2_en").box.setX( tx );
-//        getByName("selectTrack_tab3_en").box.setX( tx );
-//        getByName("selectTrack_tab4_en").box.setX( tx );
-//        
-//        ofRect(20,430,multitween.getTarget(1),20);
-//        
-//    }
-    
+
     Layout::draw();
     
 }

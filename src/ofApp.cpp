@@ -3,9 +3,9 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     
-//    ofLogToFile("log.txt", true);
-//    ofSetLogLevel(OF_LOG_WARNING);
-//    ofLogWarning("Setup", ofGetTimestampString("%w, %h:%M%a"));
+    ofLogToFile("log.txt", true);
+    ofSetLogLevel(OF_LOG_WARNING);
+    ofLogWarning("Setup", ofGetTimestampString("%w, %h:%M%a"));
     
     //Hide cursor (comment out if not on touch screen)
     ofHideCursor();
@@ -46,12 +46,12 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::initRecording(){
-
+    
     //Start recording new video file in /temp folder (video only)
     currentVidPath = "temp/video_"+ofGetTimestampString()+".mov";
     
-    //Setup to record 6fps, with no sound, and use the system clock to sync videos
-    vidRecorder.setup(currentVidPath, vidGrabber.getWidth(), vidGrabber.getHeight(), 6, 0, 0, true, true);
+    //Setup to record 24fps, with no sound, and use the system clock to sync videos
+    vidRecorder.setup(currentVidPath, vidGrabber.getWidth(), vidGrabber.getHeight(), 24, 0, 0, true, true);
     
     vidRecorder.start();
     
@@ -160,7 +160,7 @@ void ofApp::update(){
         
         ofLogNotice("End half-speed recording", ofToString(timeElapsed));
         if(vidRecorder.isRecording()){
-            ofLogWarning("NORM RECORDED frames", ofToString(vidRecorder.getNumVideoFramesRecorded()));
+            ofLogWarning("HALF RECORDED frames", ofToString(vidRecorder.getNumVideoFramesRecorded()));
             vidRecorder.close();
             appState = STATE_PRE_PLAYBACK;
             this->videoSaved();
@@ -292,7 +292,6 @@ void ofApp::mousePressed(int x, int y, int button){
             //Show freestyle music selection screen
             layout.setView(DMLayout::VIEW_SELECT_TRACK);
             jukebox.playSound("selectTrack_en");
-            
             
         }
 
@@ -466,7 +465,7 @@ void ofApp::initCamera() {
     vidGrabber.setDeviceID(0);//Assumes there is only one camera connected.
     vidGrabber.initGrabber(VID_SIZE_BIG_W, VID_SIZE_BIG_H);
     vidRecorder.setVideoCodec("mpeg4");//default is "mpeg4"
-    vidRecorder.setVideoBitrate("12000k");//default is "2000k"
+    vidRecorder.setVideoBitrate("5600k");//default is "2000k"
 }
 
 //--------------------------------------------------------------
@@ -503,8 +502,9 @@ void ofApp::Session::saveData(bool halfSpeed, string vid){
         slowVidPlayer.update(); // This update throws error, but do not remove
         ofSleepMillis(50);
         slowVidPlayer.close();
-        slowVidPlayer.loadMovie(slowVid);
+        slowVidPlayer.loadMovie(slowVid);//, OF_QTKIT_DECODE_TEXTURE_ONLY);
         slowVidPlayer.setLoopState(OF_LOOP_NONE);
+//        slowVidPlayer.setSynchronousSeeking(false);
         slowVidPlayer.play();
         
     } else if (halfSpeed == false) {
@@ -514,8 +514,9 @@ void ofApp::Session::saveData(bool halfSpeed, string vid){
         normVidPlayer.update(); // This update throws error, but do not remove
         ofSleepMillis(50);
         normVidPlayer.close();
-        normVidPlayer.loadMovie(normVid);
+        normVidPlayer.loadMovie(normVid);//, OF_QTKIT_DECODE_TEXTURE_ONLY);
         normVidPlayer.setLoopState(OF_LOOP_NONE);
+//        normVidPlayer.setSynchronousSeeking(false);
         normVidPlayer.play();
         
     } else {
