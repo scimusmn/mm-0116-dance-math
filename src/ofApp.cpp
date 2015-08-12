@@ -502,9 +502,9 @@ void ofApp::Session::saveData(bool halfSpeed, string vid){
         slowVidPlayer.update(); // This update throws error, but do not remove
         ofSleepMillis(50);
         slowVidPlayer.close();
-        slowVidPlayer.loadMovie(slowVid);//, OF_QTKIT_DECODE_TEXTURE_ONLY);
+        slowVidPlayer.setSynchronousSeeking(false);
+        slowVidPlayer.loadMovie(slowVid, OF_QTKIT_DECODE_TEXTURE_ONLY);
         slowVidPlayer.setLoopState(OF_LOOP_NONE);
-//        slowVidPlayer.setSynchronousSeeking(false);
         slowVidPlayer.play();
         
     } else if (halfSpeed == false) {
@@ -514,9 +514,9 @@ void ofApp::Session::saveData(bool halfSpeed, string vid){
         normVidPlayer.update(); // This update throws error, but do not remove
         ofSleepMillis(50);
         normVidPlayer.close();
-        normVidPlayer.loadMovie(normVid);//, OF_QTKIT_DECODE_TEXTURE_ONLY);
+        normVidPlayer.setSynchronousSeeking(false);
+        normVidPlayer.loadMovie(normVid, OF_QTKIT_DECODE_TEXTURE_ONLY);
         normVidPlayer.setLoopState(OF_LOOP_NONE);
-//        normVidPlayer.setSynchronousSeeking(false);
         normVidPlayer.play();
         
     } else {
@@ -533,6 +533,7 @@ void ofApp::Session::updateVids(){
     }
     
     if(!slowVid.empty()) {
+//        slowVidPlayer.setFrame(normVidPlayer.getCurrentFrame() * 2);
         slowVidPlayer.update();
     }
     
