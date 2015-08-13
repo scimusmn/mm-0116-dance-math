@@ -110,8 +110,8 @@ void ofApp::update(){
         }
     }
     
-    //Draw camera feed unless on last playback screen or screensaver
-    if (layout.baseViewId != DMLayout::VIEW_PLAYBACK_3 && appState != STATE_SCREENSAVER) {
+    //Draw camera feed unless on last two playback screens or screensaver
+    if (layout.baseViewId != DMLayout::VIEW_PLAYBACK_2 && layout.baseViewId != DMLayout::VIEW_PLAYBACK_3 && appState != STATE_SCREENSAVER) {
         
         //Update during recording
         vidGrabber.update();
