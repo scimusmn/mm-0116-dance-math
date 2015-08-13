@@ -51,7 +51,11 @@ void ofApp::initRecording(){
     currentVidPath = "temp/video_"+ofGetTimestampString()+".mov";
     
     //Setup to record 24fps, with no sound, and use the system clock to sync videos
-    vidRecorder.setup(currentVidPath, vidGrabber.getWidth(), vidGrabber.getHeight(), 24, 0, 0, true, true);
+    if (appState == STATE_PRE_RECORD_NORM || appState == STATE_RECORD_NORM){
+        vidRecorder.setup(currentVidPath, vidGrabber.getWidth(), vidGrabber.getHeight(), 24, 0, 0, true, true);
+    } else {
+        vidRecorder.setup(currentVidPath, vidGrabber.getWidth(), vidGrabber.getHeight(), 12, 0, 0, true, true);
+    }
     
     vidRecorder.start();
     
@@ -465,11 +469,11 @@ void ofApp::initCamera() {
         ofSleepMillis(150);
     }
     
-    vidGrabber.setDesiredFrameRate(30);
+    vidGrabber.setDesiredFrameRate(24);
     vidGrabber.setDeviceID(0);//Assumes there is only one camera connected.
     vidGrabber.initGrabber(VID_SIZE_BIG_W, VID_SIZE_BIG_H);
-    vidRecorder.setVideoCodec("mjpeg");//default is "mpeg4" (mjpeg,libx264
-    vidRecorder.setVideoBitrate("24000k");//default is "2000k"
+    vidRecorder.setVideoCodec("mpeg4");//default is "mpeg4"
+    vidRecorder.setVideoBitrate("4400k");//default is "2000k"
 }
 
 //--------------------------------------------------------------
@@ -538,14 +542,14 @@ void ofApp::Session::updateVids(bool syncVids){
     }
     
     if(!slowVid.empty()) {
-        if (syncVids == false) {
-            slowVidPlayer.update();
-        } else {
-            int syncFrame = normVidPlayer.getCurrentFrame() * 2;
-            if (syncFrame > slowVidPlayer.getTotalNumFrames()) syncFrame = slowVidPlayer.getTotalNumFrames();
-            slowVidPlayer.setFrame(syncFrame);
-        }
         
+//        if (syncVids == false) {
+            slowVidPlayer.update();
+//        } else {
+//            int syncFrame = normVidPlayer.getCurrentFrame();
+//            if (syncFrame > slowVidPlayer.getTotalNumFrames()) syncFrame = slowVidPlayer.getTotalNumFrames();
+//            slowVidPlayer.setFrame(syncFrame);
+//        }
 
     }
     
