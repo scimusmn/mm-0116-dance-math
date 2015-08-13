@@ -99,7 +99,11 @@ void ofApp::update(){
     
     //Update videos or camera-feeds
     if (appState == STATE_PLAYBACK) {
-        session.updateVids();
+        if (layout.currentViewId == DMLayout::VIEW_PLAYBACK_1) {
+            session.updateVids(false);
+        } else {
+            session.updateVids(true);
+        }
     }
     
     //Draw camera feed unless on last playback screen or screensaver
@@ -464,8 +468,8 @@ void ofApp::initCamera() {
     vidGrabber.setDesiredFrameRate(30);
     vidGrabber.setDeviceID(0);//Assumes there is only one camera connected.
     vidGrabber.initGrabber(VID_SIZE_BIG_W, VID_SIZE_BIG_H);
-    vidRecorder.setVideoCodec("mpeg4");//default is "mpeg4"
-    vidRecorder.setVideoBitrate("5600k");//default is "2000k"
+    vidRecorder.setVideoCodec("mjpeg");//default is "mpeg4" (mjpeg,libx264
+    vidRecorder.setVideoBitrate("24000k");//default is "2000k"
 }
 
 //--------------------------------------------------------------
@@ -507,6 +511,7 @@ void ofApp::Session::saveData(bool halfSpeed, string vid){
         slowVidPlayer.setLoopState(OF_LOOP_NONE);
         slowVidPlayer.play();
         
+        
     } else if (halfSpeed == false) {
         normVid = vid;
         
@@ -526,15 +531,22 @@ void ofApp::Session::saveData(bool halfSpeed, string vid){
 }
 
 //--------------------------------------------------------------
-void ofApp::Session::updateVids(){
+void ofApp::Session::updateVids(bool syncVids){
     
     if(!normVid.empty()) {
         normVidPlayer.update();
     }
     
     if(!slowVid.empty()) {
-//        slowVidPlayer.setFrame(normVidPlayer.getCurrentFrame() * 2);
-        slowVidPlayer.update();
+        if (syncVids == false) {
+            slowVidPlayer.update();
+        } else {
+            int syncFrame = normVidPlayer.getCurrentFrame() * 2;
+            if (syncFrame > slowVidPlayer.getTotalNumFrames()) syncFrame = slowVidPlayer.getTotalNumFrames();
+            slowVidPlayer.setFrame(syncFrame);
+        }
+        
+
     }
     
 }

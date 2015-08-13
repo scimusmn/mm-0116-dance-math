@@ -53,7 +53,7 @@ class ofApp : public ofBaseApp{
             ofQTKitPlayer slowVidPlayer;
             ofQTKitPlayer normVidPlayer;
             void saveData(bool halfSpeed, string vid);
-            void updateVids();
+            void updateVids(bool syncVids);
             void drawVids(bool combine);
             void restartVids();
             void clear();
