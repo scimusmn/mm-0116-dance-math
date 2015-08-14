@@ -308,16 +308,6 @@ void ofApp::mousePressed(int x, int y, int button){
     
     //Playback buttons
     if (btn == "double_playback_speed"){
-        //Speed up second vid
-        //swap in 2x video
-//        session.slowVidPlayer.stop();
-//        session.slowVidPlayer.update();
-//        ofSleepMillis(50);
-//        session.slowVidPlayer.close();
-//        string vidPath2x = currentVidPath;
-//        ofStringReplace(vidPath2x,"video_","video2x_");
-//        session.slowVidPlayer.loadMovie(vidPath2x, OF_QTKIT_DECODE_TEXTURE_ONLY);
-        
         //change view
         session.restartVids();
         layout.setView(DMLayout::VIEW_PLAYBACK_2);
@@ -420,9 +410,6 @@ void ofApp::videoSaved(){
     } else if (appState == STATE_PRE_PLAYBACK || appState == STATE_PLAYBACK) {
         
         session.saveData(true, currentVidPath);
-        
-        //stall here to create second version of video
-//        create2xVid();
 
         session.restartVids();
 
@@ -474,31 +461,6 @@ void ofApp::initCamera() {
     vidGrabber.initGrabber(VID_SIZE_BIG_W, VID_SIZE_BIG_H);
     vidRecorder.setVideoCodec("mpeg4");//default is "mpeg4"
     vidRecorder.setVideoBitrate("4400k");//default is "2000k"
-}
-
-//--------------------------------------------------------------
-bool ofApp::create2xVid() {
-    
-    string vidPath2x = currentVidPath;
-    ofStringReplace(vidPath2x,"video_","video2x_");
-
-    vidRecorder.setup(vidPath2x, vidGrabber.getWidth(), vidGrabber.getHeight(), 24, 0, 0, true, true);
-    vidRecorder.start();
-    
-    for(int i= 0; i < session.slowVidPlayer.getTotalNumFrames(); i++ ) {
-        
-        session.slowVidPlayer.setFrame(i+1);
-        vidRecorder.addFrame(session.slowVidPlayer.getPixelsRef());
-        
-    }
-    
-    vidRecorder.close();
-    
-    ofLogWarning("norm FRAMES", ofToString(session.normVidPlayer.getTotalNumFrames()));
-    ofLogWarning("slow FRAMES", ofToString(session.slowVidPlayer.getTotalNumFrames()));
-    ofLogWarning("slow2x FRAMES", ofToString(vidRecorder.getNumVideoFramesRecorded()));
-    
-    return true;
 }
 
 //--------------------------------------------------------------

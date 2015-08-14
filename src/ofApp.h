@@ -44,7 +44,6 @@ class ofApp : public ofBaseApp{
         string currentVidPath;
         void videoSaved();
         void initCamera();
-        bool create2xVid();
 
         //Session
         class Session {
