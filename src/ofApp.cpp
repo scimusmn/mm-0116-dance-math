@@ -111,7 +111,7 @@ void ofApp::update(){
     }
     
     //Draw camera feed unless on last two playback screens or screensaver
-    if (layout.baseViewId != DMLayout::VIEW_PLAYBACK_2 && layout.baseViewId != DMLayout::VIEW_PLAYBACK_3 && appState != STATE_SCREENSAVER) {
+    if (appState != STATE_PLAYBACK && appState != STATE_SCREENSAVER) {
         
         //Update during recording
         vidGrabber.update();
@@ -133,7 +133,6 @@ void ofApp::update(){
     //Start normal-speed recording
     if (appState == STATE_PRE_RECORD_NORM && timeElapsed >= jukebox.current.normPreRecordDuration){
         
-        ofLogNotice("Start normal-speed recording", ofToString(timeElapsed));
         initRecording();
         appState = STATE_RECORD_NORM;
 
@@ -141,10 +140,7 @@ void ofApp::update(){
     //End normal-speed recording
     else if (appState == STATE_RECORD_NORM && timeElapsed >= jukebox.current.normRecordDuration){
         
-        ofLogNotice("End normal-speed recording", ofToString(timeElapsed));
-        
         if(vidRecorder.isRecording()){
-            ofLogWarning("NORM RECORDED frames", ofToString(vidRecorder.getNumVideoFramesRecorded()));
             vidRecorder.close();
             appState = STATE_PRE_RECORD_HALF;
             this->videoSaved();
@@ -158,7 +154,6 @@ void ofApp::update(){
     //Start half-speed recording
     else if (appState == STATE_PRE_RECORD_HALF && timeElapsed >= jukebox.current.halfPreRecordDuration){
         
-        ofLogNotice("Start half-speed recording", ofToString(timeElapsed));
         initRecording();
         appState = STATE_RECORD_HALF;
         
@@ -166,9 +161,7 @@ void ofApp::update(){
     //End half-speed recording
     else if (appState == STATE_RECORD_HALF && timeElapsed >= jukebox.current.halfRecordDuration){
         
-        ofLogNotice("End half-speed recording", ofToString(timeElapsed));
         if(vidRecorder.isRecording()){
-            ofLogWarning("HALF RECORDED frames", ofToString(vidRecorder.getNumVideoFramesRecorded()));
             vidRecorder.close();
             appState = STATE_PRE_PLAYBACK;
             this->videoSaved();
@@ -316,9 +309,17 @@ void ofApp::mousePressed(int x, int y, int button){
     //Playback buttons
     if (btn == "double_playback_speed"){
         //Speed up second vid
-        session.slowVidPlayer.setSpeed(2);
-        session.slowVidPlayer.firstFrame();
-        session.normVidPlayer.firstFrame();
+        //swap in 2x video
+//        session.slowVidPlayer.stop();
+//        session.slowVidPlayer.update();
+//        ofSleepMillis(50);
+//        session.slowVidPlayer.close();
+//        string vidPath2x = currentVidPath;
+//        ofStringReplace(vidPath2x,"video_","video2x_");
+//        session.slowVidPlayer.loadMovie(vidPath2x, OF_QTKIT_DECODE_TEXTURE_ONLY);
+        
+        //change view
+        session.restartVids();
         layout.setView(DMLayout::VIEW_PLAYBACK_2);
         jukebox.playSound("playback2_en");
     } else if (btn == "combine") {
@@ -420,12 +421,11 @@ void ofApp::videoSaved(){
         
         session.saveData(true, currentVidPath);
         
-        //Default to original speeds
-        session.slowVidPlayer.setSpeed(1);
-        session.normVidPlayer.setSpeed(1);
-        
+        //stall here to create second version of video
+//        create2xVid();
+
         session.restartVids();
-        
+
     } else {
         
         ofLogError("videoSaved") << "Appstate unexpected: " << appState;
@@ -477,6 +477,31 @@ void ofApp::initCamera() {
 }
 
 //--------------------------------------------------------------
+bool ofApp::create2xVid() {
+    
+    string vidPath2x = currentVidPath;
+    ofStringReplace(vidPath2x,"video_","video2x_");
+
+    vidRecorder.setup(vidPath2x, vidGrabber.getWidth(), vidGrabber.getHeight(), 24, 0, 0, true, true);
+    vidRecorder.start();
+    
+    for(int i= 0; i < session.slowVidPlayer.getTotalNumFrames(); i++ ) {
+        
+        session.slowVidPlayer.setFrame(i+1);
+        vidRecorder.addFrame(session.slowVidPlayer.getPixelsRef());
+        
+    }
+    
+    vidRecorder.close();
+    
+    ofLogWarning("norm FRAMES", ofToString(session.normVidPlayer.getTotalNumFrames()));
+    ofLogWarning("slow FRAMES", ofToString(session.slowVidPlayer.getTotalNumFrames()));
+    ofLogWarning("slow2x FRAMES", ofToString(vidRecorder.getNumVideoFramesRecorded()));
+    
+    return true;
+}
+
+//--------------------------------------------------------------
 void ofApp::clearFiles() {
     
     ofDirectory dir;
@@ -512,6 +537,7 @@ void ofApp::Session::saveData(bool halfSpeed, string vid){
         slowVidPlayer.close();
         slowVidPlayer.setSynchronousSeeking(false);
         slowVidPlayer.loadMovie(slowVid, OF_QTKIT_DECODE_TEXTURE_ONLY);
+//        slowVidPlayer.loadMovie(slowVid, OF_QTKIT_DECODE_PIXELS_AND_TEXTURE);
         slowVidPlayer.setLoopState(OF_LOOP_NONE);
         slowVidPlayer.play();
         
@@ -543,14 +569,15 @@ void ofApp::Session::updateVids(bool syncVids){
     
     if(!slowVid.empty()) {
         
-//        if (syncVids == false) {
+        if (syncVids == false) {
             slowVidPlayer.update();
-//        } else {
-//            int syncFrame = normVidPlayer.getCurrentFrame();
-//            if (syncFrame > slowVidPlayer.getTotalNumFrames()) syncFrame = slowVidPlayer.getTotalNumFrames();
-//            slowVidPlayer.setFrame(syncFrame);
-//        }
-
+        } else {
+            int syncFrame = normVidPlayer.getCurrentFrame();
+            if (syncFrame %3==0){
+                slowVidPlayer.setFrame(syncFrame);
+            }
+        }
+        
     }
     
 }
