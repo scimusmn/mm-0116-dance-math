@@ -7,7 +7,6 @@
 //
 
 #include "ofxSimpleLayout.h"
-#include "ofxTween.h"
 
 class DMLayout : public ofxSimpleLayout::Layout{
 
@@ -29,21 +28,7 @@ public:
     string baseViewId;
     
     void draw();
-    
-    void setupTweens(string viewId);
-    ofxTween multitween;
-    ofxEasingBack 	easingback;
-    ofxEasingBounce easingbounce;
-    ofxEasingCirc 	easingcirc;
-    ofxEasingCubic 	easingcubic;
-    ofxEasingElastic easingelastic;
-    ofxEasingExpo 	easingexpo;
-    ofxEasingLinear easinglinear;
-    ofxEasingQuad 	easingquad;
-    ofxEasingQuart 	easingquart;
-    ofxEasingQuint 	easingquint;
-    ofxEasingSine	easingsine;
-    
+
 protected:
     
     

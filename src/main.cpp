@@ -9,7 +9,7 @@ int main( ){
     
     //Tell watchdog to restart app if a process
     //lasts more than seven seconds.
-    ofxWatchdog::watch(7000, true, true, true);
+    ofxWatchdog::watch(8500, true, true, true);
     
 	ofSetupOpenGL(1920,1080,OF_FULLSCREEN);			// <-------- setup the GL context
 

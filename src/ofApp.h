@@ -3,6 +3,8 @@
 #include "ofMain.h"
 #include "Jukebox.h"
 #include "DMLayout.h"
+#include "ofxVideoRecorder.h"
+#include "ofQTKitPlayer.h"
 
 using namespace ofxSimpleLayout;
 
@@ -34,11 +36,13 @@ class ofApp : public ofBaseApp{
 		void update();
 		void draw();
 		void mousePressed(int x, int y, int button);
+        void exit();
     
         //Cameras
-        ofVideoGrabber cam;
-        ofPtr<ofQTKitGrabber> vidRecorder;
-        void videoSaved(ofVideoSavedEventArgs& e);
+        ofVideoGrabber      vidGrabber;
+        ofxVideoRecorder    vidRecorder;
+        string currentVidPath;
+        void videoSaved();
         void initCamera();
 
         //Session
@@ -46,10 +50,10 @@ class ofApp : public ofBaseApp{
         public:
             string slowVid;
             string normVid;
-            ofVideoPlayer slowVidPlayer;
-            ofVideoPlayer normVidPlayer;
+            ofQTKitPlayer slowVidPlayer;
+            ofQTKitPlayer normVidPlayer;
             void saveData(bool halfSpeed, string vid);
-            void updateVids();
+            void updateVids(bool syncVids);
             void drawVids(bool combine);
             void restartVids();
             void clear();
