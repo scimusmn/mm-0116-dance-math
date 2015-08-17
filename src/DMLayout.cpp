@@ -18,7 +18,11 @@ string DMLayout::VIEW_PLAYBACK_3 = "view_playback3";
 string DMLayout::VIEW_SCREENSAVER = "view_screensaver";
 
 void DMLayout::setupViews(){
-
+    
+    /* --------------- */
+    /* ENGLISH Screens */
+    /* --------------- */
+    
     //Select Screen
     image("select_bg_en", 0, 0);
     image("select_tabLeft_en", -46, 246);
@@ -28,7 +32,7 @@ void DMLayout::setupViews(){
     videoButton("select_btnSquare_en", 912, 407, "chose_pattern_square");
     videoButton("select_btnFreestyle_en", 1418, 407, "chose_pattern_freestyle");
     button("btnLang_en", 44, 952, "toggle_language");
-    saveView(VIEW_SELECT);
+    saveView(VIEW_SELECT + "_en");
 
     //Choose your music (Advanced)
     video("selectTrack_bg_en", 0, 0);
@@ -36,29 +40,78 @@ void DMLayout::setupViews(){
     button("selectTrack_tab2_en", 1117, 432, "chose_music_freestyle2");
     button("selectTrack_tab3_en", 1117, 610, "chose_music_freestyle3");
     button("selectTrack_tab4_en", 1117, 788, "chose_music_freestyle4");
-    saveView(VIEW_SELECT_TRACK);
+    saveView(VIEW_SELECT_TRACK + "_en");
     
     //Record View (Populated dynamically)
-    saveView(VIEW_RECORD);
+    saveView(VIEW_RECORD + "_en");
 
     //Playback 1 (Diff Speeds)
     video("playback1_bg_en", 0, 0, false);
     image("playback_tabRight1_en", 970, 239);
     image("playback_tabLeft_en", -250, 245);
     button("playback_btnSpeed_en", 970, 911, "double_playback_speed");
-    saveView(VIEW_PLAYBACK_1);
+    saveView(VIEW_PLAYBACK_1 + "_en");
     
     //Playback 2 (Sped up to match)
     video("playback2_bg_en", 0, 0, false);
     image("playback_tabRight2_en", 970, 239);
     image("playback_tabLeft_en", -250, 245);
     button("playback_btnCombine_en", 485, 912, "combine");
-    saveView(VIEW_PLAYBACK_2);
+    saveView(VIEW_PLAYBACK_2 + "_en");
     
     //Playback 3 (Combined Fullscreen)
     video("playback3_bg_en", 0, 0, false);
     button("btnStartOver_en", 1490, 955, "start_over");
-    saveView(VIEW_PLAYBACK_3);
+    saveView(VIEW_PLAYBACK_3 + "_en");
+    
+    /* --------------- */
+    /* SPANISH Screens */
+    /* --------------- */
+    
+    //Select Screen
+    image("select_bg_es", 0, 0);
+    image("select_tabLeft_es", -46, 246);
+    image("select_tabRight_es", 1375, 246);
+    videoButton("select_btnCircle_es", 478, 407, "chose_pattern_circle");
+    videoButton("select_btnTriangle_es", 47, 407, "chose_pattern_triangle");
+    videoButton("select_btnSquare_es", 912, 407, "chose_pattern_square");
+    videoButton("select_btnFreestyle_es", 1418, 407, "chose_pattern_freestyle");
+    button("btnLang_es", 44, 952, "toggle_language");
+    saveView(VIEW_SELECT + "_es");
+    
+    //Choose your music (Advanced)
+    video("selectTrack_bg_es", 0, 0);
+    button("selectTrack_tab1_es", 1117, 254, "chose_music_freestyle1");
+    button("selectTrack_tab2_es", 1117, 432, "chose_music_freestyle2");
+    button("selectTrack_tab3_es", 1117, 610, "chose_music_freestyle3");
+    button("selectTrack_tab4_es", 1117, 788, "chose_music_freestyle4");
+    saveView(VIEW_SELECT_TRACK + "_es");
+    
+    //Record View (Populated dynamically)
+    saveView(VIEW_RECORD + "_es");
+    
+    //Playback 1 (Diff Speeds)
+    video("playback1_bg_es", 0, 0, false);
+    image("playback_tabRight1_es", 970, 239);
+    image("playback_tabLeft_es", -250, 245);
+    button("playback_btnSpeed_es", 970, 911, "double_playback_speed");
+    saveView(VIEW_PLAYBACK_1 + "_es");
+    
+    //Playback 2 (Sped up to match)
+    video("playback2_bg_es", 0, 0, false);
+    image("playback_tabRight2_es", 970, 239);
+    image("playback_tabLeft_es", -250, 245);
+    button("playback_btnCombine_es", 485, 912, "combine");
+    saveView(VIEW_PLAYBACK_2 + "_es");
+    
+    //Playback 3 (Combined Fullscreen)
+    video("playback3_bg_es", 0, 0, false);
+    button("btnStartOver_es", 1490, 955, "start_over");
+    saveView(VIEW_PLAYBACK_3 + "_es");
+    
+    /* -------------------- */
+    /* Non-Language Screens */
+    /* -------------------- */
     
     //Screensaver
     video("screensaver", 0, 0);

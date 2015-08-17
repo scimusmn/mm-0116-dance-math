@@ -3,12 +3,12 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     
-    ofLogToFile("log.txt", true);
-    ofSetLogLevel(OF_LOG_WARNING);
-    ofLogWarning("Setup", ofGetTimestampString("%w, %h:%M%a"));
+//    ofLogToFile("log.txt", true);
+//    ofSetLogLevel(OF_LOG_WARNING);
+//    ofLogWarning("Setup", ofGetTimestampString("%w, %h:%M%a"));
     
     //Hide cursor (comment out if not on touch screen)
-    ofHideCursor();
+//    ofHideCursor();
 
     //Set up graphics
     ofSetFrameRate(60);
@@ -119,7 +119,7 @@ void ofApp::update(){
     
     //Update videos or camera-feeds
     if (appState == STATE_PLAYBACK) {
-        if (layout.currentViewId == DMLayout::VIEW_PLAYBACK_1) {
+        if (layout.baseViewId == DMLayout::VIEW_PLAYBACK_1) {
             session.updateVids(false);
         } else {
             session.updateVids(true);
@@ -202,7 +202,7 @@ void ofApp::update(){
                 //(recorded vids may or may not already be loaded)
                 appState = STATE_PLAYBACK;
                 layout.setView(DMLayout::VIEW_PLAYBACK_1);
-                jukebox.playSound("playback1_en");
+                jukebox.playSound("playback1");
                 
             }
             
@@ -218,13 +218,13 @@ void ofApp::update(){
     //Auto-advance playback screens
     if (appState == STATE_PLAYBACK && inactivityCount > ceil(SCREENSAVER_TIMEOUT * 0.5)) {
         
-        if (layout.currentViewId == DMLayout::VIEW_PLAYBACK_1) {
-            ofLogWarning("Auto-advance from", ofToString(layout.currentViewId) );
+        if (layout.baseViewId == DMLayout::VIEW_PLAYBACK_1) {
+            ofLogWarning("Auto-advance from", ofToString(layout.baseViewId) );
             mousePressed(975, 916, 1);
             resetInactivity();
         }
-        else if (layout.currentViewId == DMLayout::VIEW_PLAYBACK_2) {
-            ofLogWarning("Auto-advance from", ofToString(layout.currentViewId) );
+        else if (layout.baseViewId == DMLayout::VIEW_PLAYBACK_2) {
+            ofLogWarning("Auto-advance from", ofToString(layout.baseViewId) );
             mousePressed(490, 917, 1);
             resetInactivity();
         }
@@ -308,7 +308,7 @@ void ofApp::mousePressed(int x, int y, int button){
         } else {
             //Show freestyle music selection screen
             layout.setView(DMLayout::VIEW_SELECT_TRACK);
-            jukebox.playSound("selectTrack_en");
+            jukebox.playSound("selectTrack");
             
         }
 
@@ -327,10 +327,10 @@ void ofApp::mousePressed(int x, int y, int button){
         //change view
         session.restartVids();
         layout.setView(DMLayout::VIEW_PLAYBACK_2);
-        jukebox.playSound("playback2_en");
+        jukebox.playSound("playback2");
     } else if (btn == "combine") {
         layout.setView(DMLayout::VIEW_PLAYBACK_3);
-        jukebox.playSound("playback3_en");
+        jukebox.playSound("playback3");
     }
     
     if (btn == "toggle_language") {
@@ -373,7 +373,7 @@ void ofApp::startOver(){
     appState = STATE_NORMAL;
     
     layout.setView(DMLayout::VIEW_SELECT);
-    jukebox.playSound("select_en");
+    jukebox.playSound("select");
     
     clearData();
     
@@ -409,6 +409,12 @@ void ofApp::toggleLanguage(){
     
     jukebox.setLanguageKey(currentLanguage);
     layout.updateLanguage(currentLanguage);
+    
+    if (layout.baseViewId == DMLayout::VIEW_SELECT) {
+        jukebox.playSound("select");
+    }
+    
+    ofLogNotice("Language Change", layout.baseViewId);
     
 }
 
@@ -515,7 +521,6 @@ void ofApp::Session::saveData(bool halfSpeed, string vid){
         slowVidPlayer.close();
         slowVidPlayer.setSynchronousSeeking(false);
         slowVidPlayer.loadMovie(slowVid, OF_QTKIT_DECODE_TEXTURE_ONLY);
-//        slowVidPlayer.loadMovie(slowVid, OF_QTKIT_DECODE_PIXELS_AND_TEXTURE);
         slowVidPlayer.setLoopState(OF_LOOP_NONE);
         slowVidPlayer.play();
         

@@ -11,21 +11,13 @@
 //---------
 void Jukebox::autoAddTrack(string id, int normPre, int normDur, int halfPre, int halfDur){
 
-    string path = "video/record_" + id + "_en.mov";
-    string halfSpeedPath = "video/record_" + id + "_half_en.mov";
-    string introPath = "video/record_" + id + "_intro_en.mov";
-
-    string pathSpanish = "video/record_" + id + "_es.mov";
-    string halfSpeedPathSpanish = "video/record_" + id + "_half_es.mov";
-    string introPathSpanish = "video/record_" + id + "_intro_es.mov";
-
-    this->addTrack(id + "_en", path, halfSpeedPath, introPath, normPre, normDur, halfPre, halfDur);
-    this->addTrack(id + "_es", pathSpanish, halfSpeedPathSpanish, introPathSpanish, normPre, normDur, halfPre, halfDur);
+    string path = "video/record_" + id + ".mov";
+    this->addTrack(id, path, normPre, normDur, halfPre, halfDur);
 
 }
 
 //---------
-void Jukebox::addTrack(string id, string path, string halfSpeedPath, string introPath, int normPre, int normDur, int halfPre, int halfDur){
+void Jukebox::addTrack(string id, string path, int normPre, int normDur, int halfPre, int halfDur){
 
     Track s;
     s.id = id;
@@ -40,7 +32,7 @@ void Jukebox::addTrack(string id, string path, string halfSpeedPath, string intr
     //we should consider loading on the fly when the track is changed. -tn
 
     s.player.setPixelFormat(OF_PIXELS_RGBA); // Allow alpha channel
-    s.player.loadMovie(path);
+//    s.player.loadMovie(path);
     s.player.setLoopState(OF_LOOP_NONE);
 
     tracks.insert(pair<string, Track>(id, s));
@@ -88,6 +80,13 @@ void Jukebox::playFromStart() {
 
 //---------
 void Jukebox::switchTrack(string id) {
+    
+    //Unload video from previous track
+    if (current.player.isLoaded() == true){
+        current.player.close();
+        ofLogNotice("Unloading track: ", current.path);
+        ofSleepMillis(40);
+    }
 
     //Try language specific version first,
     //fallback to language-agnostic version.
@@ -101,6 +100,8 @@ void Jukebox::switchTrack(string id) {
     }
     
     current = getTrack(trackId);
+    current.player.loadMovie(current.path);
+    ofLogNotice("Loading track: ", current.path);
     trackLoaded = true;
 
 }
@@ -127,16 +128,10 @@ void Jukebox::setLanguageKey(string key) {
 void Jukebox::loadSound(string id){
 
     string path = "audio/" + id + ".wav";
-//    string pathSpanish = "audio/" + id + ".wav";
-
     ofSoundPlayer player;
-//    ofSoundPlayer playerSpanish;
-
     player.loadSound(path);
-//    playerSpanish.loadSound(pathSpanish);
-
-    sounds.insert(pair<string, ofSoundPlayer>(id+"_en", player));
-//    sounds.insert(pair<string, ofSoundPlayer>(id+"_es", playerSpanish));
+    
+    sounds.insert(pair<string, ofSoundPlayer>(id, player));
 
 }
 
@@ -149,7 +144,8 @@ void Jukebox::playSound(string id) {
     auto findSound = this->sounds.find(sndId);
 
     if (findSound != this->sounds.end()) {
-
+        
+        ofLogNotice("Jukebox ") << "Playing language("<< languageKey << ") sound: '" << sndId << "'. '" ;
         findSound->second.play();
 
     } else {
@@ -157,7 +153,8 @@ void Jukebox::playSound(string id) {
         //Fallback to language-agnostic version
         findSound = this->sounds.find(id);
         if (findSound != this->sounds.end()) {
-
+            
+            ofLogNotice("Jukebox ") << "Playing non-language sound: '" << id << "'. '" ;
             findSound->second.play();
 
         } else {

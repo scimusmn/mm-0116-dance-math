@@ -25,7 +25,7 @@ public:
     };
     
     void autoAddTrack(string id, int normPre, int normDur, int halfPre, int halfDur);
-    void addTrack(string id, string path, string halfSpeedPath, string introPath, int normPre, int normDur, int halfPre, int halfDur);
+    void addTrack(string id, string path, int normPre, int normDur, int halfPre, int halfDur);
     void switchTrack(string id);
     void clearTrack();
     Track getTrack(string id);
