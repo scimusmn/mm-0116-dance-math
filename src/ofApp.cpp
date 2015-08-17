@@ -18,20 +18,36 @@ void ofApp::setup(){
     //Setup cameras & video recorder
     initCamera();
     
-    //Load Sounds
-    jukebox.autoAddTrack("circle", 9911, 18386, 28096, 45046); // CIRCLE
-    jukebox.autoAddTrack("triangle", 9911, 18386, 28096, 45046); // TRIANGLE
-    jukebox.autoAddTrack("square", 9951, 18286, 28063, 44812); // SQUARE
-    jukebox.autoAddTrack("freestyle1", 5507, 11612, 21790, 34002); // HIP and HOPPY
-    jukebox.autoAddTrack("freestyle2", 5340, 11629, 21690, 34269); // WALKIN THE KEYS
-    jukebox.autoAddTrack("freestyle3", 5107, 10962, 20722, 32433); // STOMP AND SHUFFLE
-    jukebox.autoAddTrack("freestyle4", 4639,  9728, 18753, 28930); // ROCK & ROLL
+    //Setup track videos (English)
+    jukebox.autoAddTrack("circle_en", 9909, 17283, 28194, 42942); // CIRCLE
+    jukebox.autoAddTrack("triangle_en", 9909, 17283, 28228, 42942); // TRIANGLE
+    jukebox.autoAddTrack("square_en", 9909, 17283, 28161, 42909); // SQUARE
+    jukebox.autoAddTrack("freestyle1_en", 5505, 11044, 21788, 32866); // HIP and HOPPY
+    jukebox.autoAddTrack("freestyle2_en", 5372, 10777, 21755, 32599); // WALKIN THE KEYS
+    jukebox.autoAddTrack("freestyle3_en", 5105, 10243, 20720, 30997); // STOMP AND SHUFFLE
+    jukebox.autoAddTrack("freestyle4_en", 4571,  9175, 18685, 27894); // ROCK & ROLL
+    
+    ///Setup track videos (Spanish)
+    jukebox.autoAddTrack("circle_es", 10310, 17684, 29763, 44511); // CIRCLE
+    jukebox.autoAddTrack("triangle_es", 9876, 17250, 29262, 44010); // TRIANGLE
+    jukebox.autoAddTrack("square_es", 9876, 17250, 28928, 43710); // SQUARE
+    jukebox.autoAddTrack("freestyle1_es", 5839, 11378, 22222, 33299); // HIP and HOPPY
+    jukebox.autoAddTrack("freestyle2_es", 5405, 10777, 21554, 32265); // WALKIN THE KEYS
+    jukebox.autoAddTrack("freestyle3_es", 5138, 10243, 20954, 31164); // STOMP AND SHUFFLE
+    jukebox.autoAddTrack("freestyle4_es", 4604, 9209, 18385, 27560); // ROCK & ROLL
+
+    //Load other sounds
     jukebox.loadSound("btnPress");
     jukebox.loadSound("select_en");
+    jukebox.loadSound("select_es");
     jukebox.loadSound("selectTrack_en");
+    jukebox.loadSound("selectTrack_es");
     jukebox.loadSound("playback1_en");
     jukebox.loadSound("playback2_en");
     jukebox.loadSound("playback3_en");
+    jukebox.loadSound("playback1_es");
+    jukebox.loadSound("playback2_es");
+    jukebox.loadSound("playback3_es");
     
     //Load/Setup UI
     layout.setupViews();

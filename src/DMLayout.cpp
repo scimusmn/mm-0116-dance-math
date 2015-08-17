@@ -27,7 +27,7 @@ void DMLayout::setupViews(){
     videoButton("select_btnTriangle_en", 47, 407, "chose_pattern_triangle");
     videoButton("select_btnSquare_en", 912, 407, "chose_pattern_square");
     videoButton("select_btnFreestyle_en", 1418, 407, "chose_pattern_freestyle");
-//    button("btnLang_en", 44, 952, "toggle_language");
+    button("btnLang_en", 44, 952, "toggle_language");
     saveView(VIEW_SELECT);
 
     //Choose your music (Advanced)
