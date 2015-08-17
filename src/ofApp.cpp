@@ -3,12 +3,12 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     
-//    ofLogToFile("log.txt", true);
-//    ofSetLogLevel(OF_LOG_WARNING);
-//    ofLogWarning("Setup", ofGetTimestampString("%w, %h:%M%a"));
+    ofLogToFile("log.txt", true);
+    ofSetLogLevel(OF_LOG_WARNING);
+    ofLogWarning("Setup", ofGetTimestampString("%w, %h:%M%a"));
     
     //Hide cursor (comment out if not on touch screen)
-//    ofHideCursor();
+    ofHideCursor();
 
     //Set up graphics
     ofSetFrameRate(60);
@@ -247,13 +247,13 @@ void ofApp::update(){
         inactivityCount++;
         
         //Uncomment to simulate user input for debugging.
-        /*
+        
         if (inactivityCount > 15){
             //Simulate mouse press at random point on screen
             mousePressed(ofRandomWidth(), ofRandomHeight(), 1);
             inactivityCount = 0;
         }
-        */
+        
         
     }
     
@@ -357,6 +357,14 @@ void ofApp::mousePressed(int x, int y, int button){
     }
     
     resetInactivity();
+    
+}
+
+void ofApp::keyPressed  (int key){
+    
+    if (key == 'f'){
+        ofToggleFullscreen();
+    }
     
 }
 

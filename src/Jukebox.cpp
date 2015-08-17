@@ -12,7 +12,7 @@
 void Jukebox::autoAddTrack(string id, int normPre, int normDur, int halfPre, int halfDur){
 
     string path = "video/record_" + id + ".mov";
-    this->addTrack(id, path, normPre, normDur, halfPre, halfDur);
+    this->addTrack(id, path, normPre, normDur+500, halfPre, halfDur+1000);
 
 }
 
@@ -27,12 +27,7 @@ void Jukebox::addTrack(string id, string path, int normPre, int normDur, int hal
     s.halfPreRecordDuration = halfPre;
     s.halfRecordDuration = halfDur;
 
-    //NOTE: Currently loading ALL "guide" videos up front,
-    //which is going to eat a lot of RAM. If we run into memory issues,
-    //we should consider loading on the fly when the track is changed. -tn
-
     s.player.setPixelFormat(OF_PIXELS_RGBA); // Allow alpha channel
-//    s.player.loadMovie(path);
     s.player.setLoopState(OF_LOOP_NONE);
 
     tracks.insert(pair<string, Track>(id, s));
@@ -96,12 +91,11 @@ void Jukebox::switchTrack(string id) {
 
     if (trackExists(trackId) == false) {
         trackId = id;
-        ofLogNotice("switchTrack fallback: ", trackId);
     }
     
     current = getTrack(trackId);
     current.player.loadMovie(current.path);
-    ofLogNotice("Loading track: ", current.path);
+    current.player.setLoopState(OF_LOOP_NONE);
     trackLoaded = true;
 
 }

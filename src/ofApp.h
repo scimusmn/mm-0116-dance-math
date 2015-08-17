@@ -36,6 +36,7 @@ class ofApp : public ofBaseApp{
 		void update();
 		void draw();
 		void mousePressed(int x, int y, int button);
+        void keyPressed(int key);
         void exit();
     
         //Cameras
