@@ -1,16 +1,17 @@
 # mm-0116-dance-math
-What does half-speed feel like? Record your movements at different speeds to kinesthetically learn about ratios.
+What does half-speed feel like? Record your movements at different speeds to  learn about ratios kinesthetically.
 
 ## Installation
-#### 1. Copy compiled application from SMM project server.
-* */Projects/Math Moves-SMM/Multimedia/0116 Dance Math/04_Programming/01_latest/danceMath/*
+#### 1. Copy compiled project folder from SMM server to Desktop.
+* */Projects/Math Moves-SMM/Multimedia/0116 Dance Math/04_Programming/01_latest/danceMath*
 #### 2. Install [ffmpeg](https://www.ffmpeg.org/) video framework. 
-	1. Go to [http://ffmpegmac.net/](http://ffmpegmac.net/) and download the 64 bit binary.
-	2. Unzip, then copy the *ffmpeg* file into your $PATH directory. (typically *usr/local/bin/*)
-	3. In Terminal, navigate to the directory: ``` $ cd /usr/local/bin ```
-	4. Install the ffmpeg library: ```$ ./ffmpeg```
-#### 3. Drag *danceMath.app* icon into dock.
-#### 4. Right-click *danceMath* application in dock, then select Options > Open at Login.
+1. Go to [http://ffmpegmac.net/](http://ffmpegmac.net/) and download the 64 bit binary.
+2. Unzip, then copy the *ffmpeg* file into your $PATH directory. (typically *usr/local/bin/*)
+3. Use Terminal to navigate to directory: ``` $ cd /usr/local/bin ```
+4. Install ffmpeg library: ```$ ./ffmpeg```
+#### 3. Set application to launch automatically.
+1. Drag *danceMath.app* icon into dock.
+2. Right-click *danceMath* application in dock, then select *Options > Open at Login*.
 
 ## Editing & Compiling (Advanced)
 #### 1. Download openFrameworks
