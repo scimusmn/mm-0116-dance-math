@@ -11,7 +11,7 @@ What does half-speed feel like? Record your movements at different speeds to  le
 3. Use Terminal to navigate there: ``` $ cd /usr/local/bin ```
 4. Install ffmpeg library: ```$ ./ffmpeg```   
 
-#### 3. Setup to launch automatically.
+#### 3. Set to launch automatically.
 1. Drag *danceMath.app* icon into dock.
 2. Right-click icon, then select *Options > Open at Login*.
 
