@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		74AD5E672F48211FE09C2B09 /* ofxSimpleLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 376C4C360806907A36697DD7 /* ofxSimpleLayout.cpp */; };
 		BBAB23CB13894F3D00AA2426 /* GLUT.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = BBAB23BE13894E4700AA2426 /* GLUT.framework */; };
 		BF4447711B4EE6A40049C819 /* ofxWatchdog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF44476F1B4EE6A40049C819 /* ofxWatchdog.cpp */; };
 		BFB5149C1AD881E5003BF056 /* Jukebox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFB5149A1AD881E5003BF056 /* Jukebox.cpp */; };
 		BFBC96BD1B793A8D00B11ACF /* ofxVideoRecorder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFBC96BB1B793A8D00B11ACF /* ofxVideoRecorder.cpp */; };
+		BFDE96FC1B839A270071B80C /* ofxSimpleLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFDE96FA1B839A270071B80C /* ofxSimpleLayout.cpp */; };
 		BFFBB5A01AC5E5580004F7B0 /* DMLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFFBB59E1AC5E5580004F7B0 /* DMLayout.cpp */; };
 		E4328149138ABC9F0047C5CB /* openFrameworksDebug.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E4328148138ABC890047C5CB /* openFrameworksDebug.a */; };
 		E45BE97B0E8CC7DD009D7055 /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E45BE9710E8CC7DD009D7055 /* AGL.framework */; };
@@ -64,8 +64,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		031B71DF3C786EAFD16F9669 /* ofxSimpleLayout.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxSimpleLayout.h; path = ../../../addons/ofxSimpleLayout/src/ofxSimpleLayout.h; sourceTree = SOURCE_ROOT; };
-		376C4C360806907A36697DD7 /* ofxSimpleLayout.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxSimpleLayout.cpp; path = ../../../addons/ofxSimpleLayout/src/ofxSimpleLayout.cpp; sourceTree = SOURCE_ROOT; };
 		BBAB23BE13894E4700AA2426 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = ../../../libs/glut/lib/osx/GLUT.framework; sourceTree = "<group>"; };
 		BF44476F1B4EE6A40049C819 /* ofxWatchdog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxWatchdog.cpp; path = src/ofxWatchdog.cpp; sourceTree = "<group>"; };
 		BF4447701B4EE6A40049C819 /* ofxWatchdog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxWatchdog.h; path = src/ofxWatchdog.h; sourceTree = "<group>"; };
@@ -73,6 +71,8 @@
 		BFB5149B1AD881E5003BF056 /* Jukebox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Jukebox.h; sourceTree = "<group>"; };
 		BFBC96BB1B793A8D00B11ACF /* ofxVideoRecorder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxVideoRecorder.cpp; path = src/ofxVideoRecorder.cpp; sourceTree = "<group>"; };
 		BFBC96BC1B793A8D00B11ACF /* ofxVideoRecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxVideoRecorder.h; path = src/ofxVideoRecorder.h; sourceTree = "<group>"; };
+		BFDE96FA1B839A270071B80C /* ofxSimpleLayout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxSimpleLayout.cpp; path = src/ofxSimpleLayout.cpp; sourceTree = "<group>"; };
+		BFDE96FB1B839A270071B80C /* ofxSimpleLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxSimpleLayout.h; path = src/ofxSimpleLayout.h; sourceTree = "<group>"; };
 		BFFBB59E1AC5E5580004F7B0 /* DMLayout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DMLayout.cpp; sourceTree = "<group>"; };
 		BFFBB59F1AC5E5580004F7B0 /* DMLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DMLayout.h; sourceTree = "<group>"; };
 		E4328143138ABC890047C5CB /* openFrameworksLib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = openFrameworksLib.xcodeproj; path = ../../../libs/openFrameworksCompiled/project/osx/openFrameworksLib.xcodeproj; sourceTree = SOURCE_ROOT; };
@@ -126,21 +126,12 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		15895B05891EB8F6AB3DE953 /* src */ = {
-			isa = PBXGroup;
-			children = (
-				376C4C360806907A36697DD7 /* ofxSimpleLayout.cpp */,
-				031B71DF3C786EAFD16F9669 /* ofxSimpleLayout.h */,
-			);
-			name = src;
-			sourceTree = "<group>";
-		};
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				BFDE96FD1B839A2E0071B80C /* ofxSimpleLayout */,
 				BFBC96BA1B71797200B11ACF /* ofxVideoRecorder */,
 				BF4B74091B474CF5006F75B2 /* ofxWatchdog */,
-				E0A0690D43CA6CE398F64F45 /* ofxSimpleLayout */,
 			);
 			name = addons;
 			sourceTree = "<group>";
@@ -192,10 +183,11 @@
 			name = ofxVideoRecorder;
 			sourceTree = "<group>";
 		};
-		E0A0690D43CA6CE398F64F45 /* ofxSimpleLayout */ = {
+		BFDE96FD1B839A2E0071B80C /* ofxSimpleLayout */ = {
 			isa = PBXGroup;
 			children = (
-				15895B05891EB8F6AB3DE953 /* src */,
+				BFDE96FA1B839A270071B80C /* ofxSimpleLayout.cpp */,
+				BFDE96FB1B839A270071B80C /* ofxSimpleLayout.h */,
 			);
 			name = ofxSimpleLayout;
 			sourceTree = "<group>";
@@ -346,7 +338,7 @@
 				E4B69E210A3A1BDC003C02F2 /* ofApp.cpp in Sources */,
 				BFFBB5A01AC5E5580004F7B0 /* DMLayout.cpp in Sources */,
 				BFB5149C1AD881E5003BF056 /* Jukebox.cpp in Sources */,
-				74AD5E672F48211FE09C2B09 /* ofxSimpleLayout.cpp in Sources */,
+				BFDE96FC1B839A270071B80C /* ofxSimpleLayout.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

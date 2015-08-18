@@ -10,7 +10,7 @@ void ofApp::setup(){
     //Hide cursor (comment out if not on touch screen)
     ofHideCursor();
 
-    //Set up graphics
+    //Setup graphics
     ofSetFrameRate(60);
     ofEnableSmoothing();
     ofBackground(30,30,30);
@@ -247,13 +247,13 @@ void ofApp::update(){
         inactivityCount++;
         
         //Uncomment to simulate user input for debugging.
-        
+        /*
         if (inactivityCount > 15){
             //Simulate mouse press at random point on screen
             mousePressed(ofRandomWidth(), ofRandomHeight(), 1);
             inactivityCount = 0;
         }
-        
+        */
         
     }
     
@@ -366,6 +366,10 @@ void ofApp::keyPressed  (int key){
         ofToggleFullscreen();
     }
     
+    if (key == 'c'){
+        ofShowCursor();
+    }
+
 }
 
 //--------------------------------------------------------------
