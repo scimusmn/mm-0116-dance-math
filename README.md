@@ -3,7 +3,8 @@ What does half-speed feel like? Record your movements at different speeds to  le
 
 ## Installation
 #### 1. Copy project from SMM server.
-* Copy this folder to your Desktop: */Projects/Math Moves-SMM/Multimedia/0116 Dance Math/04_Programming/01_latest/danceMath*   
+* Copy entire folder to your Desktop: 
+* */Projects/Math Moves-SMM/Multimedia/0116 Dance Math/04_Programming/01_latest/danceMath*   
 
 #### 2. Install [ffmpeg](https://www.ffmpeg.org/) video framework.
 1. Go to [http://ffmpegmac.net/](http://ffmpegmac.net/) and download the 64 bit binary.
