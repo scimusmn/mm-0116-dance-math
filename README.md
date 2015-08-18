@@ -8,7 +8,7 @@ What does half-speed feel like? Record your movements at different speeds to  le
 #### 2. Install [ffmpeg](https://www.ffmpeg.org/) video framework. 
 1. Go to [http://ffmpegmac.net/](http://ffmpegmac.net/) and download the 64 bit binary.
 2. Unzip, then copy *ffmpeg* into your $PATH directory. (typically *usr/local/bin/*)
-3. Use Terminal to navigate there: ``` $ cd /usr/local/bin ```
+3. Use Terminal to navigate: ``` $ cd /usr/local/bin ```
 4. Install ffmpeg library: ```$ ./ffmpeg```   
 
 #### 3. Set to launch automatically.
@@ -20,7 +20,7 @@ What does half-speed feel like? Record your movements at different speeds to  le
 * [http://openframeworks.cc/download/](http://openframeworks.cc/download/)
 * This project was built using v0.8.4.  If you come from the future, check [here.](http://openframeworks.cc/download/older.html)
 
-#### 2. Clone this repository into *myApps* folder
+#### 2. Clone repository into *myApps* folder
 * Your folder structure will look like this:
 ```
 OpenFrameworks/apps/myApps/mm-0116-dance-math/...
