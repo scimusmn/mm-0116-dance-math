@@ -4,8 +4,8 @@
 void ofApp::setup(){
     
     ofLogToFile("log.txt", true);
-    ofSetLogLevel(OF_LOG_WARNING);
-    ofLogWarning("Setup", ofGetTimestampString("%w, %h:%M%a"));
+    ofSetLogLevel(OF_LOG_ERROR);
+    ofLogError("Setup", ofGetTimestampString("%w, %h:%M%a"));
     
     //Hide cursor (comment out if not on touch screen)
     ofHideCursor();
@@ -96,7 +96,7 @@ void ofApp::resetInactivity(){
 //--------------------------------------------------------------
 void ofApp::startRecordSequence(){
     
-    ofLogWarning("startRecordSequence()", ofToString(jukebox.current.id) + ", " + ofToString(ofGetTimestampString()) );
+    ofLogError("startRecordSequence()", ofToString(jukebox.current.id) + ", " + ofGetTimestampString("%w, %h:%M%a") );
 
     //Show live camera feed and overlay video guide
     layout.setView(DMLayout::VIEW_RECORD);
@@ -426,7 +426,7 @@ void ofApp::toggleLanguage(){
         jukebox.playSound("select");
     }
     
-    ofLogNotice("Language Change", layout.baseViewId);
+    ofLogNotice("Language Change", currentLanguage);
     
 }
 
