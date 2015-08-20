@@ -6,8 +6,8 @@ What does half-speed feel like? Record your movements at different speeds to  le
 * Copy this folder to your Desktop: */Projects/Math Moves-SMM/Multimedia/0116 Dance Math/04_Programming/01_latest/danceMath*   
 
 #### 2. Install [ffmpeg](https://www.ffmpeg.org/).
-1. Copy *ffmpeg* into your $PATH directory: ``` $ cp ~/Desktop/danceMath/ffmpeg /usr/local/bin/ ```
-2. Install *ffmpeg* by running: ```$ /usr/local/bin/ffmpeg```
+1. Copy into your $PATH directory: ``` $ cp ~/Desktop/danceMath/ffmpeg /usr/local/bin/ ```
+2. Install by running: ```$ /usr/local/bin/ffmpeg```
 
 #### 3. Set up app to launch automatically.
 1. Drag *danceMath.app* icon into dock.
