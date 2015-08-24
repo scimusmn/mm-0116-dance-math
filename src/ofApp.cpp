@@ -4,11 +4,13 @@
 void ofApp::setup(){
     
     ofLogToFile("log.txt", true);
-    ofSetLogLevel(OF_LOG_ERROR);
+    ofSetLogLevel(OF_LOG_WARNING);
     ofLogError("Setup", ofGetTimestampString("%w, %h:%M%a"));
-    
-    //Hide cursor (comment out if not on touch screen)
+
+    //Hide cursor and turn off simulation mode
+    //See keyPressed events to toggle
     ofHideCursor();
+    simulationMode = false;
 
     //Setup graphics
     ofSetFrameRate(60);
@@ -247,13 +249,11 @@ void ofApp::update(){
         inactivityCount++;
         
         //Uncomment to simulate user input for debugging.
-        /*
-        if (inactivityCount > 15){
+        if (simulationMode == true && inactivityCount > 5){
             //Simulate mouse press at random point on screen
             mousePressed(ofRandomWidth(), ofRandomHeight(), 1);
             inactivityCount = 0;
         }
-        */
         
     }
     
@@ -369,6 +369,10 @@ void ofApp::keyPressed  (int key){
     if (key == 'c'){
         ofShowCursor();
     }
+    
+    if (key == 's'){
+        simulationMode = true;
+    }
 
 }
 
@@ -405,6 +409,11 @@ void ofApp::clearData(){
     
     //reset base time
     ofResetElapsedTimeCounter();
+    
+    //delete video pipe file
+    string videoPipePath = ofFilePath::getAbsolutePath("ofxvrpipe0");
+    string command = "rm -f " + videoPipePath;
+    system(command.c_str());
     
 }
 

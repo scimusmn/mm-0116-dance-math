@@ -85,5 +85,6 @@ class ofApp : public ofBaseApp{
         //Util
         bool listCamDevices();
         void clearFiles();
+        bool simulationMode;
 		
 };
