@@ -1,18 +1,18 @@
 # mm-0116-dance-math
 What does half-speed feel like? Record your movements at different speeds to  learn about ratios.
 
-## Installation
-#### 1. Copy project from SMM server.
-* Copy this folder to your Desktop: */Projects/Math Moves-SMM/Multimedia/0116 Dance Math/04_Programming/01_latest/danceMath*   
+## Install Instructions
+If you need to make edits to this project, see the *Editing and Compiling* instructions below. Otherwise, this project does not require any files from this Git repository to run.
 
-#### 2. Install [ffmpeg](https://www.ffmpeg.org/).
-* Copy into your $PATH directory: ``` $ cp ~/Desktop/danceMath/ffmpeg /usr/local/bin/ ```
-* Install by running: ```$ /usr/local/bin/ffmpeg```
+If starting with a fresh out-of-box machine, start with the [official exhibit computer setup](http://projects.smm.org/atrium/media/node/280246). 
 
-#### 3. Set up app to launch automatically.
-* Drag *danceMath.app* icon into dock.
-* Right-click icon, then select *Options > Open at Login*.
+Once base Boxen has successfully been installed, you should be ready to run the custom Partner Motion install.
 
+    boxen mm_0116_motion_math
+    
+
+## Run the application
+The application should start correctly after rebooting the computer.
 
 ## Editing & Compiling (Advanced)
 #### 1. Download openFrameworks
