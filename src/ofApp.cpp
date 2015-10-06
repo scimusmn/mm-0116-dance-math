@@ -3,8 +3,9 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     
+    //Set up file logging (for long-term installation, only log fatal errors)
     ofLogToFile("log.txt", true);
-    ofSetLogLevel(OF_LOG_WARNING);
+    ofSetLogLevel(OF_LOG_FATAL_ERROR);
     ofLogError("Setup", ofGetTimestampString("%w, %h:%M%a"));
 
     //Hide cursor and turn off simulation mode

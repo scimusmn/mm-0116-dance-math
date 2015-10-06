@@ -79,7 +79,7 @@ void ofxWatchdog::watch(int msec, bool reboot, bool override, bool verbose)
     
     //tn
     ofLogToFile("log.txt", true);
-    ofSetLogLevel(OF_LOG_ERROR);
+    ofSetLogLevel(OF_LOG_FATAL_ERROR);
     
     char const* env;
     bool mask;
