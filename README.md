@@ -2,7 +2,7 @@
 What does half-speed feel like? Record your movements at different speeds to  learn about ratios.
 
 ## Install instructions
-To make edits to this project, see the *Editing and Compiling* instructions below. Otherwise, this project does not require any files from this Git repository to run. These instructions will walk you through installing the compiled application on a fresh computer.
+To make edits to this project, see the *Editing and Compiling* instructions below. Otherwise, this project does not require any files from this Git repository to run. These instructions will install the compiled application on a fresh computer.
 
 Start with the [official exhibit computer setup](http://projects.smm.org/atrium/media/node/280246). 
 
