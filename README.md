@@ -12,7 +12,8 @@ Once base Boxen has successfully been installed, you should be ready to run the 
     
 
 ## Run the application
-The application should start correctly after rebooting the computer.
+The application should start correctly after rebooting the computer. If you'd like to start it manually, you can find and double-click the app icon at Desktop > danceMath > danceMath.app.
+
 
 ## Editing & Compiling (Advanced)
 #### 1. Download openFrameworks
